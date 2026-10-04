@@ -1,6 +1,6 @@
 # 淘宝 AI 运营
 
-面向淘宝电商工作者的独立 SOP Skill 套件。当前开发版本包含运营路由、预策类目机会研究和淘宝搜索商品形态研究。类目研究支持本地 Excel 与授权 NAS/预策取数；商品研究接受搜索结果表。每个节点独立执行，报告保留其原有方法和完整证据。
+面向淘宝电商工作者的独立 SOP Skill 套件。当前版本包含运营路由、预策类目机会研究和淘宝搜索商品形态研究。类目研究支持本地 Excel 与授权 NAS/预策取数；商品研究接受搜索结果表。每个节点独立执行，报告保留其原有方法和完整证据。
 
 ```sh
 taobao-ai-ops nodes list --json
@@ -10,10 +10,10 @@ taobao-ai-ops skill source --name yuce-category-opportunity-report --json
 taobao-ai-ops skill install --agent codex --profile research --json
 ```
 
-预发布通道为 `next`，适合研究流程试用；跨 Agent 的完整验收范围见下文。安装后按需运行 `skill install`，服务访问仍需单独配置。
+正式版本使用默认 `latest` 通道；跨 Agent 的完整验收范围见下文。安装后按需运行 `skill install`，服务访问仍需单独配置。
 
 ```sh
-npm install --global @petercjl/taobao-ai-ops@next
+npm install --global @petercjl/taobao-ai-ops
 taobao-ai-ops version
 taobao-ai-ops skill install --agent codex --profile research --json
 ```

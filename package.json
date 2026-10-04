@@ -30,7 +30,7 @@
   ],
   "publishConfig": {
     "access": "public",
-    "tag": "next"
+    "tag": "latest"
   },
   "scripts": {
     "test": "node --test test/*.test.mjs",
