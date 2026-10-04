@@ -5,6 +5,9 @@ import {spawnSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {ROOT,MANIFEST,PACKAGE,nodeFor,source,fail} from './core.mjs';
 const require=createRequire(import.meta.url);
+export function pythonEnvironment(env=process.env){
+ return {...env,PYTHONUTF8:'1',PYTHONIOENCODING:'utf-8',PYTHONDONTWRITEBYTECODE:'1'};
+}
 export function pythonCandidates(platform=process.platform,home=os.homedir(),env=process.env){
  const targetPath=platform==='win32'?path.win32:path.posix;
  const agent=env.SEALSEEK_HOME||targetPath.join(home,'.sealseek');
@@ -30,7 +33,7 @@ export function runScript(id,name,args){
  const n=nodeFor(id);if(!n.scripts.includes(name))throw fail('SCRIPT_NOT_ALLOWED',`Script ${name} is not exposed by ${n.id}`);
  const runtime=name.endsWith('.py')?resolvePython(n.python_imports):{command:process.execPath,prefix:[]};
  if(!runtime)throw fail('RUNTIME_UNAVAILABLE',`Python imports required: ${n.python_imports.join(', ')}`);
- const r=spawnSync(runtime.command,[...runtime.prefix,path.join(source(n),'scripts',name),...args],{stdio:'inherit',env:{...process.env,PYTHONDONTWRITEBYTECODE:'1'}});
+ const r=spawnSync(runtime.command,[...runtime.prefix,path.join(source(n),'scripts',name),...args],{stdio:'inherit',env:pythonEnvironment()});
  if(r.error)throw fail('EXECUTION_FAILED',r.error.message);process.exitCode=r.status??1;
 }
 export async function doctor(id,mode='excel'){
