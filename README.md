@@ -10,7 +10,15 @@ taobao-ai-ops skill source --name yuce-category-opportunity-report --json
 taobao-ai-ops skill install --agent codex --profile research --json
 ```
 
-尚未发布到 npm；开发时用 `node bin/taobao-ai-ops.mjs` 执行。Node >=20，Python 依赖见 requirements.txt；可通过 TAOBAO_AI_OPS_PYTHON 指定稳定解释器。CLI 也发现 Agent 管理的 Python 和已有商品研究环境。
+预发布通道为 `next`，适合研究流程试用；跨 Agent 的完整验收范围见下文。安装后按需运行 `skill install`，服务访问仍需单独配置。
+
+```sh
+npm install --global @petercjl/taobao-ai-ops@next
+taobao-ai-ops version
+taobao-ai-ops skill install --agent codex --profile research --json
+```
+
+开发时用 `node bin/taobao-ai-ops.mjs` 执行。Node >=20，Python 依赖见 requirements.txt，可运行 `python -m pip install -r requirements.txt`；可通过 TAOBAO_AI_OPS_PYTHON 指定稳定解释器。CLI 也发现 Agent 管理的 Python 和已有商品研究环境。已有独立 Skill 先检查 `skill status`；明确授权迁移后使用 `--adopt`，CLI 会保留恢复点。
 
 新安装默认在 macOS 使用链接、Windows 使用受管理副本。已有 Skill 迁移使用 `--adopt`，完整备份并校验；受管理本地修改会阻止覆盖。SealSeek 根目录可用 SEALSEEK_SKILLS_DIR 指定，发现歧义时会明确报错。
 
