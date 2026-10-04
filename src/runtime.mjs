@@ -6,9 +6,10 @@ import {createRequire} from 'node:module';
 import {ROOT,MANIFEST,PACKAGE,nodeFor,source,fail} from './core.mjs';
 const require=createRequire(import.meta.url);
 export function pythonCandidates(platform=process.platform,home=os.homedir(),env=process.env){
- const agent=env.SEALSEEK_HOME||path.join(home,'.sealseek');
+ const targetPath=platform==='win32'?path.win32:path.posix;
+ const agent=env.SEALSEEK_HOME||targetPath.join(home,'.sealseek');
  const bins=platform==='win32'?['Scripts','python.exe']:['bin','python'];
- return [...new Set([env.TAOBAO_AI_OPS_PYTHON,env.TAOBAO_SEARCH_PYTHON,path.join(agent,'binaries','python','envs','default',...bins),path.join(home,'.local','share','taobao-ai-ops','.venv',...bins),path.join(home,'.local','share','taobao-search-product-form','.venv',...bins),...(platform==='win32'?['py','python','python3']:['python3','python'])].filter(Boolean))];
+ return [...new Set([env.TAOBAO_AI_OPS_PYTHON,env.TAOBAO_SEARCH_PYTHON,targetPath.join(agent,'binaries','python','envs','default',...bins),targetPath.join(home,'.local','share','taobao-ai-ops','.venv',...bins),targetPath.join(home,'.local','share','taobao-search-product-form','.venv',...bins),...(platform==='win32'?['py','python','python3']:['python3','python'])].filter(Boolean))];
 }
 export function resolvePython(imports,candidates=pythonCandidates()){
  for(const command of candidates){const prefix=command==='py'?['-3']:[];const result=spawnSync(command,[...prefix,'-c',imports.length?`import ${imports.join(',')}`:'import sys'],{encoding:'utf8',timeout:15000});if(result.status===0)return {command,prefix};}

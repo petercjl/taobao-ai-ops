@@ -10,4 +10,5 @@ test('missing interpreter and imports cannot pass dependency discovery',()=>{
 });
 test('managed runtime discovery includes Agent and suite environments without an override',()=>{
  const candidates=pythonCandidates('darwin','/test-user',{SEALSEEK_HOME:'/test-agent'});assert.ok(candidates.includes('/test-agent/binaries/python/envs/default/bin/python'));assert.ok(candidates.some(p=>p.includes('taobao-ai-ops/.venv')));
+ const windows=pythonCandidates('win32','C:/User',{SEALSEEK_HOME:'C:/Agent'});assert.ok(windows.includes('C:\\Agent\\binaries\\python\\envs\\default\\Scripts\\python.exe'));assert.ok(windows.some(p=>p.includes('taobao-ai-ops\\.venv')));
 });
