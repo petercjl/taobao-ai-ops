@@ -1,6 +1,6 @@
 {
   "name": "@petercjl/taobao-ai-ops",
-  "version": "0.1.0-next.1",
+  "version": "0.1.0",
   "description": "Independent Taobao AI operations SOP skills with a managed suite lifecycle",
   "repository": {
     "type": "git",
