@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "package": "@petercjl/taobao-ai-ops",
+  "profiles": {"research": ["operations", "category-research", "product-research"]},
+  "nodes": [
+    {"id": "operations", "skill": "taobao-ai-operations", "stage": "routing", "method_version": "1.0", "requires_skills": ["yuce-category-opportunity-report", "taobao-search-product-form"], "python_imports": [], "scripts": [], "native_requirements": []},
+    {"id": "category-research", "skill": "yuce-category-opportunity-report", "stage": "discover-market", "method_version": "yuce-category-opportunity@2.0", "requires_skills": [], "python_imports": ["openpyxl"], "scripts": ["build_report.py"], "native_requirements": [], "optional_tools": ["tbcli", "yccli"], "origin": {"kind": "accepted-local-skill", "skill_md_sha256": "e93ea7817d44eada35f9934007f5d4d04736553fb28afb01339fdcdacf8275ef"}},
+    {"id": "product-research", "skill": "taobao-search-product-form", "stage": "research-product", "method_version": "taobao-search-product-form@0.1.1", "requires_skills": [], "python_imports": ["pandas", "numpy", "openpyxl", "PIL", "jieba"], "native_requirements": ["image.observe"], "origin": {"package": "@petercjl/taobao-search-product-form", "version": "0.1.1", "repository": "https://github.com/petercjl/taobao-search-product-form", "commit": "49a574d572895ea4f0047d54766633de754b07d4", "npm_integrity": "sha512-RSoCkbdp3Ggh+VwJl9ejR+IpGHaWeIkExWq4/WcqBS6xzcxYbfuPzX6Fx15PXgh/K2QffjLjgll4mQMiJK3yig=="}, "scripts": ["clean_search_export.mjs", "prepare.py", "analyze.py", "analyze_advertisers.py", "analyze_geography.py", "analyze_price_bands.py", "analyze_title_roots.py", "assemble_opportunity_evidence.py", "build_report_viewmodel.py", "build_visual_review_viewmodel.py", "cluster_visual_forms.py", "compile_style_prototypes.py", "compile_visual_review.py", "compile_visual_selection.py", "render_report.py", "validate_opportunity_cards.py", "validate_report_viewmodel.py", "visual_form_pipeline.py", "visual_observation_batches.py", "workflow_ledger.py"]}
+  ],
+  "tools": {
+    "tbcli": {"package": "@petercjl/tbcli", "version": "0.10.4", "entry": "scripts/tbcli.mjs", "role": "existing monthly exports, warehouse and additive category import"},
+    "sycmcli": {"package": "@petercjl/sycmcli", "version": "0.3.1", "entry": "scripts/sycmcli.mjs", "role": "store-bound market, category, keyword and competitor read operations"},
+    "yccli": {"external": true, "minimum_version": "0.5.0", "executable_env": "TAOBAO_AI_OPS_YCCLI", "role": "authorized Yuce monthly collection; optional for supplied Excel"}
+  },
+  "targets": {"codex:macos": "implemented", "sealseek:macos": "implemented", "sealseek:windows": "implemented"},
+  "update_policy": {"owner": "suite", "during_run": "fixed-version-set", "automatic_install": false, "offline": "keep-current", "source_checkout": "git-managed"}
+}

@@ -1,0 +1,113 @@
+{
+  "schema": "portable-skill-adapter",
+  "schema_version": "1.0.0",
+  "platform": "codex",
+  "mappings": [
+    {
+      "capability_id": "category.monthly.collect",
+      "status": "implemented",
+      "implementation": {
+        "kind": "stable-cli",
+        "discovery": "Resolve yccli from PATH, then inspect --version and capabilities --json before invoking its industry monthly JSON commands."
+      },
+      "features": [
+        "yccli>=0.5.0",
+        "first_category_monthly",
+        "second_category_monthly",
+        "third_category_monthly",
+        "json_output",
+        "login_and_verification_stop"
+      ],
+      "permissions": [
+        "read authorized Yuce account",
+        "create new task-scoped JSON files"
+      ],
+      "normalization": "Return CLI receipt, actual months, category path, new JSON path and errors; never expose browser authentication material."
+    },
+    {
+      "capability_id": "category.warehouse.sync",
+      "status": "implemented",
+      "implementation": {
+        "kind": "stable-cli",
+        "discovery": "Resolve tbcli from PATH; inspect capabilities for db yuce coverage/export and yuce categories validate/import."
+      },
+      "features": [
+        "tbcli_db_yuce_coverage",
+        "tbcli_db_yuce_export",
+        "tbcli_yuce_categories_validate",
+        "tbcli_yuce_categories_import",
+        "read_role_check",
+        "rolled_back_write_probe",
+        "additive_transaction"
+      ],
+      "permissions": [
+        "read authorized NAS warehouse tables",
+        "insert missing requested category-month rows only when maintainer role is verified"
+      ],
+      "normalization": "Return coverage, new snapshot path and per-file import receipts; distinguish unavailable connection from write failure."
+    },
+    {
+      "capability_id": "category.excel.cache",
+      "status": "tested",
+      "implementation": {
+        "kind": "bundled-script",
+        "path": "scripts/build_report.py",
+        "runtime": "Python 3 with openpyxl>=3.1"
+      },
+      "features": [
+        "xlsx_input",
+        "first_second_third_monthly",
+        "full_category_paths",
+        "source_hashes",
+        "conflict_stop",
+        "new_output_only",
+        "data_only_cache"
+      ],
+      "permissions": [
+        "read selected local Excel or JSON files",
+        "create one new local Excel cache"
+      ],
+      "normalization": "Return new cache path and data-quality counts; Excel-input mode does not contact NAS or Yuce.",
+      "tested_date": "2026-09-25",
+      "evidence": [
+        "Codex/macOS prepared one 3852-row, single-sheet cache from six existing first-/second-/third-category kitchen workbooks; 24-month root coverage and source identities were checked."
+      ]
+    },
+    {
+      "capability_id": "report.html.render",
+      "status": "tested",
+      "implementation": {
+        "kind": "bundled-script",
+        "path": "scripts/build_report.py",
+        "template": "assets/report-template.html",
+        "runtime": "Python 3 with openpyxl>=3.1"
+      },
+      "features": [
+        "yuce-category-opportunity@2.0",
+        "relative_capacity_bands",
+        "three_independent_routes",
+        "table_chart_dual_views",
+        "raw_chart_evidence",
+        "filter_sort_chart_sync",
+        "local_xlsx_cache_input",
+        "bundled_template",
+        "responsive_views",
+        "print_all_views",
+        "escaped_text",
+        "new_output_only",
+        "analysis_sidecar"
+      ],
+      "permissions": [
+        "read selected JSON evidence",
+        "write new report and analysis files"
+      ],
+      "normalization": "Return paths, contract, category and reconciliation counts from the JSON receipt.",
+      "tested_date": "2026-10-04",
+      "evidence": [
+        "Codex/macOS synthetic 24-month first/second/third source test passed; output files, shortlist, self-contained view structure, source-conflict stop and non-overwrite were checked.",
+        "Codex/macOS v2 local-cache main run: three relative-capacity routes; scale-invariance, tie, sparse, missing, zero-base, invalid-policy and source safety tests passed. Clean-context regression not run.",
+        "Self-contained SVG table/chart views and synthetic-DOM event tests passed; actual browser layout/interaction inspection remains unverified due local URL policy."
+      ]
+    }
+  ]
+}

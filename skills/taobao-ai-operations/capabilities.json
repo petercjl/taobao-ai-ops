@@ -1,0 +1,73 @@
+{
+  "schema": "portable-skill-capabilities",
+  "schema_version": "1.0.0",
+  "skill": "taobao-ai-operations",
+  "target_platforms": [
+    "codex",
+    "sealseek"
+  ],
+  "capabilities": [
+    {
+      "id": "suite.node.route",
+      "purpose": "Resolve registered research nodes and load exact canonical child Skills.",
+      "required": true,
+      "required_features": [
+        "node_registry",
+        "exact_skill_source",
+        "full_child_instructions",
+        "runtime_preflight"
+      ],
+      "input_fields": [
+        "goal",
+        "node",
+        "input_files"
+      ],
+      "output_fields": [
+        "node",
+        "source",
+        "deliverables",
+        "warnings"
+      ],
+      "side_effects": {
+        "external_mutation": false,
+        "may_cost_money": false,
+        "authorization": "Read local manifests and inputs; execute only the requested child scope."
+      },
+      "errors": [
+        "CAPABILITY_UNAVAILABLE",
+        "OUTPUT_CONTRACT_FAILED"
+      ]
+    },
+    {
+      "id": "suite.evidence.handoff",
+      "purpose": "Preserve source-bound context between independently usable research nodes.",
+      "required": true,
+      "required_features": [
+        "source_sha256",
+        "exact_candidate",
+        "explicit_query",
+        "new_output_only"
+      ],
+      "input_fields": [
+        "analysis",
+        "candidate",
+        "query",
+        "new_output"
+      ],
+      "output_fields": [
+        "handoff_path",
+        "source_hashes",
+        "next_requests"
+      ],
+      "side_effects": {
+        "external_mutation": false,
+        "may_cost_money": false,
+        "authorization": "Create a new local handoff for the selected research direction."
+      },
+      "errors": [
+        "CAPABILITY_UNAVAILABLE",
+        "OUTPUT_CONTRACT_FAILED"
+      ]
+    }
+  ]
+}

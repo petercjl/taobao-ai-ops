@@ -1,0 +1,7 @@
+node_modules/
+__pycache__/
+*.pyc
+*.tgz
+.venv/
+*.private.json
+evaluation/private/

@@ -1,0 +1,11 @@
+{
+ "$schema":"https://json-schema.org/draft/2020-12/schema",
+ "title":"Taobao AI operations evidence handoff",
+ "type":"object",
+ "required":["schema_version","run_id","node_id","method_version","source_hashes","scope","time_range","evidence_refs","conclusions","unknowns","next_requests","artifacts","payload"],
+ "properties":{
+  "schema_version":{"const":"taobao-ai-ops-handoff@1"},"run_id":{"type":"string","minLength":1},"node_id":{"type":"string","enum":["category-research","product-research"]},"method_version":{"type":"string"},
+  "source_hashes":{"type":"array","minItems":1,"items":{"type":"object","required":["path","sha256"],"properties":{"path":{"type":"string"},"sha256":{"type":"string","pattern":"^[a-f0-9]{64}$"}}}},
+  "scope":{"type":"object"},"time_range":{"type":["array","null"]},"evidence_refs":{"type":"array","items":{"type":"string"}},"conclusions":{"type":"array"},"unknowns":{"type":"array","items":{"type":"string"}},"next_requests":{"type":"array"},"artifacts":{"type":"array"},"payload":{"type":"object"}
+ }
+}

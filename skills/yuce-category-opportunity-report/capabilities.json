@@ -1,0 +1,48 @@
+{
+  "schema": "portable-skill-capabilities",
+  "schema_version": "1.0.0",
+  "skill": "yuce-category-opportunity-report",
+  "target_platforms": ["codex", "sealseek"],
+  "capabilities": [
+    {
+      "id": "category.monthly.collect",
+      "purpose": "Use the installed yccli to collect authorized first-, second-, and third-category monthly JSON for explicit periods.",
+      "required": false,
+      "required_features": ["yccli>=0.5.0", "first_category_monthly", "second_category_monthly", "third_category_monthly", "json_output", "login_and_verification_stop"],
+      "input_fields": ["category", "second_category_optional", "start_month", "end_month", "new_output_path"],
+      "output_fields": ["json_path", "actual_months", "category_path", "receipt"],
+      "side_effects": {"external_mutation": true, "may_cost_money": false, "authorization": "Read data visible to the current Yuce account; create only new local JSON. If initial NAS read fails, obtain explicit user consent before collection."},
+      "errors": ["CAPABILITY_UNAVAILABLE", "AUTH_REQUIRED", "PERIOD_UNAVAILABLE", "PROVIDER_FAILURE", "OUTPUT_CONTRACT_FAILED"]
+    },
+    {
+      "id": "category.warehouse.sync",
+      "purpose": "Use tbcli for path-level coverage, read-only monthly export, and authorized additive import.",
+      "required": false,
+      "required_features": ["tbcli_db_yuce_coverage", "tbcli_db_yuce_export", "tbcli_yuce_categories_validate", "tbcli_yuce_categories_import", "read_role_check", "rolled_back_write_probe", "additive_transaction"],
+      "input_fields": ["category", "start_month", "end_month", "yccli_json_files", "new_snapshot_path"],
+      "output_fields": ["coverage", "snapshot_path", "import_receipts", "warnings"],
+      "side_effects": {"external_mutation": true, "may_cost_money": false, "authorization": "Warehouse read through existing role; default write scope is only missing rows for the requested category-months, after maintainer checks. Connection or write failure never authorizes credential or network changes."},
+      "errors": ["CAPABILITY_UNAVAILABLE", "DATABASE_UNAVAILABLE_AWAITING_CONSENT", "PERMISSION_REQUIRED", "SOURCE_CONFLICT", "PROVIDER_FAILURE"]
+    },
+    {
+      "id": "category.excel.cache",
+      "purpose": "Normalize supplied Yuce monthly Excel or locally exported NAS/yccli data into one data-only, 24-month Excel cache before analysis.",
+      "required": true,
+      "required_features": ["xlsx_input", "first_second_third_monthly", "full_category_paths", "source_hashes", "conflict_stop", "new_output_only", "data_only_cache"],
+      "input_fields": ["category", "start_month", "end_month", "excel_files_or_local_json", "new_cache_path"],
+      "output_fields": ["cache_xlsx", "row_count", "category_count", "source_count", "quality_findings"],
+      "side_effects": {"external_mutation": false, "may_cost_money": false, "authorization": "Read only selected local source files and create one new local Excel cache; Excel-input mode makes no database or platform calls."},
+      "errors": ["CAPABILITY_UNAVAILABLE", "SOURCE_CONFLICT", "OUTPUT_CONTRACT_FAILED"]
+    },
+    {
+      "id": "report.html.render",
+      "purpose": "Analyze one local Excel cache and render a self-contained 24-month category-priority HTML report without a runtime HTML Skill dependency.",
+      "required": true,
+      "required_features": ["yuce-category-opportunity@2.0", "relative_capacity_bands", "three_independent_routes", "table_chart_dual_views", "raw_chart_evidence", "filter_sort_chart_sync", "local_xlsx_cache_input", "bundled_template", "responsive_views", "print_all_views", "escaped_text", "new_output_only", "analysis_sidecar"],
+      "input_fields": ["category", "window", "local_cache_xlsx", "strategy_config_optional", "output_paths"],
+      "output_fields": ["analysis_json", "html_path", "contract", "validation"],
+      "side_effects": {"external_mutation": true, "may_cost_money": false, "authorization": "Read task evidence and create two new files in the selected output directory."},
+      "errors": ["CAPABILITY_UNAVAILABLE", "SOURCE_CONFLICT", "OUTPUT_CONTRACT_FAILED"]
+    }
+  ]
+}

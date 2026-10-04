@@ -1,0 +1,54 @@
+{
+  "schema": "portable-skill-adapter",
+  "schema_version": "1.0.0",
+  "platform": "codex",
+  "skill": "taobao-ai-operations",
+  "mappings": [
+    {
+      "capability_id": "suite.node.route",
+      "implementation": {
+        "kind": "cli-and-host-file-reader",
+        "execution": "Use the current host's command execution and file-reading surfaces to invoke taobao-ai-ops and load the returned source.",
+        "normalization": "Return artifacts, metadata and warnings; preserve structured CLI errors."
+      },
+      "status": "implemented",
+      "configuration": [],
+      "permissions": [
+        "local file read",
+        "new local output"
+      ],
+      "normalization": "Return artifacts, metadata and warnings; preserve structured CLI errors.",
+      "output_contract_differences": [],
+      "evidence": [],
+      "features": [
+        "node_registry",
+        "exact_skill_source",
+        "full_child_instructions",
+        "runtime_preflight"
+      ]
+    },
+    {
+      "capability_id": "suite.evidence.handoff",
+      "implementation": {
+        "kind": "cli-and-host-file-reader",
+        "execution": "Use the current host's command execution and file-reading surfaces to invoke taobao-ai-ops and load the returned source.",
+        "normalization": "Return artifacts, metadata and warnings; preserve structured CLI errors."
+      },
+      "status": "implemented",
+      "configuration": [],
+      "permissions": [
+        "local file read",
+        "new local output"
+      ],
+      "normalization": "Return artifacts, metadata and warnings; preserve structured CLI errors.",
+      "output_contract_differences": [],
+      "evidence": [],
+      "features": [
+        "source_sha256",
+        "exact_candidate",
+        "explicit_query",
+        "new_output_only"
+      ]
+    }
+  ]
+}
