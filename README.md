@@ -24,6 +24,7 @@ SealSeek 用户改用 --agent sealseek。目标有歧义时通过 SEALSEEK_SKILL
 - @petercjl/taobao-search-product-form：搜索结果数据和商品形态研究、机会判断卡及 HTML。
 - @petercjl/tbcli：淘宝数据与 NAS 数据库工具，含其独立 Skill。
 - @petercjl/sycmcli：店铺经营数据工具，含其独立 Skill。
+- @petercjl/commerce-ui：通用 HTML 报告 Skill、模板、渲染与校验。调用 `taobao-ai-ops component run html-report ...`；Python 依赖不足时通过该入口执行 `runtime install --yes`。
 - taobao-ai-operations：套件自带的管理与业务路由 Skill。
 
 yccli 为取数时按需准备的外部工具，可用 TAOBAO_AI_OPS_YCCLI 指定；Excel 分析不需要 NAS、VPN 或平台登录。账号与授权留在包外，安装不会获得服务权限。

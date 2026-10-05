@@ -39,7 +39,13 @@ export async function doctor(id,mode='excel'){
   const children=await Promise.all(n.requires_skills.map(skill=>doctor(skill,mode)));
   return {ok:checks.every(c=>c.ok)&&children.every(c=>c.ok),package:PACKAGE.name,version:PACKAGE.version,node:n.id,checks,children,native_requirements:children.flatMap(c=>c.native_requirements)};
  }
- if(n.python_imports.length){const python=resolvePython(n.python_imports);checks.push({id:'python',ok:Boolean(python),value:python,required_imports:n.python_imports});}
+ if(n.python_imports.length&&n.id!=='html-report'){const python=resolvePython(n.python_imports);checks.push({id:'python',ok:Boolean(python),value:python,required_imports:n.python_imports});}
+ if(n.id==='html-report'){
+  const record=componentRecord(n.component);
+  const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:30000,env:pythonEnvironment()});
+  let detail;try{detail=JSON.parse(result.stdout||result.stderr);}catch{detail={message:result.stderr||'Unparseable component doctor'};}
+  checks.push({id:'html-component-runtime',ok:result.status===0,value:detail});
+ }
  if(n.id==='category-research')checks.push({id:'report-runtime',ok:['assets/report-template.html','assets/chart-views.js'].every(p=>fs.existsSync(path.join(source(n),p)))});
  if(n.id==='product-research'){
   const componentRequire=createRequire(path.join(componentRecord(n.component).root,'package.json'));

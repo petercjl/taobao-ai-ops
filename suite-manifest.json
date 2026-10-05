@@ -7,10 +7,22 @@
       "category-research",
       "product-research",
       "tbcli-tools",
-      "sycmcli-tools"
+      "sycmcli-tools",
+      "html-report"
     ]
   },
   "nodes": [
+    {
+      "id": "html-report",
+      "skill": "compact-commerce-ui",
+      "component": "html-report",
+      "stage": "shared-reporting",
+      "method_version": "commerce-ui-template-pack@1",
+      "requires_skills": [],
+      "python_imports": ["jsonschema"],
+      "scripts": [],
+      "native_requirements": ["browser.report.inspect"]
+    },
     {
       "id": "operations",
       "skill": "taobao-ai-operations",
@@ -18,7 +30,8 @@
       "method_version": "1.0",
       "requires_skills": [
         "yuce-category-opportunity-report",
-        "taobao-search-product-form"
+        "taobao-search-product-form",
+        "compact-commerce-ui"
       ],
       "python_imports": [],
       "scripts": [],
@@ -105,6 +118,11 @@
     }
   ],
   "tools": {
+    "commerce-ui": {
+      "package": "@petercjl/commerce-ui",
+      "component": "html-report",
+      "role": "versioned HTML templates, rendering and validation"
+    },
     "tbcli": {
       "package": "@petercjl/tbcli",
       "entry": "scripts/tbcli.mjs",
@@ -138,6 +156,11 @@
     "source_checkout": "git-managed"
   },
   "components": {
+    "html-report": {
+      "package": "@petercjl/commerce-ui",
+      "bin": "commerce-ui",
+      "skills": ["compact-commerce-ui"]
+    },
     "category-research": {
       "package": "@petercjl/yuce-category-opportunity-report",
       "bin": "yuce-category-research",

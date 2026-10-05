@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {doctor,resolvePython,pythonCandidates} from '../src/runtime.mjs';
+import {nodeFor} from '../src/core.mjs';
 test('suite doctor checks independent children and reports native-image limits',async()=>{
- const r=await doctor();assert.equal(r.children.length,2);assert.equal(r.native_requirements[0].status,'requires-active-agent-verification');assert.equal(r.children.find(n=>n.node==='category-research').service_access,'not-required');
+ const r=await doctor();assert.equal(r.children.length,nodeFor('operations').requires_skills.length);assert.ok(r.native_requirements.every(n=>n.status==='requires-active-agent-verification'));assert.equal(r.children.find(n=>n.node==='category-research').service_access,'not-required');assert.ok(r.children.find(n=>n.node==='html-report'));
 });
 test('missing interpreter and imports cannot pass dependency discovery',()=>{
  assert.equal(resolvePython(['openpyxl'],['nonexistent-suite-python']),null);
