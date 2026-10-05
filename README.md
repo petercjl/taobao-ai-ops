@@ -6,7 +6,7 @@
 
 ```sh
 npm install --global @petercjl/taobao-ai-ops
-taobao-ai-ops skill install --agent codex --profile research --json
+taobao-ai-ops components install --agent codex --yes --json
 taobao-ai-ops doctor --json
 taobao-ai-ops update check --json
 taobao-ai-ops update install --agent codex --yes --json
