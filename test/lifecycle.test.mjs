@@ -8,8 +8,8 @@ import {nodeFor,closure,source} from '../src/core.mjs';
 import {pythonCandidates,runScript} from '../src/runtime.mjs';
 const temp=()=>fs.mkdtemp(path.join(os.tmpdir(),'taobao-suite-test-'));
 
-test('profile closure installs three independently discoverable canonical Skills',async()=>{
- const root=await temp();const r=await install({targetDir:root,mode:'copy'});assert.equal(r.skills.length,3);
+test('profile closure installs five independently discoverable canonical Skills',async()=>{
+ const root=await temp();const r=await install({targetDir:root,mode:'copy'});assert.equal(r.skills.length,5);
  for(const n of closure())assert.equal((await status(root,n)).state,'current');
  const repeated=await install({targetDir:root,mode:'copy'});assert.ok(repeated.skills.every(s=>s.action==='unchanged'));
 });

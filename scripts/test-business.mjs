@@ -1,12 +1,10 @@
-import path from 'node:path';
 import {spawnSync} from 'node:child_process';
-import {ROOT} from '../src/core.mjs';
-import {resolvePython,pythonEnvironment} from '../src/runtime.mjs';
-const python=resolvePython(['pandas','numpy','openpyxl','PIL','jieba']);if(!python)throw Error('A Python with requirements.txt imports is required');
-const commands=[
- [python.command,[...python.prefix,'-m','unittest','discover','-s',path.join(ROOT,'skills/yuce-category-opportunity-report/tests'),'-q']],
- [process.execPath,[path.join(ROOT,'skills/yuce-category-opportunity-report/tests/test_navigation.cjs')]],
- [process.execPath,[path.join(ROOT,'skills/yuce-category-opportunity-report/tests/test_chart_views.cjs')]],
- [python.command,[...python.prefix,'-m','unittest','discover','-s',path.join(ROOT,'test/product'),'-q']],
-];
-for(const [bin,args] of commands){const r=spawnSync(bin,args,{stdio:'inherit',env:pythonEnvironment()});if(r.status!==0)process.exit(r.status||1);}
+import {doctor} from '../src/runtime.mjs';
+import {componentRecord} from '../src/core.mjs';
+const d=await doctor();if(!d.ok)throw Error('Research dependency smoke failed');
+for(const [id,script] of [['category-research','build_report.py'],['product-research','render_report.py']]){
+ const record=componentRecord(id);
+ const r=spawnSync(process.execPath,[record.entry,'script',script,'--help'],{stdio:'inherit'});
+ if(r.status!==0)throw Error('Independent component smoke failed: '+id);
+}
+console.log('Independent component CLI smoke passed; full method tests belong to each component repository.');

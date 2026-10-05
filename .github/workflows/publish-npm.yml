@@ -43,6 +43,7 @@ jobs:
         run: npm install --global npm@latest
       - run: npm ci
       - run: npm run check --if-present
+      - run: node bin/taobao-ai-ops.mjs components install --target-dir .qa-skills --yes --json
       - run: npm test --if-present
       - uses: actions/setup-python@v5
         with:

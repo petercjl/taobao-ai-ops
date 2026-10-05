@@ -3,8 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import {spawnSync} from 'node:child_process';
 import {createRequire} from 'node:module';
-import {ROOT,MANIFEST,PACKAGE,nodeFor,source,fail} from './core.mjs';
-const require=createRequire(import.meta.url);
+import {ROOT,MANIFEST,PACKAGE,nodeFor,source,componentRecord,fail} from './core.mjs';
 export function pythonEnvironment(env=process.env){
  return {...env,PYTHONUTF8:'1',PYTHONIOENCODING:'utf-8',PYTHONDONTWRITEBYTECODE:'1'};
 }
@@ -21,25 +20,21 @@ export function resolvePython(imports,candidates=pythonCandidates()){
 export function toolEntry(id){
  const tool=MANIFEST.tools[id];if(!tool)throw fail('UNKNOWN_TOOL',`Unknown tool ${id}`);
  if(tool.external)return {command:process.env[tool.executable_env]||id,args:[],external:true};
- let packageRoot;
- try{packageRoot=path.dirname(require.resolve(`${tool.package}/package.json`));}
- catch{let dir=path.dirname(require.resolve(tool.package));while(dir!==path.dirname(dir)){const p=path.join(dir,'package.json');if(fs.existsSync(p)&&JSON.parse(fs.readFileSync(p,'utf8')).name===tool.package){packageRoot=dir;break;}dir=path.dirname(dir);}}
- if(!packageRoot)throw fail('CAPABILITY_UNAVAILABLE',`Cannot resolve ${tool.package}`);
- const entry=path.join(packageRoot,tool.entry);
- if(!fs.existsSync(entry))throw fail('CAPABILITY_UNAVAILABLE',`Missing ${id} entry`,{entry});
- return {command:process.execPath,args:[entry],version:JSON.parse(fs.readFileSync(path.join(packageRoot,'package.json'),'utf8')).version};
+ const managed=componentRecord(tool.component);
+ if(!fs.existsSync(managed.entry))throw fail('CAPABILITY_UNAVAILABLE',`Missing ${id} entry`);
+ return {command:process.execPath,args:[managed.entry],version:managed.version};
 }
 export function runScript(id,name,args){
- const n=nodeFor(id);if(!n.scripts.includes(name))throw fail('SCRIPT_NOT_ALLOWED',`Script ${name} is not exposed by ${n.id}`);
- const runtime=name.endsWith('.py')?resolvePython(n.python_imports):{command:process.execPath,prefix:[]};
- if(!runtime)throw fail('RUNTIME_UNAVAILABLE',`Python imports required: ${n.python_imports.join(', ')}`);
- const r=spawnSync(runtime.command,[...runtime.prefix,path.join(source(n),'scripts',name),...args],{stdio:'inherit',env:pythonEnvironment()});
+ const n=nodeFor(id);if(!n.component||!/^[a-z][a-z0-9_]*\.(py|mjs)$/.test(name))throw fail('SCRIPT_NOT_ALLOWED',`Invalid component script ${name}`);
+ // The independent CLI owns its current allowlist and runtime; new component scripts need no shell release.
+ const record=componentRecord(n.component);
+ const r=spawnSync(process.execPath,[record.entry,'script',name,...args],{stdio:'inherit',env:pythonEnvironment()});
  if(r.error)throw fail('EXECUTION_FAILED',r.error.message);process.exitCode=r.status??1;
 }
 export async function doctor(id,mode='excel'){
  const n=nodeFor(id||'operations'),checks=[];
  checks.push({id:'node',ok:Number(process.versions.node.split('.')[0])>=20,value:process.version});
- checks.push({id:'skill',ok:fs.existsSync(path.join(source(n),'SKILL.md'))});
+ try{checks.push({id:'skill',ok:fs.existsSync(path.join(source(n),'SKILL.md'))});}catch(e){return {ok:false,node:n.id,checks:[...checks,{id:'component',ok:false,code:e.code,message:e.message}],native_requirements:[]};}
  if(n.id==='operations'){
   const children=await Promise.all(n.requires_skills.map(skill=>doctor(skill,mode)));
   return {ok:checks.every(c=>c.ok)&&children.every(c=>c.ok),package:PACKAGE.name,version:PACKAGE.version,node:n.id,checks,children,native_requirements:children.flatMap(c=>c.native_requirements)};
@@ -47,7 +42,8 @@ export async function doctor(id,mode='excel'){
  if(n.python_imports.length){const python=resolvePython(n.python_imports);checks.push({id:'python',ok:Boolean(python),value:python,required_imports:n.python_imports});}
  if(n.id==='category-research')checks.push({id:'report-runtime',ok:['assets/report-template.html','assets/chart-views.js'].every(p=>fs.existsSync(path.join(source(n),p)))});
  if(n.id==='product-research'){
-  checks.push({id:'exceljs',ok:Boolean(await import('@excel.js/exceljs').catch(()=>null))});
+  const componentRequire=createRequire(path.join(componentRecord(n.component).root,'package.json'));
+  try{checks.push({id:'exceljs',ok:Boolean(componentRequire.resolve('@excel.js/exceljs'))});}catch(e){checks.push({id:'exceljs',ok:false,message:e.message});}
   checks.push({id:'report-runtime',ok:['report_runtime/renderer.py','report_runtime/validator.py','report_runtime/templates/workbench.html'].every(p=>fs.existsSync(path.join(source(n),p)))});
  }
  if(!['excel','nas'].includes(mode))throw fail('USAGE','Doctor mode must be excel or nas');

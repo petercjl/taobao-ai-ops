@@ -17,7 +17,7 @@
   "files": [
     "bin",
     "src",
-    "skills",
+    "skills/taobao-ai-operations",
     "contracts",
     "suite-manifest.json",
     "requirements.txt",
@@ -37,10 +37,5 @@
     "test:business": "node scripts/test-business.mjs",
     "check": "node scripts/validate-suite.mjs",
     "prepack": "npm run check"
-  },
-  "dependencies": {
-    "@excel.js/exceljs": "0.9.0",
-    "@petercjl/tbcli": "0.10.4",
-    "@petercjl/sycmcli": "0.3.1"
   }
 }

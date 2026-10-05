@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import {randomUUID} from 'node:crypto';
-import {PACKAGE,source,closure,json,stat,fileHashes,digest,fail,stateRoot} from './core.mjs';
+import {PACKAGE,source,nodeVersion,closure,json,stat,fileHashes,digest,fail,stateRoot} from './core.mjs';
 
 const OWNER='.taobao-ai-ops-managed.json';
 export function targetRoot(opts){
@@ -22,7 +22,7 @@ export function targetRoot(opts){
 import {existsSync as osExists} from 'node:fs';
 async function owners(root){const p=path.join(root,OWNER);if(!await stat(p))return {package:PACKAGE.name,skills:{}};const value=await json(p);if(value.package!==PACKAGE.name)throw fail('OWNERSHIP_CONFLICT','Suite ownership file belongs to another package');return value;}
 export async function status(root,n){
- const dest=path.join(root,n.skill),files=await fileHashes(source(n));const base={skill:n.skill,node:n.id,source:source(n),destination:dest,sourceDigest:digest(files),version:PACKAGE.version};
+ const dest=path.join(root,n.skill),files=await fileHashes(source(n));const base={skill:n.skill,node:n.id,source:source(n),destination:dest,sourceDigest:digest(files),version:nodeVersion(n)};
  const s=await stat(dest);if(!s)return {...base,state:'absent',managed:false};
  const own=(await owners(root)).skills[n.skill];
  if(s.isSymbolicLink()){
@@ -40,7 +40,7 @@ export async function status(root,n){
 async function makeCopy(dest,n){
  const files=await fileHashes(source(n));await fs.mkdir(dest,{recursive:true});
  for(const relative of Object.keys(files)){const d=path.join(dest,relative);await fs.mkdir(path.dirname(d),{recursive:true});await fs.copyFile(path.join(source(n),relative),d);}
- await fs.writeFile(path.join(dest,'.suite-install.json'),JSON.stringify({package:PACKAGE.name,skill:n.skill,version:PACKAGE.version,sourceDigest:digest(files),files}),{flag:'wx'});
+ await fs.writeFile(path.join(dest,'.suite-install.json'),JSON.stringify({package:PACKAGE.name,skill:n.skill,version:nodeVersion(n),sourceDigest:digest(files),files}),{flag:'wx'});
  await fs.writeFile(path.join(dest,'.install-meta.json'),JSON.stringify({title:n.skill,description:`Taobao AI operations: ${n.id}`}),{flag:'wx'});
 }
 async function restore(backup,dest,inPlace){
@@ -72,7 +72,7 @@ export async function install(opts,options={}){
    if(mode==='link')await fs.symlink(source(n),dest,process.platform==='win32'?'junction':'dir');else await makeCopy(dest,n);
    if(mode==='copy'&&record.backup){const ui=path.join(record.backup,'.install-meta.json');if(await stat(ui))await fs.copyFile(ui,path.join(dest,'.install-meta.json'));}
    const after=await status(root,n);if(after.state!=='current')throw fail('INSTALL_VERIFY_FAILED',`Skill verification failed: ${n.skill}`);
-   old.skills[n.skill]={source:source(n),version:PACKAGE.version,digest:after.sourceDigest,mode,backup:record.backup};
+   old.skills[n.skill]={source:source(n),version:nodeVersion(n),digest:after.sourceDigest,mode,backup:record.backup};
    results.push({...after,action:item.state==='absent'?'installed':item.managed?'updated':'adopted',backup:record.backup,strategy:inPlace?'in-place':'rename'});
    if(options.failAfter===changed.length)throw fail('TEST_INJECTED_FAILURE','Injected migration failure');
   }

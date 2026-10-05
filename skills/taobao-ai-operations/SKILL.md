@@ -18,7 +18,11 @@ Input: an operator's goal, supplied workbooks or authorized data sources, option
 
 ## Execution and branches
 
-Bundled node scripts run via `taobao-ai-ops script NODE SCRIPT ...`; supplied Excel does not require platform accounts. Optional platform calls use `taobao-ai-ops tool run TOOL ...` so the suite selects its fixed tool entry. Accounts, warehouse access and write permissions remain external. The category child's database-consent and additive-import boundaries apply in its NAS route.
+Component scripts run via `taobao-ai-ops script NODE SCRIPT ...`; supplied Excel does not require platform accounts. Optional platform calls use `taobao-ai-ops tool run TOOL ...` so the shell selects the installed independent component. Accounts, warehouse access and write permissions remain external. The category child's database-consent and additive-import boundaries apply in its NAS route.
+
+When a child was installed by the shell, forward its CLI examples through `taobao-ai-ops component run COMPONENT ...`, retaining all remaining arguments. This resolves the actual independent package even when its CLI is not on PATH or another global version exists. Use the shell's unified update entry for shell-managed components; a child's standalone global updater belongs only to independent global installations.
+
+The shell registers independent npm packages; each owns its method, resources and release. Ordinary tasks use installed versions. On an explicit install/update request, use `taobao-ai-ops skill install --agent AGENT` or `taobao-ai-ops update install --agent AGENT --yes`; the latter checks both shell and every registered component's stable latest version even when the shell is unchanged. Inspect returned versions and managed Skill state. Registry failure preserves current components; local edits stop synchronization. Missing components return COMPONENT_NOT_INSTALLED and require authorized installation before returning to step 2. Development registrations update through their Git owners and are reported separately. Skill source resolves to each component's own canonical package, not a shell copy.
 
 Current node selection and source resolution are deterministic contracts, with method judgment owned by each child Skill. The package manifest is the node registry and shared contracts are maintained in the package's contracts directory. Do not load unrelated node methods at startup.
 

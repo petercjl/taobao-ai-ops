@@ -3,6 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
+import {readFileSync,existsSync} from 'node:fs';
 export const ROOT=fileURLToPath(new URL('../',import.meta.url));
 export const PACKAGE=JSON.parse(await fs.readFile(path.join(ROOT,'package.json'),'utf8'));
 export const MANIFEST=JSON.parse(await fs.readFile(path.join(ROOT,'suite-manifest.json'),'utf8'));
@@ -11,7 +12,10 @@ export const json=p=>fs.readFile(p,'utf8').then(JSON.parse);
 export const stat=p=>fs.lstat(p).catch(e=>{if(e.code==='ENOENT')return null;throw e;});
 export const hash=data=>createHash('sha256').update(data).digest('hex');
 export function nodeFor(id){const n=MANIFEST.nodes.find(n=>n.id===id||n.skill===id);if(!n)throw fail('UNKNOWN_NODE',`Unknown node: ${id}`);return n;}
-export const source=n=>path.join(ROOT,'skills',n.skill);
+export function componentRecords(){const file=path.join(stateRoot(),'components.json');return existsSync(file)?JSON.parse(readFileSync(file,'utf8')).components||{}:{};}
+export function componentRecord(id){const r=componentRecords()[id];if(!r)throw fail('COMPONENT_NOT_INSTALLED',`Install registered component ${id} with components install`);return r;}
+export const source=n=>n.component?componentRecord(n.component).sources[n.skill]||(()=>{throw fail('SKILL_SOURCE_MISSING',n.skill);})():path.join(ROOT,'skills',n.skill);
+export const nodeVersion=n=>n.component?componentRecord(n.component).version:PACKAGE.version;
 export function stateRoot(){return process.env.TAOBAO_AI_OPS_STATE_DIR||path.join(os.homedir(),'.local','state','taobao-ai-ops');}
 export async function fileHashes(root,rel=''){
  const out={};

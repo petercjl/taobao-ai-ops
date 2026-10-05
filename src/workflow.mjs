@@ -1,14 +1,14 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {randomUUID} from 'node:crypto';
-import {ROOT,PACKAGE,MANIFEST,closure,nodeFor,hash,json,stat,fail} from './core.mjs';
+import {ROOT,PACKAGE,MANIFEST,closure,nodeFor,nodeVersion,hash,json,stat,fail} from './core.mjs';
 export async function plan(opts){
  if(!opts.runDir)throw fail('USAGE','--run-dir is required');
  const root=path.resolve(opts.runDir),dest=path.join(root,'taobao-ai-ops-run.json');
  if(await stat(dest))throw fail('OUTPUT_EXISTS','Run already exists; use workflow status');
- const nodes=closure(opts).filter(n=>n.id!=='operations');
+ const nodes=closure(opts).filter(n=>n.id!=='operations'&&n.stage!=='tools');
  const inputs=[];for(const p of [].concat(opts.input||[])){inputs.push({path:path.resolve(p),sha256:hash(await fs.readFile(p))});}
- const value={schema_version:1,run_id:randomUUID(),package:PACKAGE.name,package_version:PACKAGE.version,manifest_sha256:hash(await fs.readFile(path.join(ROOT,'suite-manifest.json'))),created_at:new Date().toISOString(),inputs,nodes:nodes.map(n=>({node_id:n.id,method_version:n.method_version,status:'planned',artifacts:[],verified:false})),context:opts.context||null,requirement:'Each node loads its complete Skill and executes its own QA; planning does not execute business work.'};
+ const value={schema_version:1,run_id:randomUUID(),package:PACKAGE.name,package_version:PACKAGE.version,manifest_sha256:hash(await fs.readFile(path.join(ROOT,'suite-manifest.json'))),created_at:new Date().toISOString(),inputs,nodes:nodes.map(n=>({node_id:n.id,component:n.component,component_version:nodeVersion(n),method_version:n.method_version,status:'planned',artifacts:[],verified:false})),context:opts.context||null,requirement:'Each node loads its complete Skill and executes its own QA; planning does not execute business work.'};
  await fs.mkdir(root,{recursive:true});await fs.writeFile(dest,JSON.stringify(value,null,2),{flag:'wx'});return {ok:true,ledger:dest,...value};
 }
 export async function workflowStatus(opts){if(!opts.runDir)throw fail('USAGE','--run-dir is required');return json(path.join(path.resolve(opts.runDir),'taobao-ai-ops-run.json'));}
