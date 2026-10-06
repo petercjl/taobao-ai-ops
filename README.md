@@ -25,9 +25,24 @@ SealSeek 用户改用 --agent sealseek。目标有歧义时通过 SEALSEEK_SKILL
 - @petercjl/tbcli：淘宝数据与 NAS 数据库工具，含其独立 Skill。
 - @petercjl/sycmcli：店铺经营数据工具，含其独立 Skill。
 - @petercjl/commerce-ui：通用 HTML 报告 Skill、模板、渲染与校验。调用 `taobao-ai-ops component run html-report ...`；Python 依赖不足时通过该入口执行 `runtime install --yes`。
+- @petercjl/procli：项目 SOP、任务依赖与成果归档，配套 `project-management` Skill。任务卡组织工作，项目 Wiki 积累可复用的证据与结论。
 - taobao-ai-operations：套件自带的管理与业务路由 Skill。
 
 yccli 为取数时按需准备的外部工具，可用 TAOBAO_AI_OPS_YCCLI 指定；Excel 分析不需要 NAS、VPN 或平台登录。账号与授权留在包外，安装不会获得服务权限。
+
+## 项目主线与知识复用
+
+procli 是跨业务节点的公共能力：先读取项目的任务与已编译 Wiki，确定本次研究问题，再调用对应的独立研究工具；用户授权归档后，通过 `task publish` 将完整成果关联到指定项目和任务，供下一阶段读取。
+
+任务卡保存工作说明、责任人、依赖、状态和验收要求；钉钉文档与可选 HTML 面向人；完整报告 Wiki 与节点累计知识面向 Agent，保留数据口径、观察窗口、来源、分歧和待验证问题。普通 `task update` 只编辑任务字段；成果发布需要内容包与独立授权，报告完成也不等于任务已审批。
+
+```sh
+taobao-ai-ops skill source --name project-management --json
+taobao-ai-ops tool run procli directory list --json
+taobao-ai-ops component run procli knowledge index --project "项目名称" --json
+```
+
+向 Agent 明确说“用 procli”，并指定项目、任务及读取或归档目标。按当前 `project-management` Skill 解析真实名称和目标环境。项目读写需项目服务授权；发布钉钉文档还需官方 dws 与对应权限。服务不可访问时报告原目标错误并停止该操作，已有 Excel 研究可独立进行。套件不自动创建所有 SOP 任务、执行整条业务链或向项目写入研究结果；现有项目的真实 SOP 与依赖以 procli 读取结果为准。
 
 ## 调用与开发
 

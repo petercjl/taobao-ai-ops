@@ -17,7 +17,11 @@ export async function inspectComponent(id,root){
  for(const skill of c.skills){
   const r=spawnSync(process.execPath,[entry,'skill','source','--json'],{encoding:'utf8',timeout:30000,env:{...process.env,TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1'}});
   if(r.status!==0)throw fail('COMPONENT_SOURCE_FAILED',r.stderr||id);
-  const result=JSON.parse(r.stdout);const s=result.source||(result.skills||[]).find(s=>s.skill===skill)?.source;
+  const envelope=JSON.parse(r.stdout);
+  if(envelope.ok===false)throw fail('COMPONENT_SOURCE_FAILED',id, envelope.error);
+  const result=envelope.data??envelope;
+  if(result.skill&&result.skill!==skill)throw fail('SKILL_IDENTITY_MISMATCH',skill);
+  const s=result.source||(result.skills||[]).find(s=>s.skill===skill)?.source;
   if(!s||!path.resolve(s).startsWith(path.resolve(root)+path.sep))throw fail('INVALID_COMPONENT_SOURCE',skill);
   const text=await fs.readFile(path.join(s,'SKILL.md'),'utf8');
   if(!new RegExp(`^name: ${skill}\\s*$`,'m').test(text))throw fail('SKILL_IDENTITY_MISMATCH',skill);

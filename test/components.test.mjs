@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import {componentRecords,PACKAGE} from '../src/core.mjs';
-import {checkComponents,installComponents} from '../src/components.mjs';
+import {componentRecords,PACKAGE,MANIFEST,closure} from '../src/core.mjs';
+import {checkComponents,installComponents,inspectComponent} from '../src/components.mjs';
 
 async function fixture(fn){
  const originals=componentRecords(),env=process.env.TAOBAO_AI_OPS_STATE_DIR;
@@ -50,4 +50,26 @@ test('npm failure retains prior component versions',async()=>fixture(async(root,
 }));
 test('component update requires explicit authorization',async()=>{
  await assert.rejects(installComponents({agent:'codex'}),e=>e.code==='AUTHORIZATION_REQUIRED');
+});
+
+test('project-management is independently selectable and included in the suite profile',()=>{
+ assert.deepEqual(closure({node:'project-management'}).map(n=>n.skill),['project-management']);
+ assert.ok(closure().some(n=>n.component==='procli'));
+ assert.equal(MANIFEST.tools.procli.package,MANIFEST.components.procli.package);
+});
+
+test('component source discovery accepts procli envelopes and refuses bad sources',async()=>{
+ const root=await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(),'ops-procli-')));
+ const skill=path.join(root,'skill','project-management');await fs.mkdir(skill,{recursive:true});
+ await fs.writeFile(path.join(root,'package.json'),JSON.stringify({name:'@petercjl/procli',version:'0.7.0',bin:{procli:'cli.mjs'}}));
+ await fs.writeFile(path.join(skill,'SKILL.md'),'---\nname: project-management\ndescription: fixture\n---\n');
+ const emit=async result=>fs.writeFile(path.join(root,'cli.mjs'),`console.log(${JSON.stringify(JSON.stringify(result))});`);
+ await emit({ok:true,data:{skill:'project-management',source:skill}});
+ assert.equal((await inspectComponent('procli',root)).sources['project-management'],skill);
+ await emit({ok:false,error:{code:'AUTH_REQUIRED'}});
+ await assert.rejects(inspectComponent('procli',root),e=>e.code==='COMPONENT_SOURCE_FAILED');
+ await emit({ok:true,data:{skill:'other-skill',source:skill}});
+ await assert.rejects(inspectComponent('procli',root),e=>e.code==='SKILL_IDENTITY_MISMATCH');
+ await emit({ok:true,data:{skill:'project-management',source:path.join(os.tmpdir(),'outside')}});
+ await assert.rejects(inspectComponent('procli',root),e=>e.code==='INVALID_COMPONENT_SOURCE');
 });

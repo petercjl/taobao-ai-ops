@@ -46,6 +46,13 @@ export async function doctor(id,mode='excel'){
   let detail;try{detail=JSON.parse(result.stdout||result.stderr);}catch{detail={message:result.stderr||'Unparseable component doctor'};}
   checks.push({id:'html-component-runtime',ok:result.status===0,value:detail});
  }
+ if(n.component==='procli'){
+  const record=componentRecord(n.component);
+  const result=spawnSync(process.execPath,[record.entry,'--version'],{encoding:'utf8',timeout:15000});
+  let version;try{const data=JSON.parse(result.stdout);version=(data.data??data).version;}catch{}
+  checks.push({id:'procli-runtime',ok:result.status===0&&version===record.version,value:version});
+  checks.push({id:'procli-contract',ok:fs.existsSync(path.join(source(n),'capabilities.json'))});
+ }
  if(n.id==='category-research')checks.push({id:'report-runtime',ok:['assets/report-template.html','assets/chart-views.js'].every(p=>fs.existsSync(path.join(source(n),p)))});
  if(n.id==='product-research'){
   const componentRequire=createRequire(path.join(componentRecord(n.component).root,'package.json'));
@@ -54,5 +61,5 @@ export async function doctor(id,mode='excel'){
  }
  if(!['excel','nas'].includes(mode))throw fail('USAGE','Doctor mode must be excel or nas');
  if(mode==='nas'&&n.id==='category-research')for(const id of ['tbcli','yccli']){try{const tool=toolEntry(id);const r=spawnSync(tool.command,[...tool.args,'--version'],{encoding:'utf8',timeout:15000,env:{...process.env,TBCLI_UPDATE_CHECK:'0'}});checks.push({id,ok:r.status===0,value:r.stdout?.trim()});}catch(e){checks.push({id,ok:false,message:e.message});}}
- return {ok:checks.every(c=>c.ok),package:PACKAGE.name,version:PACKAGE.version,node:n.id,mode,checks,native_requirements:n.native_requirements.map(id=>({id,status:'requires-active-agent-verification'})),service_access:mode==='nas'?'not-probed':'not-required'};
+ return {ok:checks.every(c=>c.ok),package:PACKAGE.name,version:PACKAGE.version,node:n.id,mode,checks,native_requirements:n.native_requirements.map(id=>({id,status:'requires-active-agent-verification'})),service_access:mode==='nas'||n.component==='procli'?'not-probed':'not-required'};
 }
