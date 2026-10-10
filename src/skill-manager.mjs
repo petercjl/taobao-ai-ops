@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import {randomUUID} from 'node:crypto';
+import {randomUUID,createHash} from 'node:crypto';
 import {PACKAGE,source,nodeVersion,closure,json,stat,fileHashes,digest,fail,stateRoot} from './core.mjs';
 
 const OWNER='.taobao-ai-ops-managed.json';
@@ -79,6 +79,9 @@ export async function install(opts,options={}){
   const ownerPath=path.join(root,OWNER);if(await stat(ownerPath))await fs.copyFile(ownerPath,path.join(transaction,'previous-owner.json'));
   await fs.writeFile(path.join(transaction,'transaction.json'),JSON.stringify({package:PACKAGE.name,root,results},null,2),{flag:'wx'});
   const pending=path.join(root,`${OWNER}.${randomUUID()}.pending`);await fs.writeFile(pending,JSON.stringify(old,null,2),{flag:'wx'});await fs.rename(pending,ownerPath);
+  const registry=path.join(stateRoot(),'skill-targets');await fs.mkdir(registry,{recursive:true});
+  const registration=path.join(registry,createHash('sha256').update(root).digest('hex')+'.json');
+  if(!await stat(registration))await fs.writeFile(registration,JSON.stringify({root}),{flag:'wx'});
   return {ok:true,package:PACKAGE.name,version:PACKAGE.version,targetRoot:root,transaction,skills:results};
  }catch(e){for(const item of changed.reverse()){if(item.backup)await restore(item.backup,item.dest,item.inPlace);else if(await stat(item.dest))await fs.rm(item.dest,{recursive:true,force:true});}throw e;}
  finally{await fs.rmdir(lock);}

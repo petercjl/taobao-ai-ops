@@ -1,7 +1,7 @@
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {MANIFEST,PACKAGE,nodeFor,source,nodeVersion,fileHashes,digest,fail,componentRecords,componentRecord} from './core.mjs';
-import {checkComponents,installComponents,registerComponent} from './components.mjs';
+import {checkComponents,installComponents,registerComponent,prepareComponentRun} from './components.mjs';
 import {targetRoot,status,install} from './skill-manager.mjs';
 import {runScript,doctor,toolEntry} from './runtime.mjs';
 import {plan,workflowStatus,createHandoff} from './workflow.mjs';
@@ -14,10 +14,12 @@ export async function main(argv){
  if(['version','--version'].includes(command))return console.log(PACKAGE.version);
  if(command==='script')return runScript(action,rest[0],rest.slice(1));
  if(command==='component'&&action==='run'){
-  const record=componentRecord(rest[0]);const r=spawnSync(process.execPath,[record.entry,...rest.slice(1)],{stdio:'inherit',env:{...process.env,TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1'}});if(r.error)throw fail('EXECUTION_FAILED',r.error.message);process.exitCode=r.status??1;return;
+  await prepareComponentRun(rest[0]);
+  const record=componentRecord(rest[0]);const r=spawnSync(process.execPath,[record.entry,...rest.slice(1)],{stdio:'inherit',env:{...process.env,TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0'}});if(r.error)throw fail('EXECUTION_FAILED',r.error.message);process.exitCode=r.status??1;return;
  }
  if(command==='tool'&&action==='run'){
-  const entry=toolEntry(rest[0]);const r=spawnSync(entry.command,[...entry.args,...rest.slice(1)],{stdio:'inherit',env:{...process.env,TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1'}});if(r.error)throw fail('CAPABILITY_UNAVAILABLE',r.error.message);process.exitCode=r.status??1;return;
+  await prepareComponentRun(MANIFEST.tools[rest[0]]?.component);
+  const entry=toolEntry(rest[0]);const r=spawnSync(entry.command,[...entry.args,...rest.slice(1)],{stdio:'inherit',env:{...process.env,TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0'}});if(r.error)throw fail('CAPABILITY_UNAVAILABLE',r.error.message);process.exitCode=r.status??1;return;
  }
  if(command==='nodes'&&action==='list')return print(MANIFEST.nodes);
  if(command==='node'&&action==='show')return print(nodeFor(rest[0]));

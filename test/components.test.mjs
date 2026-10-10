@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import {componentRecords,PACKAGE,MANIFEST,closure} from '../src/core.mjs';
-import {checkComponents,installComponents,inspectComponent} from '../src/components.mjs';
+import {checkComponents,installComponents,inspectComponent,prepareComponentRun} from '../src/components.mjs';
 
 async function fixture(fn){
  const originals=componentRecords(),env=process.env.TAOBAO_AI_OPS_STATE_DIR;
@@ -73,3 +73,35 @@ test('component source discovery accepts procli envelopes and refuses bad source
  await emit({ok:true,data:{skill:'project-management',source:path.join(os.tmpdir(),'outside')}});
  await assert.rejects(inspectComponent('procli',root),e=>e.code==='INVALID_COMPONENT_SOURCE');
 });
+
+test('audio auto-update isolates generations, syncs Skill and checks each invocation',async()=>fixture(async(root,records)=>{
+ records.seedaudiocli.development=false;
+ await fs.writeFile(path.join(root,'components.json'),JSON.stringify({components:records}));
+ const target=path.join(root,'agent');
+ const {install}=await import('../src/skill-manager.mjs');
+ await install({targetDir:target,name:'seedaudiocli',mode:'copy'});
+ let checks=0,installs=0;
+ const registry=async()=>{checks++;return {ok:true,json:async()=>({name:'@petercjl/seedaudiocli',version:'9.0.0'})};};
+ const npm=async args=>{installs++;const pkg=path.join(args[args.indexOf('--prefix')+1],'node_modules','@petercjl','seedaudiocli');
+  await fs.mkdir(path.join(pkg,'skills','seedaudiocli'),{recursive:true});
+  await fs.writeFile(path.join(pkg,'package.json'),JSON.stringify({name:'@petercjl/seedaudiocli',version:'9.0.0',bin:{seedaudiocli:'cli.mjs'}}));
+  const skill=await fs.realpath(path.join(pkg,'skills','seedaudiocli'));
+  await fs.writeFile(path.join(skill,'SKILL.md'),'---\nname: seedaudiocli\ndescription: fixture\n---\nUpdated');
+  await fs.writeFile(path.join(pkg,'cli.mjs'),`console.log(${JSON.stringify(JSON.stringify({ok:true,source:skill}))});`);
+ };
+ await prepareComponentRun('seedaudiocli',{registry,npm});
+ assert.equal(componentRecords().seedaudiocli.version,'9.0.0');
+ assert.match(await fs.readFile(path.join(target,'seedaudiocli','SKILL.md'),'utf8'),/Updated/);
+ await prepareComponentRun('seedaudiocli',{registry,npm});
+ assert.equal(checks,2);assert.equal(installs,1);
+ assert.equal(componentRecords().tbcli.version,records.tbcli.version);
+ await prepareComponentRun('seedaudiocli',{registry:async()=>{throw Error('offline');},npm});
+ assert.equal(componentRecords().seedaudiocli.version,'9.0.0');
+}));
+test('audio failed installation retains component selection',async()=>fixture(async(root,records)=>{
+ records.seedaudiocli.development=false;
+ await fs.writeFile(path.join(root,'components.json'),JSON.stringify({components:records}));
+ const registry=async()=>({ok:true,json:async()=>({name:'@petercjl/seedaudiocli',version:'9.0.0'})});
+ await prepareComponentRun('seedaudiocli',{registry,npm:async()=>{throw Error('failed');}});
+ assert.deepEqual(componentRecords(),records);
+}));

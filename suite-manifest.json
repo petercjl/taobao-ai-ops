@@ -9,7 +9,8 @@
       "tbcli-tools",
       "sycmcli-tools",
       "html-report",
-      "project-management"
+      "project-management",
+      "seedaudio-tools"
     ]
   },
   "nodes": [
@@ -20,9 +21,13 @@
       "stage": "shared-reporting",
       "method_version": "commerce-ui-template-pack@1",
       "requires_skills": [],
-      "python_imports": ["jsonschema"],
+      "python_imports": [
+        "jsonschema"
+      ],
       "scripts": [],
-      "native_requirements": ["browser.report.inspect"]
+      "native_requirements": [
+        "browser.report.inspect"
+      ]
     },
     {
       "id": "operations",
@@ -107,7 +112,9 @@
       "python_imports": [],
       "scripts": [],
       "native_requirements": [],
-      "optional_tools": ["dws"]
+      "optional_tools": [
+        "dws"
+      ]
     },
     {
       "id": "tbcli-tools",
@@ -124,6 +131,16 @@
       "skill": "sycmcli",
       "component": "sycmcli",
       "stage": "tools",
+      "requires_skills": [],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": []
+    },
+    {
+      "id": "seedaudio-tools",
+      "skill": "seedaudiocli",
+      "component": "seedaudiocli",
+      "stage": "visual-production-audio",
       "requires_skills": [],
       "python_imports": [],
       "scripts": [],
@@ -158,6 +175,11 @@
       "minimum_version": "0.5.0",
       "executable_env": "TAOBAO_AI_OPS_YCCLI",
       "role": "authorized Yuce monthly collection; optional for supplied Excel"
+    },
+    "seedaudiocli": {
+      "package": "@petercjl/seedaudiocli",
+      "component": "seedaudiocli",
+      "role": "audio generation, reference voices, image-conditioned audio and task recovery"
     }
   },
   "targets": {
@@ -171,18 +193,25 @@
     "during_run": "installed-component-set",
     "automatic_install": false,
     "offline": "keep-current",
-    "source_checkout": "git-managed"
+    "source_checkout": "git-managed",
+    "automatic_components": [
+      "seedaudiocli"
+    ]
   },
   "components": {
     "procli": {
       "package": "@petercjl/procli",
       "bin": "procli",
-      "skills": ["project-management"]
+      "skills": [
+        "project-management"
+      ]
     },
     "html-report": {
       "package": "@petercjl/commerce-ui",
       "bin": "commerce-ui",
-      "skills": ["compact-commerce-ui"]
+      "skills": [
+        "compact-commerce-ui"
+      ]
     },
     "category-research": {
       "package": "@petercjl/yuce-category-opportunity-report",
@@ -211,6 +240,14 @@
       "skills": [
         "sycmcli"
       ]
+    },
+    "seedaudiocli": {
+      "package": "@petercjl/seedaudiocli",
+      "bin": "seedaudiocli",
+      "skills": [
+        "seedaudiocli"
+      ],
+      "automatic_update": true
     }
   }
 }

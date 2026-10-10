@@ -15,7 +15,7 @@ export async function inspectComponent(id,root){
  if(!p.bin?.[c.bin]||!entry.startsWith(path.resolve(root)+path.sep))throw fail('INVALID_COMPONENT_ENTRY',id);
  const sources={};
  for(const skill of c.skills){
-  const r=spawnSync(process.execPath,[entry,'skill','source','--json'],{encoding:'utf8',timeout:30000,env:{...process.env,TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1'}});
+  const r=spawnSync(process.execPath,[entry,'skill','source','--json'],{encoding:'utf8',timeout:30000,env:{...process.env,TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0'}});
   if(r.status!==0)throw fail('COMPONENT_SOURCE_FAILED',r.stderr||id);
   const envelope=JSON.parse(r.stdout);
   if(envelope.ok===false)throw fail('COMPONENT_SOURCE_FAILED',id, envelope.error);
@@ -73,5 +73,44 @@ export async function installComponents(opts,services={}){
    // The Skill manager backs up changed targets and rolls all Skill changes back on failure.
    const skills=await install(opts);return {ok:true,action:'updated',suiteVersion:PACKAGE.version,components:updates,skills,backup:path.join(generation,'previous-components.json')};
   }catch(e){await save(old);throw e;}
+ });
+}
+
+// Only components declaring this policy update on invocation; other lifecycle stays explicit.
+export async function prepareComponentRun(id,services={}){
+ if(!MANIFEST.components[id]?.automatic_update || process.env.TAOBAO_AI_OPS_AUTO_UPDATE==='0')return;
+ if(componentRecords()[id]?.development)return;
+ return locked(async()=>{
+  const old=componentRecords(),c=MANIFEST.components[id];
+  let latest;
+  try{
+   const r=await (services.registry||fetch)(`https://registry.npmjs.org/${encodeURIComponent(c.package)}/latest`,{signal:AbortSignal.timeout(8000)});
+   if(!r.ok)throw Error('registry');const p=await r.json();
+   if(p.name!==c.package||!/^\d+\.\d+\.\d+$/.test(p.version))throw Error('version');latest=p.version;
+  }catch{if(!old[id])throw fail('COMPONENT_NOT_INSTALLED','Install components while online');console.error('[taobao-ai-ops] Update check unavailable; using installed audio component.');return;}
+  const newer=(a,b)=>{const x=a.split('.').map(Number),y=b.split('.').map(Number);for(let i=0;i<3;i++)if(x[i]!==y[i])return x[i]>y[i];return false;};
+  if(old[id]&&!newer(latest,old[id].version))return;
+  const generation=path.join(stateRoot(),'component-generations',randomUUID());await fs.mkdir(generation,{recursive:true});
+  await fs.writeFile(path.join(generation,'previous-components.json'),JSON.stringify(old),{flag:'wx'});
+  const roots=[];
+  for(const name of await fs.readdir(path.join(stateRoot(),'skill-targets')).catch(()=>[])){
+   const info=JSON.parse(await fs.readFile(path.join(stateRoot(),'skill-targets',name),'utf8'));
+   const owner=JSON.parse(await fs.readFile(path.join(info.root,'.taobao-ai-ops-managed.json'),'utf8').catch(()=>'{}'));
+   if(c.skills.some(skill=>owner.skills?.[skill]))roots.push(info.root);
+  }
+  const synced=[];
+  try{
+   await (services.npm||npm)(['install','--prefix',generation,'--no-audit','--no-fund','--ignore-scripts',`${c.package}@${latest}`]);
+   const record=await inspectComponent(id,path.join(generation,'node_modules',...c.package.split('/')));
+   if(record.version!==latest)throw fail('COMPONENT_VERSION_MISMATCH',id);
+   await save({...old,[id]:record});
+   for(const targetDir of roots){await install({targetDir,name:c.skills[0]});synced.push(targetDir);}
+   console.error(`[taobao-ai-ops] ${id} updated to ${latest}.`);
+  }catch(e){
+   await save(old);
+   for(const targetDir of synced)await install({targetDir,name:c.skills[0]});
+   if(!old[id])throw e;
+   console.error(`[taobao-ai-ops] ${e.code||'UPDATE_FAILED'}; using previous audio component.`);
+  }
  });
 }

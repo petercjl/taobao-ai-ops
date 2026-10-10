@@ -59,3 +59,9 @@ taobao-ai-ops tool run tbcli capabilities --json
 Node >=20。Python 研究依赖通过稳定解释器准备；TAOBAO_AI_OPS_PYTHON 可指定已配置解释器。脚本和报告模板来自实际组件目录。原生图片理解由当前 Agent 提供；缺失时报告而非缩减流程。
 
 本地 macOS 确定性安装、更新与恢复测试单独记录；Windows/SealSeek 的真实宿主安装和端到端行为尚待验证。CI 发布前须先有可安装的类目独立包；所有发布通过 GitHub Actions OIDC。
+
+## Audio production
+
+The `seedaudio-tools` node registers the independent `@petercjl/seedaudiocli` package and its canonical `seedaudiocli` Skill. Install with `taobao-ai-ops skill install --agent codex --name seedaudiocli` (or the actual SealSeek target). Discover its source with `taobao-ai-ops skill source --name seedaudiocli --json`, read the complete current Skill and relative resources, then invoke `taobao-ai-ops component run seedaudiocli ...` or `tool run seedaudiocli ...`. Return task IDs and output files to the caller's audio acceptance flow. A missing component requires `components install --agent AGENT --yes`; missing credentials require importing the administrator-provided file through the component CLI.
+
+Before every audio component invocation, the suite checks stable latest, installs a newer component into a separate generation and synchronizes registered managed Skill targets. Configuration and task history remain in user directories. Registry/install failures retain the previous version. Local development checkouts remain Git-managed. `TAOBAO_AI_OPS_AUTO_UPDATE=0` pins the installed set for a specific run. Other components keep their declared update policy. The suite owns installation and invocation; the audio package owns provider integration, validation, authentication, generation and recovery. Prompts and output acceptance belong to the caller.

@@ -53,6 +53,12 @@ export async function doctor(id,mode='excel'){
   checks.push({id:'procli-runtime',ok:result.status===0&&version===record.version,value:version});
   checks.push({id:'procli-contract',ok:fs.existsSync(path.join(source(n),'capabilities.json'))});
  }
+ if(n.component==='seedaudiocli'){
+  const record=componentRecord(n.component);
+  const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:30000,env:{...pythonEnvironment(),SEEDAUDIO_AUTO_UPDATE:'0'}});
+  let detail;try{detail=JSON.parse(result.stdout);}catch{detail={code:'COMPONENT_DOCTOR_FAILED'};}
+  checks.push({id:'seedaudio-runtime-and-config',ok:result.status===0,value:detail});
+ }
  if(n.id==='category-research')checks.push({id:'report-runtime',ok:['assets/report-template.html','assets/chart-views.js'].every(p=>fs.existsSync(path.join(source(n),p)))});
  if(n.id==='product-research'){
   const componentRequire=createRequire(path.join(componentRecord(n.component).root,'package.json'));

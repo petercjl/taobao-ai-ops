@@ -43,3 +43,9 @@ Missing native image observation stops product visual analysis; an unverified su
 ## QA and maintenance
 
 Confirm the selected node, actual source path, method version, source hashes and full output contract. Keep every Skill's tests independent and exercise suite installation, dependency closure and handoffs separately. Suite targets are implemented, with actual Agent/OS runtime evidence recorded separately. Clean-context regression requires an explicit user request. New business nodes enter the suite registry only with an independent I → S → O, execution and QA contract.
+
+## Audio production
+
+The `seedaudio-tools` node registers the independent `@petercjl/seedaudiocli` package and its canonical `seedaudiocli` Skill. Install with `taobao-ai-ops skill install --agent codex --name seedaudiocli` (or the actual SealSeek target). Discover its source with `taobao-ai-ops skill source --name seedaudiocli --json`, read the complete current Skill and relative resources, then invoke `taobao-ai-ops component run seedaudiocli ...` or `tool run seedaudiocli ...`. Return task IDs and output files to the caller's audio acceptance flow. A missing component requires `components install --agent AGENT --yes`; missing credentials require importing the administrator-provided file through the component CLI.
+
+Before every audio component invocation, the suite checks stable latest, installs a newer component into a separate generation and synchronizes registered managed Skill targets. Configuration and task history remain in user directories. Registry/install failures retain the previous version. Local development checkouts remain Git-managed. `TAOBAO_AI_OPS_AUTO_UPDATE=0` pins the installed set for a specific run. Other components keep their declared update policy. The suite owns installation and invocation; the audio package owns provider integration, validation, authentication, generation and recovery. Prompts and output acceptance belong to the caller.
