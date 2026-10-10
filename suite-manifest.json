@@ -10,7 +10,10 @@
       "sycmcli-tools",
       "html-report",
       "project-management",
-      "seedaudio-tools"
+      "seedaudio-tools",
+      "sourcing-tools",
+      "product-sourcing",
+      "opportunity-sourcing"
     ]
   },
   "nodes": [
@@ -37,7 +40,10 @@
       "requires_skills": [
         "yuce-category-opportunity-report",
         "taobao-search-product-form",
-        "compact-commerce-ui"
+        "compact-commerce-ui",
+        "1688cli",
+        "1688-product-sourcing",
+        "1688-opportunity-sourcing-research"
       ],
       "python_imports": [],
       "scripts": [],
@@ -145,6 +151,50 @@
       "python_imports": [],
       "scripts": [],
       "native_requirements": []
+    },
+    {
+      "id": "sourcing-tools",
+      "skill": "1688cli",
+      "component": "1688cli",
+      "stage": "sourcing-capability",
+      "method_version": "1688-contract@1",
+      "requires_skills": [],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": []
+    },
+    {
+      "id": "product-sourcing",
+      "skill": "1688-product-sourcing",
+      "component": "1688-product-sourcing",
+      "stage": "product-sourcing",
+      "method_version": "1688-product-sourcing@1",
+      "requires_skills": [
+        "1688cli",
+        "compact-commerce-ui"
+      ],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": [
+        "image.observe",
+        "browser.report.inspect"
+      ]
+    },
+    {
+      "id": "opportunity-sourcing",
+      "skill": "1688-opportunity-sourcing-research",
+      "component": "1688-opportunity-sourcing-research",
+      "stage": "opportunity-portfolio",
+      "method_version": "1688-opportunity-sourcing-research@1",
+      "requires_skills": [
+        "1688cli"
+      ],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": [
+        "image.observe",
+        "browser.report.inspect"
+      ]
     }
   ],
   "tools": {
@@ -180,12 +230,30 @@
       "package": "@petercjl/seedaudiocli",
       "component": "seedaudiocli",
       "role": "audio generation, reference voices, image-conditioned audio and task recovery"
+    },
+    "1688cli": {
+      "package": "@petercjl/1688cli",
+      "component": "1688cli",
+      "role": "sourcing-capability"
+    },
+    "1688-product-sourcing": {
+      "package": "@petercjl/1688-product-sourcing",
+      "component": "1688-product-sourcing",
+      "role": "product-sourcing"
+    },
+    "1688-opportunity-sourcing-research": {
+      "package": "@petercjl/1688-opportunity-sourcing-research",
+      "component": "1688-opportunity-sourcing-research",
+      "role": "opportunity-portfolio"
     }
   },
   "targets": {
     "codex:macos": "implemented",
     "sealseek:macos": "implemented",
-    "sealseek:windows": "implemented"
+    "sealseek:windows": "implemented",
+    "codex:windows": "implemented",
+    "workbuddy:macos": "implemented",
+    "workbuddy:windows": "implemented"
   },
   "update_policy": {
     "owner": "shell",
@@ -248,6 +316,27 @@
         "seedaudiocli"
       ],
       "automatic_update": true
+    },
+    "1688cli": {
+      "package": "@petercjl/1688cli",
+      "bin": "1688cli",
+      "skills": [
+        "1688cli"
+      ]
+    },
+    "1688-product-sourcing": {
+      "package": "@petercjl/1688-product-sourcing",
+      "bin": "1688-product-sourcing",
+      "skills": [
+        "1688-product-sourcing"
+      ]
+    },
+    "1688-opportunity-sourcing-research": {
+      "package": "@petercjl/1688-opportunity-sourcing-research",
+      "bin": "1688-opportunity-sourcing-research",
+      "skills": [
+        "1688-opportunity-sourcing-research"
+      ]
     }
   }
 }

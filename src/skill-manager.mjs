@@ -9,6 +9,7 @@ export function targetRoot(opts){
  if(opts.targetDir&&opts.agent)throw fail('USAGE','Choose --agent or --target-dir');
  if(opts.targetDir)return path.resolve(opts.targetDir);
  if(opts.agent==='codex')return path.join(process.env.CODEX_HOME||path.join(os.homedir(),'.codex'),'skills');
+ if(opts.agent==='workbuddy')return process.env.WORKBUDDY_SKILLS_DIR||path.join(process.env.WORKBUDDY_HOME||path.join(os.homedir(),'.workbuddy'),'skills');
  if(opts.agent==='agents')return process.env.AGENT_SKILLS_DIR||path.join(os.homedir(),'.agents','skills');
  if(opts.agent==='sealseek'){
   if(process.env.SEALSEEK_SKILLS_DIR)return path.resolve(process.env.SEALSEEK_SKILLS_DIR);
@@ -17,7 +18,7 @@ export function targetRoot(opts){
   if(choices.length!==1)throw fail('TARGET_UNRESOLVED','Set SEALSEEK_SKILLS_DIR or --target-dir to the active SealSeek Skill root');
   return choices[0];
  }
- throw fail('UNKNOWN_AGENT','Choose codex, agents, sealseek or --target-dir');
+ throw fail('UNKNOWN_AGENT','Choose codex, agents, sealseek, workbuddy or --target-dir');
 }
 import {existsSync as osExists} from 'node:fs';
 async function owners(root){const p=path.join(root,OWNER);if(!await stat(p))return {package:PACKAGE.name,skills:{}};const value=await json(p);if(value.package!==PACKAGE.name)throw fail('OWNERSHIP_CONFLICT','Suite ownership file belongs to another package');return value;}

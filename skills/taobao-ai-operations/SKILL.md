@@ -49,3 +49,13 @@ Confirm the selected node, actual source path, method version, source hashes and
 The `seedaudio-tools` node registers the independent `@petercjl/seedaudiocli` package and its canonical `seedaudiocli` Skill. Install with `taobao-ai-ops skill install --agent codex --name seedaudiocli` (or the actual SealSeek target). Discover its source with `taobao-ai-ops skill source --name seedaudiocli --json`, read the complete current Skill and relative resources, then invoke `taobao-ai-ops component run seedaudiocli ...` or `tool run seedaudiocli ...`. Return task IDs and output files to the caller's audio acceptance flow. A missing component requires `components install --agent AGENT --yes`; missing credentials require importing the administrator-provided file through the component CLI.
 
 Before every audio component invocation, the suite checks stable latest, installs a newer component into a separate generation and synchronizes registered managed Skill targets. Configuration and task history remain in user directories. Registry/install failures retain the previous version. Local development checkouts remain Git-managed. `TAOBAO_AI_OPS_AUTO_UPDATE=0` pins the installed set for a specific run. Other components keep their declared update policy. The suite owns installation and invocation; the audio package owns provider integration, validation, authentication, generation and recovery. Prompts and output acceptance belong to the caller.
+
+## 1688 货源与选品应用
+
+按用户目标选择独立组件。单次关键词/图片/链接查询和明确筛选用 `1688cli`；从关键词或参考图形成商品库、视觉分类和报告用 `1688-product-sourcing`；从兼容 `product-opportunities.json` 形成六类策略组合用 `1688-opportunity-sourcing-research`。两项应用均通过原子能力获取平台事实，功能包只负责注册、依赖与安装更新。
+
+执行前运行 `taobao-ai-ops skill source --name <精确Skill名称> --json`，完整读取返回路径的当前 SKILL.md，按其要求解析依赖和相对资源，执行它的主线后回到本路由的交付节点。缺少组件用 `components install --agent <agent> --yes`；契约不兼容保留错误并停止该分支。
+
+输入输出：关键词/图找货应用接收用户需求和约束，交付 HTML、完整商品 JSON 和查询视觉证据；六类应用接收兼容机会交接文件，交付类别组合报告及 sourcing-candidates.json。只有输入契约实际兼容时才串联上游研究结果，不把其他 JSON 当作机会交接文件。
+
+调用应用用 `taobao-ai-ops component run <component> <arguments...>`，原子查询可用 `taobao-ai-ops tool run 1688cli products search "关键词"`。应用方法和模板由各自 npm 包拥有，独立升级。

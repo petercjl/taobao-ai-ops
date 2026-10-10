@@ -53,6 +53,12 @@ export async function doctor(id,mode='excel'){
   checks.push({id:'procli-runtime',ok:result.status===0&&version===record.version,value:version});
   checks.push({id:'procli-contract',ok:fs.existsSync(path.join(source(n),'capabilities.json'))});
  }
+ if(['1688cli','1688-product-sourcing','1688-opportunity-sourcing-research'].includes(n.component)){
+  const record=componentRecord(n.component);
+  const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:90000,env:pythonEnvironment()});
+  let detail;try{detail=JSON.parse(result.stdout);}catch{detail={code:'COMPONENT_DOCTOR_FAILED'};}
+  checks.push({id:'1688-component-runtime',ok:result.status===0,value:detail});
+ }
  if(n.component==='seedaudiocli'){
   const record=componentRecord(n.component);
   const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:30000,env:{...pythonEnvironment(),SEEDAUDIO_AUTO_UPDATE:'0'}});
@@ -67,5 +73,5 @@ export async function doctor(id,mode='excel'){
  }
  if(!['excel','nas'].includes(mode))throw fail('USAGE','Doctor mode must be excel or nas');
  if(mode==='nas'&&n.id==='category-research')for(const id of ['tbcli','yccli']){try{const tool=toolEntry(id);const r=spawnSync(tool.command,[...tool.args,'--version'],{encoding:'utf8',timeout:15000,env:{...process.env,TBCLI_UPDATE_CHECK:'0'}});checks.push({id,ok:r.status===0,value:r.stdout?.trim()});}catch(e){checks.push({id,ok:false,message:e.message});}}
- return {ok:checks.every(c=>c.ok),package:PACKAGE.name,version:PACKAGE.version,node:n.id,mode,checks,native_requirements:n.native_requirements.map(id=>({id,status:'requires-active-agent-verification'})),service_access:mode==='nas'||n.component==='procli'?'not-probed':'not-required'};
+ return {ok:checks.every(c=>c.ok),package:PACKAGE.name,version:PACKAGE.version,node:n.id,mode,checks,native_requirements:n.native_requirements.map(id=>({id,status:'requires-active-agent-verification'})),service_access:mode==='nas'||n.component==='procli'||['1688cli','1688-product-sourcing','1688-opportunity-sourcing-research'].includes(n.component)?'not-probed':'not-required'};
 }

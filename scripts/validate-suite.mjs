@@ -9,7 +9,7 @@ for(const n of MANIFEST.nodes){
  if(n.component){const c=MANIFEST.components[n.component];if(!c||!c.skills.includes(n.skill))throw Error('Unknown component registration');continue;}
  const text=await fs.readFile(path.join(source(n),'SKILL.md'),'utf8');if(skillName(text)!==n.skill)throw Error('Skill name mismatch '+n.skill);
  const cap=JSON.parse(await fs.readFile(path.join(source(n),'capabilities.json'),'utf8'));if(cap.skill!==n.skill)throw Error('Capability mismatch '+n.skill);
- for(const agent of ['codex','sealseek']){const a=JSON.parse(await fs.readFile(path.join(source(n),'adapters',agent+'.json'),'utf8'));if(a.platform!==agent)throw Error('Adapter mismatch');}
+ for(const agent of ['codex','sealseek','workbuddy']){const a=JSON.parse(await fs.readFile(path.join(source(n),'adapters',agent+'.json'),'utf8'));if(a.platform!==agent)throw Error('Adapter mismatch');}
  for(const dep of n.requires_skills)nodeFor(dep);
  for(const s of n.scripts){if(!/^[a-z][a-z0-9_]*\.(py|mjs)$/.test(s))throw Error('Unsafe script name');await fs.access(path.join(source(n),'scripts',s));}
 }
