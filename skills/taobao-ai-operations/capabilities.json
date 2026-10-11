@@ -4,7 +4,8 @@
   "skill": "taobao-ai-operations",
   "target_platforms": [
     "codex",
-    "sealseek"
+    "sealseek",
+    "workbuddy"
   ],
   "capabilities": [
     {
