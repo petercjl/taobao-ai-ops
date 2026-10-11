@@ -26,6 +26,7 @@ SealSeek 用户改用 --agent sealseek。目标有歧义时通过 SEALSEEK_SKILL
 - @petercjl/sycmcli：店铺经营数据工具，含其独立 Skill。
 - @petercjl/commerce-ui：通用 HTML 报告 Skill、模板、渲染与校验。调用 `taobao-ai-ops component run html-report ...`；Python 依赖不足时通过该入口执行 `runtime install --yes`。
 - @petercjl/procli：项目 SOP、任务依赖与成果归档，配套 `project-management` Skill。任务卡组织工作，项目 Wiki 积累可复用的证据与结论。
+- @petercjl/sealseek-media-cli：生图、生视频、已有素材贴入及画板操作，配套 `sealseek-media` Skill。应用层负责素材选择与布局；接入不修改宿主的默认生图生视频路由。该组件需要 Node.js >=22。
 - taobao-ai-operations：套件自带的管理与业务路由 Skill。
 
 yccli 为取数时按需准备的外部工具，可用 TAOBAO_AI_OPS_YCCLI 指定；Excel 分析不需要 NAS、VPN 或平台登录。账号与授权留在包外，安装不会获得服务权限。
@@ -52,6 +53,8 @@ taobao-ai-ops components check --json
 taobao-ai-ops skill source --name yuce-category-opportunity-report --json
 taobao-ai-ops script category-research build_report.py --help
 taobao-ai-ops tool run tbcli capabilities --json
+taobao-ai-ops skill source --name sealseek-media --json
+taobao-ai-ops component run sealseek-media capabilities --json
 ```
 
 维护者分别发布各能力包的正式 latest。新增/移除组件或调整管理机制时才发布套件。源码开发可通过 components register --name ID --path CHECKOUT --yes 注册独立组件；开发记录由 Git 管理，不会被注册表更新覆盖。已安装 npm 组件的显式接入可加 --mode npm。源码套件自身通过 Git 更新。
@@ -59,3 +62,5 @@ taobao-ai-ops tool run tbcli capabilities --json
 Node >=20。Python 研究依赖通过稳定解释器准备；TAOBAO_AI_OPS_PYTHON 可指定已配置解释器。脚本和报告模板来自实际组件目录。原生图片理解由当前 Agent 提供；缺失时报告而非缩减流程。
 
 本地 macOS 确定性安装、更新与恢复测试单独记录；Windows/SealSeek 的真实宿主安装和端到端行为尚待验证。CI 发布前须先有可安装的类目独立包；所有发布通过 GitHub Actions OIDC。
+
+The independent `competitor-visual-canvas` component collects Taobao/Tmall visual media into regional SealSeek Frames. Select its node for new collection or append; it owns application layout/state and uses the registered capability dependencies. WorkBuddy accepts the same suite lifecycle through `--agent workbuddy`; host execution evidence remains separate.

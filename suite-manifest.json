@@ -9,7 +9,9 @@
       "tbcli-tools",
       "sycmcli-tools",
       "html-report",
-      "project-management"
+      "project-management",
+      "sealseek-media-tools",
+      "competitor-visual-canvas"
     ]
   },
   "nodes": [
@@ -20,9 +22,13 @@
       "stage": "shared-reporting",
       "method_version": "commerce-ui-template-pack@1",
       "requires_skills": [],
-      "python_imports": ["jsonschema"],
+      "python_imports": [
+        "jsonschema"
+      ],
       "scripts": [],
-      "native_requirements": ["browser.report.inspect"]
+      "native_requirements": [
+        "browser.report.inspect"
+      ]
     },
     {
       "id": "operations",
@@ -107,7 +113,9 @@
       "python_imports": [],
       "scripts": [],
       "native_requirements": [],
-      "optional_tools": ["dws"]
+      "optional_tools": [
+        "dws"
+      ]
     },
     {
       "id": "tbcli-tools",
@@ -125,6 +133,31 @@
       "component": "sycmcli",
       "stage": "tools",
       "requires_skills": [],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": []
+    },
+    {
+      "id": "sealseek-media-tools",
+      "skill": "sealseek-media",
+      "component": "sealseek-media",
+      "stage": "tools",
+      "method_version": "sealseek-media-canvas-contract@1",
+      "requires_skills": [],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": []
+    },
+    {
+      "id": "competitor-visual-canvas",
+      "skill": "competitor-visual-canvas",
+      "component": "competitor-visual-canvas",
+      "stage": "competitor-visual-research",
+      "method_version": "competitor-visual-canvas@1",
+      "requires_skills": [
+        "tbcli",
+        "sealseek-media"
+      ],
       "python_imports": [],
       "scripts": [],
       "native_requirements": []
@@ -158,12 +191,23 @@
       "minimum_version": "0.5.0",
       "executable_env": "TAOBAO_AI_OPS_YCCLI",
       "role": "authorized Yuce monthly collection; optional for supplied Excel"
+    },
+    "sealseek-media": {
+      "package": "@petercjl/sealseek-media-cli",
+      "component": "sealseek-media",
+      "role": "explicit media generation, existing-media import and canvas operations; caller owns asset selection and layout"
+    },
+    "competitor-visual-canvas": {
+      "package": "@petercjl/competitor-visual-canvas",
+      "component": "competitor-visual-canvas",
+      "role": "collect ordered product media links and arrange four regional Frames per product"
     }
   },
   "targets": {
     "codex:macos": "implemented",
     "sealseek:macos": "implemented",
-    "sealseek:windows": "implemented"
+    "sealseek:windows": "implemented",
+    "workbuddy:macos": "implemented"
   },
   "update_policy": {
     "owner": "shell",
@@ -177,12 +221,16 @@
     "procli": {
       "package": "@petercjl/procli",
       "bin": "procli",
-      "skills": ["project-management"]
+      "skills": [
+        "project-management"
+      ]
     },
     "html-report": {
       "package": "@petercjl/commerce-ui",
       "bin": "commerce-ui",
-      "skills": ["compact-commerce-ui"]
+      "skills": [
+        "compact-commerce-ui"
+      ]
     },
     "category-research": {
       "package": "@petercjl/yuce-category-opportunity-report",
@@ -210,6 +258,20 @@
       "bin": "sycmcli",
       "skills": [
         "sycmcli"
+      ]
+    },
+    "sealseek-media": {
+      "package": "@petercjl/sealseek-media-cli",
+      "bin": "sealseek-media",
+      "skills": [
+        "sealseek-media"
+      ]
+    },
+    "competitor-visual-canvas": {
+      "package": "@petercjl/competitor-visual-canvas",
+      "bin": "competitor-visual-canvas",
+      "skills": [
+        "competitor-visual-canvas"
       ]
     }
   }

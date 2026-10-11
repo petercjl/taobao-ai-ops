@@ -14,10 +14,10 @@ export async function main(argv){
  if(['version','--version'].includes(command))return console.log(PACKAGE.version);
  if(command==='script')return runScript(action,rest[0],rest.slice(1));
  if(command==='component'&&action==='run'){
-  const record=componentRecord(rest[0]);const r=spawnSync(process.execPath,[record.entry,...rest.slice(1)],{stdio:'inherit',env:{...process.env,TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1'}});if(r.error)throw fail('EXECUTION_FAILED',r.error.message);process.exitCode=r.status??1;return;
+  const record=componentRecord(rest[0]);const r=spawnSync(process.execPath,[record.entry,...rest.slice(1)],{stdio:'inherit',env:{...process.env,TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0'}});if(r.error)throw fail('EXECUTION_FAILED',r.error.message);process.exitCode=r.status??1;return;
  }
  if(command==='tool'&&action==='run'){
-  const entry=toolEntry(rest[0]);const r=spawnSync(entry.command,[...entry.args,...rest.slice(1)],{stdio:'inherit',env:{...process.env,TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1'}});if(r.error)throw fail('CAPABILITY_UNAVAILABLE',r.error.message);process.exitCode=r.status??1;return;
+  const entry=toolEntry(rest[0]);const r=spawnSync(entry.command,[...entry.args,...rest.slice(1)],{stdio:'inherit',env:{...process.env,TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0'}});if(r.error)throw fail('CAPABILITY_UNAVAILABLE',r.error.message);process.exitCode=r.status??1;return;
  }
  if(command==='nodes'&&action==='list')return print(MANIFEST.nodes);
  if(command==='node'&&action==='show')return print(nodeFor(rest[0]));

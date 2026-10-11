@@ -5,7 +5,7 @@ description: Route Taobao research to independent tools, preserve evidence hando
 
 # Taobao AI operations
 
-Input: an operator's goal, supplied workbooks or authorized data sources, optional existing research and run directory. Output: the selected node's full deliverables, a versioned run plan and, when requested, an evidence-bound handoff. This suite currently implements category research and product research. Supply-chain validation, content creation and operating reviews are planned extensions reported as unavailable until registered.
+Input: an operator's goal, supplied workbooks or authorized data sources, optional existing research and run directory. Output: the selected node's full deliverables, a versioned run plan and, when requested, an evidence-bound handoff. This suite currently implements category research and product research, with independently registered media/canvas capability tools. Supply-chain validation, content creation and operating reviews are planned extensions reported as unavailable until registered.
 
 ## Main line
 
@@ -26,6 +26,12 @@ Tasks organize SOP work, dependencies, responsibility and acceptance; Wiki prese
 
 When the user explicitly authorizes archiving to an exact project/task, prepare the current child's publication bundle, preserving the complete report and its evidence, and use `task publish`: preview, inspect the target and coverage, then publish with the same bundle/key and verify readback. Existing sources require cumulative synthesis with source citations. The child owns DingTalk creation, optional HTML attachment, full report Wiki, cumulative node knowledge and task-card summary; the Agent owns evidence-based meaning. Handle partial/unknown writes only through the child's recovery flow. Ordinary `task update` is a field edit, and publication is separate from submission/reviewer approval. The shell neither copies these business rules into runtime code nor automatically executes every SOP node. New tools can join project workflows through these contracts while retaining independent analysis methods.
 
+## SealSeek media and canvas capability
+
+The `sealseek-media-tools` node registers `@petercjl/sealseek-media-cli` and its canonical `sealseek-media` Skill. For an explicitly routed SealSeek media/canvas operation, resolve `taobao-ai-ops skill source --name sealseek-media --json`, read the complete current Skill and active adapter, then discover the installed child contract through `taobao-ai-ops component run sealseek-media capabilities --json`. Invoke operations through that component entry, retaining the child's arguments and authorization requirements. Node.js 22+ is required for this component; installation does not authorize access to SealSeek.
+
+Contract: explicit prompt/references or existing-media URLs, canvas identity, placement and operation authorization in; task/element identifiers, verified writes or structured errors out. Applications own asset selection, prompts, layouts and project state; the child owns service execution, authentication, validation and recovery. Provider and model selection follow the host/user policy. Registering this component changes no image/video default routes. Ordinary component calls retain installed versions; use the shell update path for managed components. Return to main-line step 4 with the operation result, or step 6 for a direct capability request. The independently released competitor-visual application is registered as `competitor-visual-canvas`.
+
 ## Execution and branches
 
 Component scripts run via `taobao-ai-ops script NODE SCRIPT ...`; supplied Excel does not require platform accounts. Optional platform calls use `taobao-ai-ops tool run TOOL ...` so the shell selects the installed independent component. Accounts, warehouse access and write permissions remain external. The category child's database-consent and additive-import boundaries apply in its NAS route.
@@ -43,3 +49,7 @@ Missing native image observation stops product visual analysis; an unverified su
 ## QA and maintenance
 
 Confirm the selected node, actual source path, method version, source hashes and full output contract. Keep every Skill's tests independent and exercise suite installation, dependency closure and handoffs separately. Suite targets are implemented, with actual Agent/OS runtime evidence recorded separately. Clean-context regression requires an explicit user request. New business nodes enter the suite registry only with an independent I → S → O, execution and QA contract.
+
+## Competitor visual collection
+
+A request to collect product main images, main videos, SKU images and detail images into Infinite Canvas selects `competitor-visual-canvas`. Resolve `taobao-ai-ops skill source --name competitor-visual-canvas --json`, read its complete current Skill and active adapter, then follow its main line through `taobao-ai-ops component run competitor-visual-canvas ...`. The child accepts Taobao IDs or Taobao/Tmall links, owns the media manifest, four regional Frames per product, layout and append state, and returns source evidence, verified canvas URL and coverage gaps. Its exact dependencies are `tbcli` and `sealseek-media`, loaded at runtime through the child's declared tool resolver; it ships compatible npm dependency versions. Authentication, validation and writes stay with those capability packages. Missing collection or canvas capability stops the affected node with CAPABILITY_UNAVAILABLE; do not duplicate its integrations. Return to main-line step 4 for optional continuity or step 6 for delivery. Ordinary requests add to the child's selected existing canvas when asked to continue; new canvas creation follows the child's explicit user intent.

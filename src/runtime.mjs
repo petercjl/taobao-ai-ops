@@ -53,6 +53,21 @@ export async function doctor(id,mode='excel'){
   checks.push({id:'procli-runtime',ok:result.status===0&&version===record.version,value:version});
   checks.push({id:'procli-contract',ok:fs.existsSync(path.join(source(n),'capabilities.json'))});
  }
+ if(n.component==='sealseek-media'){
+  const record=componentRecord(n.component);
+  const result=spawnSync(process.execPath,[record.entry,'version'],{encoding:'utf8',timeout:15000,env:{...process.env,SEALSEEK_MEDIA_AUTO_UPDATE:'0'}});
+  const version=result.stdout?.trim().replace(/^sealseek-media\s+/,'');
+  checks.push({id:'sealseek-media-node',ok:Number(process.versions.node.split('.')[0])>=22,value:process.version,minimum:22});
+  checks.push({id:'sealseek-media-runtime',ok:result.status===0&&version===record.version,value:version});
+  checks.push({id:'sealseek-media-contract',ok:fs.existsSync(path.join(source(n),'capabilities.json'))});
+ }
+ if(n.component==='competitor-visual-canvas'){
+  const record=componentRecord(n.component);
+  const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:30000,env:{...process.env,COMPETITOR_CANVAS_AUTO_UPDATE:'0'}});
+  let detail;try{detail=JSON.parse(result.stdout||result.stderr);}catch{detail={ok:false};}
+  checks.push({id:'competitor-canvas-node',ok:Number(process.versions.node.split('.')[0])>=22,value:process.version,minimum:22});
+  checks.push({id:'competitor-canvas-contract',ok:result.status===0&&detail.ok===true,value:detail});
+ }
  if(n.id==='category-research')checks.push({id:'report-runtime',ok:['assets/report-template.html','assets/chart-views.js'].every(p=>fs.existsSync(path.join(source(n),p)))});
  if(n.id==='product-research'){
   const componentRequire=createRequire(path.join(componentRecord(n.component).root,'package.json'));
@@ -61,5 +76,5 @@ export async function doctor(id,mode='excel'){
  }
  if(!['excel','nas'].includes(mode))throw fail('USAGE','Doctor mode must be excel or nas');
  if(mode==='nas'&&n.id==='category-research')for(const id of ['tbcli','yccli']){try{const tool=toolEntry(id);const r=spawnSync(tool.command,[...tool.args,'--version'],{encoding:'utf8',timeout:15000,env:{...process.env,TBCLI_UPDATE_CHECK:'0'}});checks.push({id,ok:r.status===0,value:r.stdout?.trim()});}catch(e){checks.push({id,ok:false,message:e.message});}}
- return {ok:checks.every(c=>c.ok),package:PACKAGE.name,version:PACKAGE.version,node:n.id,mode,checks,native_requirements:n.native_requirements.map(id=>({id,status:'requires-active-agent-verification'})),service_access:mode==='nas'||n.component==='procli'?'not-probed':'not-required'};
+ return {ok:checks.every(c=>c.ok),package:PACKAGE.name,version:PACKAGE.version,node:n.id,mode,checks,native_requirements:n.native_requirements.map(id=>({id,status:'requires-active-agent-verification'})),service_access:mode==='nas'||['procli','sealseek-media','competitor-visual-canvas'].includes(n.component)?'not-probed':'not-required'};
 }

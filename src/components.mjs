@@ -15,7 +15,7 @@ export async function inspectComponent(id,root){
  if(!p.bin?.[c.bin]||!entry.startsWith(path.resolve(root)+path.sep))throw fail('INVALID_COMPONENT_ENTRY',id);
  const sources={};
  for(const skill of c.skills){
-  const r=spawnSync(process.execPath,[entry,'skill','source','--json'],{encoding:'utf8',timeout:30000,env:{...process.env,TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1'}});
+  const r=spawnSync(process.execPath,[entry,'skill','source','--json'],{encoding:'utf8',timeout:30000,env:{...process.env,TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0'}});
   if(r.status!==0)throw fail('COMPONENT_SOURCE_FAILED',r.stderr||id);
   const envelope=JSON.parse(r.stdout);
   if(envelope.ok===false)throw fail('COMPONENT_SOURCE_FAILED',id, envelope.error);

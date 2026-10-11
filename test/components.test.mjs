@@ -73,3 +73,17 @@ test('component source discovery accepts procli envelopes and refuses bad source
  await emit({ok:true,data:{skill:'project-management',source:path.join(os.tmpdir(),'outside')}});
  await assert.rejects(inspectComponent('procli',root),e=>e.code==='INVALID_COMPONENT_SOURCE');
 });
+
+test('media capability is independently registered, resolves its canonical source and preserves installed versions',async()=>{
+ assert.ok(closure().some(n=>n.id==='sealseek-media-tools'));
+ assert.deepEqual(closure({node:'sealseek-media-tools'}).map(n=>n.skill),['sealseek-media']);
+ assert.equal(MANIFEST.tools['sealseek-media'].package,'@petercjl/sealseek-media-cli');
+ const root=await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(),'ops-sealseek-')));
+ try{
+  const skill=path.join(root,'skills','sealseek-media');await fs.mkdir(skill,{recursive:true});
+  await fs.writeFile(path.join(root,'package.json'),JSON.stringify({name:'@petercjl/sealseek-media-cli',version:'0.5.0',bin:{'sealseek-media':'cli.mjs'}}));
+  await fs.writeFile(path.join(skill,'SKILL.md'),'---\nname: sealseek-media\ndescription: fixture\n---\n');
+  await fs.writeFile(path.join(root,'cli.mjs'),`if(process.env.SEALSEEK_MEDIA_AUTO_UPDATE!=='0')process.exit(2);console.log(${JSON.stringify(JSON.stringify({ok:true,name:'sealseek-media',source:skill,version:'0.5.0'}))});`);
+  const r=await inspectComponent('sealseek-media',root);assert.equal(r.version,'0.5.0');assert.equal(r.sources['sealseek-media'],skill);
+ }finally{await fs.rm(root,{recursive:true,force:true});}
+});
