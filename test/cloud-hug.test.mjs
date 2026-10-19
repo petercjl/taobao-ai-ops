@@ -22,7 +22,7 @@ test('Cloud Hug source and real CLI integrity come from owning installed package
  await assert.rejects(fs.stat(path.join(ROOT,'skills',name)));
  const result=await doctor(name);assert.equal(result.ok,true,JSON.stringify(result));
  assert.equal(result.checks.find(c=>c.id==='cloud-hug-component-integrity').value.integrity.ok,true);
- assert.equal(result.native_requirements.length,2);
+ assert.equal(result.native_requirements.length,2);assert.equal(result.service_access,'not-probed');
  assert.ok(result.native_requirements.every(r=>r.status==='requires-active-agent-verification'));
 });
 test('explicit component checks include Cloud Hug stable latest without auto-update on business calls',async()=>{
