@@ -15,7 +15,8 @@
       "product-sourcing",
       "opportunity-sourcing",
       "sealseek-media-tools",
-      "competitor-visual-canvas"
+      "competitor-visual-canvas",
+      "cloud-hug-style-transfer"
     ]
   },
   "nodes": [
@@ -45,7 +46,8 @@
         "compact-commerce-ui",
         "1688cli",
         "1688-product-sourcing",
-        "1688-opportunity-sourcing-research"
+        "1688-opportunity-sourcing-research",
+        "cloud-hug-style-transfer"
       ],
       "python_imports": [],
       "scripts": [],
@@ -222,6 +224,36 @@
       "python_imports": [],
       "scripts": [],
       "native_requirements": []
+    },
+    {
+      "id": "cloud-hug-style-transfer",
+      "skill": "cloud-hug-style-transfer",
+      "component": "cloud-hug-style-transfer",
+      "stage": "visual-production",
+      "method_version": "cloud-hug-style-transfer@0.1",
+      "requires_skills": [],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": [
+        "media.image.inspect",
+        "media.image.edit"
+      ],
+      "input_contract": {
+        "required": [
+          "current source images",
+          "task intent"
+        ],
+        "optional": [
+          "current product references",
+          "confirmed copy and layout constraints"
+        ]
+      },
+      "output_contract": {
+        "planning": "requested conversion plan",
+        "generation": "agreed number of separate raster images and acceptance summary",
+        "state": "child remains owner of generation task records and artifacts"
+      },
+      "contract_resolution": "Resolve canonical Skill and live capabilities through the component CLI; host preflight remains mandatory."
     }
   ],
   "tools": {
@@ -282,6 +314,11 @@
       "package": "@petercjl/competitor-visual-canvas",
       "component": "competitor-visual-canvas",
       "role": "collect ordered product media links and arrange four regional Frames per product"
+    },
+    "cloud-hug-style-transfer": {
+      "package": "@petercjl/cloud-hug-style-transfer",
+      "component": "cloud-hug-style-transfer",
+      "role": "brand style conversion application; child owns product/reference selection, photography, prompts and acceptance"
     }
   },
   "targets": {
@@ -387,6 +424,13 @@
       "bin": "competitor-visual-canvas",
       "skills": [
         "competitor-visual-canvas"
+      ]
+    },
+    "cloud-hug-style-transfer": {
+      "package": "@petercjl/cloud-hug-style-transfer",
+      "bin": "cloud-hug-style-transfer",
+      "skills": [
+        "cloud-hug-style-transfer"
       ]
     }
   }

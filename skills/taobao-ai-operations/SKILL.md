@@ -1,17 +1,18 @@
 ---
 name: taobao-ai-operations
-description: Route Taobao research to independent tools, preserve evidence handoffs, and use procli for explicitly requested project SOP, task context and cumulative knowledge publication.
+description: Route Taobao research, sourcing and Cloud Hug brand visual production to independently managed tools; preserve evidence handoffs and explicit project-management authorization.
 ---
 
 # Taobao AI operations
 
-Input: an operator's goal, supplied workbooks or authorized data sources, optional existing research and run directory. Output: the selected node's full deliverables, a versioned run plan and, when requested, an evidence-bound handoff. This suite currently implements category research and product research, with independently registered media/canvas capability tools. Supply-chain validation, content creation and operating reviews are planned extensions reported as unavailable until registered.
+Input: an operator's goal, supplied workbooks or authorized data sources, optional existing research and run directory. Output: the selected node's full deliverables, a versioned run plan and, when requested, an evidence-bound handoff. This suite implements category/product research, sourcing and Cloud Hug brand visual production, with independently registered media/canvas tools. Other business requests require a matching registered node.
 
 ## Main line
 
 1. Resolve the requested business result with `taobao-ai-ops nodes list --json`. A category/monthly market question uses `category-research`; a search-result workbook and concrete research object use `product-research`. Existing product scope can enter product research directly. If no supported node covers the request, report the missing node.
    An explicit request to use `procli` for project/task information, SOP progression, knowledge reuse or result publication uses `project-management`. Preserve this child's explicit-trigger contract; offering project integration does not authorize service reads or writes. For an authorized project-backed research request, resolve the project and read its task context and compiled Wiki before selecting the business research node. Preserve the target profile, exact project/task identities, observation windows, provenance and unresolved questions in the handoff.
    A supplied analysis or compatible ViewModel requiring a reusable HTML report uses `html-report`, whose exact Skill is `compact-commerce-ui`. It supplies reporting methods, not business conclusions; existing category/product outputs keep their own declared contracts.
+   A Cloud Hug brand conversion request for supplied detail pages, photography, main KV or SKU images uses `cloud-hug-style-transfer`; its brand-production contract is below.
 2. Run `taobao-ai-ops doctor --node NODE --mode excel --json` for local workbooks, or `--mode nas` for live category data. Doctor checks deterministic resources; verify any listed native capabilities in the active Agent before their stage. A missing dependency ends the affected node with its exact error.
 3. Resolve the exact child Skill with `taobao-ai-ops skill source --name SKILL --json`. Read its complete current SKILL.md, load its platform adapter, then follow only the child node's current reference routes. The logical dependencies are `yuce-category-opportunity-report` (method contract `yuce-category-opportunity@2.0`) and `taobao-search-product-form` (imported method `0.1.1`). Their returned artifacts and source hashes are the handoff; resolution or contract failure stops with CAPABILITY_UNAVAILABLE or OUTPUT_CONTRACT_FAILED. Return here at step 4 after the child completes. Naming a Skill alone is not execution.
 4. Preserve the child's analysis, full HTML and evidence files. Use `taobao-ai-ops workflow plan --run-dir NEW_DIR --node NODE --input WORKBOOK --json` when a durable suite plan is requested; this records a plan and fixed suite/method versions, not business completion. The product node's own stage ledger remains authoritative for its detailed execution.
@@ -69,3 +70,13 @@ Before every audio component invocation, the suite checks stable latest, install
 输入输出：关键词/图找货应用接收用户需求和约束，交付 HTML、完整商品 JSON 和查询视觉证据；六类应用接收兼容机会交接文件，交付类别组合报告及 sourcing-candidates.json。只有输入契约实际兼容时才串联上游研究结果，不把其他 JSON 当作机会交接文件。
 
 调用应用用 `taobao-ai-ops component run <component> <arguments...>`，原子查询可用 `taobao-ai-ops tool run 1688cli products search "关键词"`。应用方法和模板由各自 npm 包拥有，独立升级。
+
+## 抱抱云朵社品牌视觉制作
+
+用户要求把旧详情页、产品摄影、主 KV 或 SKU 转为抱抱云朵社品牌视觉，或按当前模特设定延展画面时，选择 `cloud-hug-style-transfer` 节点。它由独立 npm 包 `@petercjl/cloud-hug-style-transfer` 拥有；套件只负责安装更新、精确来源解析、调用与检查。
+
+先通过 `taobao-ai-ops skill source --name cloud-hug-style-transfer --json` 获取规范来源，完整读取当前 SKILL.md，按其中节点加载本轮参考与当前宿主适配，再回到本套件主线。执行前运行 `taobao-ai-ops doctor --node cloud-hug-style-transfer --json`：它核对组件自身的资源和完整性，宿主仍须核验实际看图、多参考图编辑及结果交付能力。组件业务 CLI 通过 `taobao-ai-ops component run cloud-hug-style-transfer ...` 调用；包管理不代替品牌判断和原生生成工具。
+
+输入为当次源图、商品依据和用户目标，可补充已确认文案、比例和版式要求。输出为本轮约定数量的独立成图及简短验收说明，或仅要求的转换规划。品牌方法、人物与产品约束、素材选择、摄影与排版顺序、提示词、任务恢复及效果验收由子 Skill 的当前主线承接。遇到来源/合同不兼容、缺失资产或宿主能力不可用时，保留子层结构化错误并停止受影响阶段；满足条件后回到子层执行节点，完成后返回套件主线第 6 步交付。
+
+独立包与素材不复制到套件。普通业务使用已安装版本；显式套件更新获取该组件的正式 latest 并同步受管 Skill。安装该应用不更改宿主的生成服务、模型或授权策略，是否使用 SealSeek 媒体工具仍遵循用户的明确选择。

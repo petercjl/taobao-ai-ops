@@ -4,15 +4,15 @@
 
 ## 安装与更新
 
-```sh
-npm install --global @petercjl/taobao-ai-ops
-taobao-ai-ops components install --agent codex --yes --json
-taobao-ai-ops doctor --json
-taobao-ai-ops update check --json
-taobao-ai-ops update install --agent codex --yes --json
-```
+将提示词发送给准备使用的 Agent，安装与检查由 Agent 完成。
 
-SealSeek 用户改用 --agent sealseek。目标有歧义时通过 SEALSEEK_SKILLS_DIR 指定。已有非套件管理的 Skill 会阻止覆盖；明确授权迁移后用 --adopt，保留完整备份。本地修改会阻止更新。
+> 请安装 npm 包 @petercjl/taobao-ai-ops。
+
+> 请更新 npm 包 @petercjl/taobao-ai-ops。
+
+> 检查 taobao-ai-ops 的安装和组件是否可用。
+
+支持 Codex、SealSeek 和 WorkBuddy；Agent 解析对应的实际技能目录。已有非套件管理的 Skill 会阻止覆盖；明确授权迁移后用 --adopt，保留完整备份。本地修改会阻止更新。
 
 首次安装会获取清单中全部独立组件的正式 latest。统一更新检查套件及每个组件：套件版本不变也会更新组件。已安装组件的 Skill 同步可用 skill update；该命令只同步本地安装内容，不查询注册表。日常业务调用不更新环境，任务中保持已安装版本。
 
@@ -27,6 +27,7 @@ SealSeek 用户改用 --agent sealseek。目标有歧义时通过 SEALSEEK_SKILL
 - @petercjl/commerce-ui：通用 HTML 报告 Skill、模板、渲染与校验。调用 `taobao-ai-ops component run html-report ...`；Python 依赖不足时通过该入口执行 `runtime install --yes`。
 - @petercjl/procli：项目 SOP、任务依赖与成果归档，配套 `project-management` Skill。任务卡组织工作，项目 Wiki 积累可复用的证据与结论。
 - @petercjl/sealseek-media-cli：生图、生视频、已有素材贴入及画板操作，配套 `sealseek-media` Skill。应用层负责素材选择与布局；接入不修改宿主的默认生图生视频路由。该组件需要 Node.js >=22。
+- @petercjl/cloud-hug-style-transfer：抱抱云朵社品牌视觉转换，提供完整品牌素材、人物设定、摄影排版方法和效果验收流程。实际生图需要宿主参考图编辑能力。
 - taobao-ai-operations：套件自带的管理与业务路由 Skill。
 
 yccli 为取数时按需准备的外部工具，可用 TAOBAO_AI_OPS_YCCLI 指定；Excel 分析不需要 NAS、VPN 或平台登录。账号与授权留在包外，安装不会获得服务权限。
@@ -45,7 +46,7 @@ taobao-ai-ops component run procli knowledge index --project "项目名称" --js
 
 向 Agent 明确说“用 procli”，并指定项目、任务及读取或归档目标。按当前 `project-management` Skill 解析真实名称和目标环境。项目读写需项目服务授权；发布钉钉文档还需官方 dws 与对应权限。服务不可访问时报告原目标错误并停止该操作，已有 Excel 研究可独立进行。套件不自动创建所有 SOP 任务、执行整条业务链或向项目写入研究结果；现有项目的真实 SOP 与依赖以 procli 读取结果为准。
 
-## 调用与开发
+## 开发者合同参考：调用与开发
 
 ```sh
 taobao-ai-ops components status --json
@@ -78,3 +79,15 @@ Before every audio component invocation, the suite checks stable latest, install
 - `1688-opportunity-sourcing-research`: six-category portfolio application from compatible opportunity handoffs.
 
 Each component is an independent `@petercjl` npm package with its own canonical Skill. Use `skill source --name NAME`, `component run NAME ...`, or `tool run 1688cli ...`. The research profile includes all three and their Skill dependency closure. `components install --agent workbuddy --yes` supports the WorkBuddy managed target, alongside Codex and SealSeek; runtime QA remains host-specific.
+
+## 抱抱云朵社品牌视觉制作
+
+安装或更新套件时，独立组件 `@petercjl/cloud-hug-style-transfer` 纳入统一管理，仍保留独立版本和维护来源。已有套件用户更新后即可发现该节点。附上待转换图片；商品关键结构或文案不清楚时补充实拍或准确文字。
+
+> 用抱抱云朵社风格转换处理所附图片。
+
+只需要规划时：
+
+> 用抱抱云朵社风格转换，为所附图片做转换规划。
+
+套件检查组件来源与素材完整性，子 Skill 按当前品牌方法执行。Codex、SealSeek、WorkBuddy 的实际生成能力以各自宿主预检为准，安装成功不代表生成效果已验证。套件不复制该组件的品牌图片、方法或提示词；独立包的兼容更新通过显式套件更新进入。

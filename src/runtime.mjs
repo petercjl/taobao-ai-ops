@@ -73,6 +73,13 @@ export async function doctor(id,mode='excel'){
   checks.push({id:'sealseek-media-runtime',ok:result.status===0&&version===record.version,value:version});
   checks.push({id:'sealseek-media-contract',ok:fs.existsSync(path.join(source(n),'capabilities.json'))});
  }
+ if(n.component==='cloud-hug-style-transfer'){
+  const record=componentRecord(n.component);
+  const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:30000});
+  let detail;try{detail=JSON.parse(result.stdout);}catch{detail={ok:false,code:'COMPONENT_DOCTOR_FAILED'};}
+  checks.push({id:'cloud-hug-node',ok:Number(process.versions.node.split('.')[0])>=22,value:process.version,minimum:22});
+  checks.push({id:'cloud-hug-component-integrity',ok:result.status===0&&detail.ok===true&&detail.package===MANIFEST.components[n.component].package&&detail.version===record.version&&detail.integrity?.ok===true,value:detail});
+ }
  if(n.component==='competitor-visual-canvas'){
   const record=componentRecord(n.component);
   const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:30000,env:{...process.env,COMPETITOR_CANVAS_AUTO_UPDATE:'0'}});
