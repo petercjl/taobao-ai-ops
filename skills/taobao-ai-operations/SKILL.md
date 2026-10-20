@@ -75,8 +75,8 @@ Before every audio component invocation, the suite checks stable latest, install
 
 用户要求把旧详情页、产品摄影、主 KV 或 SKU 转为抱抱云朵社品牌视觉，或按当前模特设定延展画面时，选择 `cloud-hug-style-transfer` 节点。它由独立 npm 包 `@petercjl/cloud-hug-style-transfer` 拥有；套件只负责安装更新、精确来源解析、调用与检查。
 
-先通过 `taobao-ai-ops skill source --name cloud-hug-style-transfer --json` 获取规范来源，完整读取当前 SKILL.md，按其中节点加载本轮参考与当前宿主适配，再回到本套件主线。执行前运行 `taobao-ai-ops doctor --node cloud-hug-style-transfer --json`：它核对组件自身的资源和完整性，宿主仍须核验实际看图、多参考图编辑及结果交付能力。组件业务 CLI 通过 `taobao-ai-ops component run cloud-hug-style-transfer ...` 调用；包管理不代替品牌判断和原生生成工具。
+先通过 `taobao-ai-ops skill source --name cloud-hug-style-transfer --json` 获取规范来源，完整读取当前 SKILL.md，按其中节点加载本轮参考与当前宿主适配，再回到本套件主线。执行前运行 `taobao-ai-ops doctor --node cloud-hug-style-transfer --json`：它核对组件资源、完整性及必需的 sealseek-media-cli 依赖，宿主仍须核验实际看图、命令执行及结果交付能力。组件业务 CLI 通过 `taobao-ai-ops component run cloud-hug-style-transfer ...` 调用；生图由 @petercjl/sealseek-media-cli 及其当前规范 sealseek-media Skill 统一执行，品牌判断由应用负责。
 
 输入为当次源图、商品依据和用户目标，可补充已确认文案、比例和版式要求。输出为本轮约定数量的独立成图及简短验收说明，或仅要求的转换规划。品牌方法、人物与产品约束、素材选择、摄影与排版顺序、提示词、任务恢复及效果验收由子 Skill 的当前主线承接。遇到来源/合同不兼容、缺失资产或宿主能力不可用时，保留子层结构化错误并停止受影响阶段；满足条件后回到子层执行节点，完成后返回套件主线第 6 步交付。
 
-独立包与素材不复制到套件。普通业务使用已安装版本；显式套件更新获取该组件的正式 latest 并同步受管 Skill。安装该应用不更改宿主的生成服务、模型或授权策略，是否使用 SealSeek 媒体工具仍遵循用户的明确选择。
+独立包与素材不复制到套件。普通业务使用已安装版本；显式套件更新获取该组件的正式 latest 并同步受管 Skill。本应用依赖 sealseek-media-cli（0.6.1+）和配套 sealseek-media Skill；缺失或不兼容时暂停整个应用任务，给出“请安装 npm 包 @petercjl/sealseek-media-cli。”，安装并复查通过后恢复。模型和服务授权遵循媒体包当前合同，其他应用的生图路由保持各自合同。

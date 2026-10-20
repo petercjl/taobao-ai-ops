@@ -3,7 +3,7 @@ import {spawnSync} from 'node:child_process';
 import {MANIFEST,PACKAGE,nodeFor,source,nodeVersion,fileHashes,digest,fail,componentRecords,componentRecord} from './core.mjs';
 import {checkComponents,installComponents,registerComponent,prepareComponentRun} from './components.mjs';
 import {targetRoot,status,install} from './skill-manager.mjs';
-import {runScript,doctor,toolEntry} from './runtime.mjs';
+import {runScript,doctor,toolEntry,componentEnvironment} from './runtime.mjs';
 import {plan,workflowStatus,createHandoff} from './workflow.mjs';
 import {checkUpdate,installUpdate} from './update.mjs';
 const print=v=>console.log(JSON.stringify(v,null,2));
@@ -15,11 +15,11 @@ export async function main(argv){
  if(command==='script')return runScript(action,rest[0],rest.slice(1));
  if(command==='component'&&action==='run'){
   await prepareComponentRun(rest[0]);
-  const record=componentRecord(rest[0]);const r=spawnSync(process.execPath,[record.entry,...rest.slice(1)],{stdio:'inherit',env:{...process.env,TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0'}});if(r.error)throw fail('EXECUTION_FAILED',r.error.message);process.exitCode=r.status??1;return;
+  const record=componentRecord(rest[0]);const r=spawnSync(process.execPath,[record.entry,...rest.slice(1)],{stdio:'inherit',env:componentEnvironment(rest[0])});if(r.error)throw fail('EXECUTION_FAILED',r.error.message);process.exitCode=r.status??1;return;
  }
  if(command==='tool'&&action==='run'){
   await prepareComponentRun(MANIFEST.tools[rest[0]]?.component);
-  const entry=toolEntry(rest[0]);const r=spawnSync(entry.command,[...entry.args,...rest.slice(1)],{stdio:'inherit',env:{...process.env,TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0'}});if(r.error)throw fail('CAPABILITY_UNAVAILABLE',r.error.message);process.exitCode=r.status??1;return;
+  const entry=toolEntry(rest[0]);const r=spawnSync(entry.command,[...entry.args,...rest.slice(1)],{stdio:'inherit',env:componentEnvironment(MANIFEST.tools[rest[0]]?.component)});if(r.error)throw fail('CAPABILITY_UNAVAILABLE',r.error.message);process.exitCode=r.status??1;return;
  }
  if(command==='nodes'&&action==='list')return print(MANIFEST.nodes);
  if(command==='node'&&action==='show')return print(nodeFor(rest[0]));

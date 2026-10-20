@@ -230,8 +230,10 @@
       "skill": "cloud-hug-style-transfer",
       "component": "cloud-hug-style-transfer",
       "stage": "visual-production",
-      "method_version": "cloud-hug-style-transfer@0.1",
-      "requires_skills": [],
+      "method_version": "cloud-hug-style-transfer@0.2",
+      "requires_skills": [
+        "sealseek-media"
+      ],
       "python_imports": [],
       "scripts": [],
       "native_requirements": [

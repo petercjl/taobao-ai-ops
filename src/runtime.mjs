@@ -3,7 +3,11 @@ import path from 'node:path';
 import os from 'node:os';
 import {spawnSync} from 'node:child_process';
 import {createRequire} from 'node:module';
-import {ROOT,MANIFEST,PACKAGE,nodeFor,source,componentRecord,fail} from './core.mjs';
+import {ROOT,MANIFEST,PACKAGE,nodeFor,source,componentRecord,componentRecords,fail} from './core.mjs';
+export function componentEnvironment(id,env=process.env){
+ const media=componentRecords()['sealseek-media'];
+ return {...env,TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0',...(id==='cloud-hug-style-transfer'&&media&&!env.CLOUD_HUG_MEDIA_ROOT?{CLOUD_HUG_MEDIA_ROOT:media.root}:{})};
+}
 export function pythonEnvironment(env=process.env){
  return {...env,PYTHONUTF8:'1',PYTHONIOENCODING:'utf-8',PYTHONDONTWRITEBYTECODE:'1'};
 }
@@ -75,7 +79,7 @@ export async function doctor(id,mode='excel'){
  }
  if(n.component==='cloud-hug-style-transfer'){
   const record=componentRecord(n.component);
-  const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:30000});
+  const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:30000,env:componentEnvironment(n.component)});
   let detail;try{detail=JSON.parse(result.stdout);}catch{detail={ok:false,code:'COMPONENT_DOCTOR_FAILED'};}
   checks.push({id:'cloud-hug-node',ok:Number(process.versions.node.split('.')[0])>=22,value:process.version,minimum:22});
   checks.push({id:'cloud-hug-component-integrity',ok:result.status===0&&detail.ok===true&&detail.package===MANIFEST.components[n.component].package&&detail.version===record.version&&detail.integrity?.ok===true,value:detail});
