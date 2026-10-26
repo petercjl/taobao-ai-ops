@@ -36,11 +36,19 @@ test('real npm candidate owns complete multi-Skill resources and survives bootst
   const packed=spawnSync(process.execPath,[npmCli,'pack',fixture,'--pack-destination',temp,'--ignore-scripts','--dry-run=false','--json'],{encoding:'utf8',env:Object.fromEntries(Object.entries(process.env).filter(([key])=>!/^npm_config_(dry_run|json|if_present)$/i.test(key)))});assert.equal(packed.status,0,packed.stderr);const archives=(await fs.readdir(temp)).filter(name=>name.endsWith('.tgz'));assert.equal(archives.length,1,packed.stdout);const tgz=path.join(temp,archives[0]);
   MANIFEST.components={fixture:{package:'@suite-test/member',bin:'member',skills:['member-one']}};
   process.env.npm_execpath=npmCli;
-  const candidate=await collectionPrepare({directory:path.join(temp,'candidate'),yes:true},{registry,run:async(command,args)=>{
+  const prepare=directory=>collectionPrepare({directory,yes:true},{registry,run:async(command,args)=>{
    const result=spawnSync(command,[...args.slice(0,-1),tgz],{encoding:'utf8'});assert.equal(result.status,0,result.stderr);return result.stdout;
   }});
+  const discarded=await prepare(path.join(temp,'discarded-host'));
+  const candidate=await prepare(path.join(temp,'candidate'));
   assert.equal(candidate.skills.length,3);assert.equal(candidate.package,PACKAGE.name);
   const second=candidate.skills.find(s=>s.name==='member-two');assert.equal(await fs.readFile(path.join(second.directory,'asset.txt'),'utf8'),'owned');
+  const discardedSkill=discarded.skills.find(s=>s.name==='member-two');
+  assert.notEqual((await fs.stat(discardedSkill.runtimeEntry)).ino,(await fs.stat(second.runtimeEntry)).ino);
+  for(const skill of candidate.skills){assert.equal((await fs.lstat(skill.directory)).isSymbolicLink(),false);const receipt=JSON.parse(await fs.readFile(path.join(skill.directory,'.collection-runtime.json'),'utf8'));assert.equal(receipt.version,skill.version);}
+  const shell=candidate.skills.find(s=>s.name==='taobao-ai-operations');
+  assert.equal(spawnSync(process.execPath,[shell.runtimeEntry,'version'],{encoding:'utf8',env:{...process.env,...candidate.environment}}).stdout.trim(),PACKAGE.version);
+  await fs.rm(path.join(temp,'discarded-host'),{recursive:true});
   await fs.rm(fixture,{recursive:true});await fs.rm(tgz);
   const version=spawnSync(process.execPath,[second.runtimeEntry,'version'],{encoding:'utf8'});assert.equal(version.stdout.trim(),'1.0.0');
   await assert.rejects(collectionPrepare({directory:path.join(temp,'candidate'),yes:true}),e=>e.code==='TARGET_EXISTS');

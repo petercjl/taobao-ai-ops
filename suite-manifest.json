@@ -16,7 +16,8 @@
       "opportunity-sourcing",
       "sealseek-media-tools",
       "competitor-visual-canvas",
-      "cloud-hug-style-transfer"
+      "cloud-hug-style-transfer",
+      "boardmix-tools"
     ]
   },
   "nodes": [
@@ -216,10 +217,11 @@
       "skill": "competitor-visual-canvas",
       "component": "competitor-visual-canvas",
       "stage": "competitor-visual-research",
-      "method_version": "competitor-visual-canvas@1",
+      "method_version": "competitor-visual-canvas@0.1.7",
       "requires_skills": [
         "tbcli",
-        "sealseek-media"
+        "sealseek-media",
+        "boardmixcli"
       ],
       "python_imports": [],
       "scripts": [],
@@ -256,6 +258,17 @@
         "state": "child remains owner of generation task records and artifacts"
       },
       "contract_resolution": "Resolve canonical Skill and live capabilities through the component CLI; host preflight remains mandatory."
+    },
+    {
+      "id": "boardmix-tools",
+      "skill": "boardmixcli",
+      "component": "boardmixcli",
+      "stage": "tools",
+      "method_version": "boardmixcli@0.1.6",
+      "requires_skills": [],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": []
     }
   ],
   "tools": {
@@ -321,6 +334,11 @@
       "package": "@petercjl/cloud-hug-style-transfer",
       "component": "cloud-hug-style-transfer",
       "role": "brand style conversion application; child owns product/reference selection, photography, prompts and acceptance"
+    },
+    "boardmixcli": {
+      "package": "@petercjl/boardmixcli",
+      "component": "boardmixcli",
+      "role": "Boardmix browser/login recovery, files, images, native videos and explicit object operations"
     }
   },
   "targets": {
@@ -433,6 +451,13 @@
       "bin": "cloud-hug-style-transfer",
       "skills": [
         "cloud-hug-style-transfer"
+      ]
+    },
+    "boardmixcli": {
+      "package": "@petercjl/boardmixcli",
+      "bin": "boardmixcli",
+      "skills": [
+        "boardmixcli"
       ]
     }
   }

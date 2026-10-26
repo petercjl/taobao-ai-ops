@@ -64,7 +64,7 @@ Node >=20。Python 研究依赖通过稳定解释器准备；TAOBAO_AI_OPS_PYTHO
 
 本地 macOS 确定性安装、更新与恢复测试单独记录；Windows/SealSeek 的真实宿主安装和端到端行为尚待验证。CI 发布前须先有可安装的类目独立包；所有发布通过 GitHub Actions OIDC。
 
-The independent `competitor-visual-canvas` component collects Taobao/Tmall visual media into regional SealSeek Frames. Select its node for new collection or append; it owns application layout/state and uses the registered capability dependencies. WorkBuddy accepts the same suite lifecycle through `--agent workbuddy`; host execution evidence remains separate.
+The independent `competitor-visual-canvas` component collects Taobao/Tmall visual media into regional Infinite Canvas or explicitly selected Boardmix Frames. Boardmix uses the independent `@petercjl/boardmixcli` component for browser/login recovery, image and native-video imports, and explicit object operations. The shell installs the full dependency closure and forwards its registered capability entries to the application. Select its node for new collection or append; it owns application layout/state and uses the registered capability dependencies. WorkBuddy accepts the same suite lifecycle through `--agent workbuddy`; host execution evidence remains separate.
 
 ## Audio production
 
