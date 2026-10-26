@@ -26,7 +26,10 @@
     "!skills/**/__pycache__/**",
     "!skills/**/*.pyc",
     "!skills/**/*.bak",
-    "!skills/**/.install-meta.json"
+    "!skills/**/.install-meta.json",
+    "sealwork.collection.json",
+    "INSTALL.md",
+    "UPDATE.md"
   ],
   "publishConfig": {
     "access": "public",

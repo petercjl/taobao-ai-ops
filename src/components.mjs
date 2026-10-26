@@ -13,20 +13,8 @@ export async function inspectComponent(id,root){
  if(p.name!==c.package)throw fail('COMPONENT_IDENTITY_MISMATCH',`${id}: ${p.name}`);
  const entry=path.resolve(root,p.bin?.[c.bin]||'');
  if(!p.bin?.[c.bin]||!entry.startsWith(path.resolve(root)+path.sep))throw fail('INVALID_COMPONENT_ENTRY',id);
- const sources={};
- for(const skill of c.skills){
-  const r=spawnSync(process.execPath,[entry,'skill','source','--json'],{encoding:'utf8',timeout:30000,env:{...process.env,TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0'}});
-  if(r.status!==0)throw fail('COMPONENT_SOURCE_FAILED',r.stderr||id);
-  const envelope=JSON.parse(r.stdout);
-  if(envelope.ok===false)throw fail('COMPONENT_SOURCE_FAILED',id, envelope.error);
-  const result=envelope.data??envelope;
-  if(result.skill&&result.skill!==skill)throw fail('SKILL_IDENTITY_MISMATCH',skill);
-  const s=result.source||(result.skills||[]).find(s=>s.skill===skill)?.source;
-  if(!s||!path.resolve(s).startsWith(path.resolve(root)+path.sep))throw fail('INVALID_COMPONENT_SOURCE',skill);
-  const text=await fs.readFile(path.join(s,'SKILL.md'),'utf8');
-  if(!new RegExp(`^name: ${skill}\\s*$`,'m').test(text))throw fail('SKILL_IDENTITY_MISMATCH',skill);
-  sources[skill]=s;
- }
+ const {readSources}=await import('./subscription.mjs');
+ const sources=Object.fromEntries((await readSources(entry,root,c)).map(s=>[s.name,s.source]));
  return {package:p.name,version:p.version,root:path.resolve(root),entry,sources};
 }
 async function save(records){

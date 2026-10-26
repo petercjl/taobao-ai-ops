@@ -6,12 +6,14 @@ import {targetRoot,status,install} from './skill-manager.mjs';
 import {runScript,doctor,toolEntry,componentEnvironment} from './runtime.mjs';
 import {plan,workflowStatus,createHandoff} from './workflow.mjs';
 import {checkUpdate,installUpdate} from './update.mjs';
+import {collectionCheck,collectionPrepare} from './subscription.mjs';
+import fs from 'node:fs/promises';
 const print=v=>console.log(JSON.stringify(v,null,2));
-function options(args){const out={};for(let i=0;i<args.length;i++){const k=args[i];if(['--json','--adopt','--yes'].includes(k))out[k.slice(2)]=true;else if(['--path','--agent','--target-dir','--name','--node','--profile','--mode','--run-dir','--input','--out','--candidate','--query','--tag','--context','--run-id'].includes(k)){if(!args[i+1]||args[i+1].startsWith('--'))throw fail('USAGE',`${k} needs a value`);out[k.slice(2).replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]=args[++i];}else throw fail('USAGE',`Unknown option ${k}`);}return out;}
+function options(args){const out={};for(let i=0;i<args.length;i++){const k=args[i];if(['--json','--adopt','--yes'].includes(k))out[k.slice(2)]=true;else if(['--directory','--previous','--path','--agent','--target-dir','--name','--node','--profile','--mode','--run-dir','--input','--out','--candidate','--query','--tag','--context','--run-id'].includes(k)){if(!args[i+1]||args[i+1].startsWith('--'))throw fail('USAGE',`${k} needs a value`);out[k.slice(2).replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]=args[++i];}else throw fail('USAGE',`Unknown option ${k}`);}return out;}
 export async function main(argv){
  const [command,action,...rest]=argv;
- if(!command||['help','--help','-h'].includes(command))return console.log(`taobao-ai-ops ${PACKAGE.version}\nversion | nodes list | node show ID | capabilities\ndoctor --node ID [--mode excel|nas]\nskill source [--name NAME] | skill status|install|update --agent AGENT [--profile research] [--adopt]\ncomponents status|check|install [--agent AGENT --yes]\ncomponents register --name ID --path CHECKOUT --yes [--mode npm]\ncomponent run ID [arguments...] | script NODE SCRIPT [arguments...] | tool run TOOL [arguments...]\nworkflow plan|status --run-dir DIR [--node ID] [--input FILE]\nhandoff create --node ID --input FILE --out FILE [--candidate PATH --query QUERY]\nupdate check|install [--tag latest] [--agent AGENT --yes]`);
- if(['version','--version'].includes(command))return console.log(PACKAGE.version);
+ if(!command||['help','--help','-h'].includes(command))return console.log(`taobao-ai-ops ${PACKAGE.version}\nversion | nodes list | node show ID | capabilities\ncollection check [--previous RECEIPT] --json | collection prepare --directory NEW --yes --json [--previous RECEIPT]\ndoctor --node ID [--mode excel|nas]\nskill source [--name NAME] | skill status|install|update --agent AGENT [--profile research] [--adopt]\ncomponents status|check|install [--agent AGENT --yes]\ncomponents register --name ID --path CHECKOUT --yes [--mode npm]\ncomponent run ID [arguments...] | script NODE SCRIPT [arguments...] | tool run TOOL [arguments...]\nworkflow plan|status --run-dir DIR [--node ID] [--input FILE]\nhandoff create --node ID --input FILE --out FILE [--candidate PATH --query QUERY]\nupdate check|install [--tag latest] [--agent AGENT --yes]`);
+ if(['version','--version'].includes(command))return action==='--json'?print({ok:true,package:PACKAGE.name,version:PACKAGE.version}):console.log(PACKAGE.version);
  if(command==='script')return runScript(action,rest[0],rest.slice(1));
  if(command==='component'&&action==='run'){
   await prepareComponentRun(rest[0]);
@@ -23,9 +25,14 @@ export async function main(argv){
  }
  if(command==='nodes'&&action==='list')return print(MANIFEST.nodes);
  if(command==='node'&&action==='show')return print(nodeFor(rest[0]));
- if(command==='capabilities')return print({package:PACKAGE.name,version:PACKAGE.version,...MANIFEST});
+ if(command==='capabilities')return print({package:PACKAGE.name,version:PACKAGE.version,...MANIFEST,collectionContract:{schemaVersion:1,manifest:'sealwork.collection.json',check:['collection','check','--json'],prepare:['collection','prepare','--directory','{newDirectory}','--yes','--json'],previousOption:'--previous',installationMode:'host-owned-generation',hostDiscoveryAuthority:'host'}});
  if(command==='doctor'){const opts=options(argv.slice(1));const r=await doctor(opts.node,opts.mode);print(r);if(!r.ok)process.exitCode=1;return;}
  const opts=options(rest);
+ if(command==='collection'){
+  if(action==='check')return print(await collectionCheck(opts.previous?JSON.parse(await fs.readFile(opts.previous,'utf8')):undefined));
+  if(action==='prepare')return print(await collectionPrepare(opts));
+ }
+
  if(command==='components'){
   if(action==='status')return print({ok:true,components:componentRecords()});
   if(action==='check')return print(await checkComponents());
