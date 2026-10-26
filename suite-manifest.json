@@ -17,7 +17,8 @@
       "sealseek-media-tools",
       "competitor-visual-canvas",
       "cloud-hug-style-transfer",
-      "boardmix-tools"
+      "boardmix-tools",
+      "dmp-product-report"
     ]
   },
   "nodes": [
@@ -48,7 +49,8 @@
         "1688cli",
         "1688-product-sourcing",
         "1688-opportunity-sourcing-research",
-        "cloud-hug-style-transfer"
+        "cloud-hug-style-transfer",
+        "dmp-product-report"
       ],
       "python_imports": [],
       "scripts": [],
@@ -269,6 +271,43 @@
       "python_imports": [],
       "scripts": [],
       "native_requirements": []
+    },
+    {
+      "id": "dmp-product-report",
+      "skill": "dmp-product-report",
+      "component": "dmp-product-report",
+      "stage": "competitor-performance-research",
+      "method_version": "dmp-product-report@1",
+      "requires_skills": [
+        "tbcli"
+      ],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": [
+        "browser.report.inspect"
+      ],
+      "input_contract": {
+        "required": [
+          "Taobao/Tmall item ID",
+          "authorized merchant and buyer browser sessions"
+        ],
+        "optional": [
+          "explicit owned anchor ID",
+          "report date",
+          "new output directory",
+          "previous collected run for offline build/finalize"
+        ]
+      },
+      "output_contract": {
+        "report": "standalone HTML with product identity, five main images, overview, operating metrics, promotion and customer composition",
+        "evidence": "12-period source snapshots, CSV, ViewModel, analyses and validation results",
+        "state": "child owns collection checkpoints, browser-role guards and report artifacts"
+      },
+      "required_component_contracts": {
+        "dmp-product-report": "0.1.2+; bundled renderer and finalization contract",
+        "tbcli": "0.11.3+; dmp snapshot version 1 and itemSummary version 1"
+      },
+      "contract_resolution": "Resolve current exact child Skill and CLI capabilities; preserve the selected merchant/buyer endpoints and returned data availability."
     }
   ],
   "tools": {
@@ -339,6 +378,11 @@
       "package": "@petercjl/boardmixcli",
       "component": "boardmixcli",
       "role": "Boardmix browser/login recovery, files, images, native videos and explicit object operations"
+    },
+    "dmp-product-report": {
+      "package": "@petercjl/dmp-product-report",
+      "component": "dmp-product-report",
+      "role": "DMP product performance, promotion and customer composition report with buyer-page product identity"
     }
   },
   "targets": {
@@ -458,6 +502,13 @@
       "bin": "boardmixcli",
       "skills": [
         "boardmixcli"
+      ]
+    },
+    "dmp-product-report": {
+      "package": "@petercjl/dmp-product-report",
+      "bin": "dmp-product-report",
+      "skills": [
+        "dmp-product-report"
       ]
     }
   }

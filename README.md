@@ -22,6 +22,7 @@
 
 - @petercjl/yuce-category-opportunity-report：24个月类目数据与相对容量路线、增长分析、双视图 HTML。
 - @petercjl/taobao-search-product-form：搜索结果数据和商品形态研究、机会判断卡及 HTML。
+- @petercjl/dmp-product-report：商品资料、经营、推广与新老客成交结构分析，自包含HTML报告；依赖套件管理的tbcli。
 - @petercjl/tbcli：淘宝数据与 NAS 数据库工具，含其独立 Skill。
 - @petercjl/sycmcli：店铺经营数据工具，含其独立 Skill。
 - @petercjl/commerce-ui：通用 HTML 报告 Skill、模板、渲染与校验。调用 `taobao-ai-ops component run html-report ...`；Python 依赖不足时通过该入口执行 `runtime install --yes`。
@@ -91,3 +92,12 @@ Each component is an independent `@petercjl` npm package with its own canonical 
 > 用抱抱云朵社风格转换，为所附图片做转换规划。
 
 套件检查组件来源与素材完整性，子 Skill 按当前品牌方法执行。Codex、SealSeek、WorkBuddy 的实际生成能力以各自宿主预检为准，安装成功不代表生成效果已验证。套件不复制该组件的品牌图片、方法或提示词；独立包的兼容更新通过显式套件更新进入。
+
+
+## 达摩盘商品经营报告
+
+> 用dmp-product-report分析商品【商品ID】，生成完整HTML报告。
+
+当前Agent通过 `dmp-product-report` 节点加载独立报告Skill，按需确认本店锚点。商品资料从橙色淘宝买家浏览器读取，DMP统计从蓝色商家电商浏览器读取；报告包含5张主图、店铺与页面指标，以及经营、推广、人群的四周期对比和8周趋势。子应用负责分析方法、独立模板、原始证据与最终校验。套件统一管理报告包和tbcli，保留独立包的升级边界。
+
+开发者入口：`taobao-ai-ops doctor --node dmp-product-report --json`、`taobao-ai-ops component run dmp-product-report ...`。

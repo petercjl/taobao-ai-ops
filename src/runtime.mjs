@@ -4,10 +4,12 @@ import os from 'node:os';
 import {spawnSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {ROOT,MANIFEST,PACKAGE,nodeFor,source,componentRecord,componentRecords,fail} from './core.mjs';
-export function componentEnvironment(id,env=process.env){
- const records=componentRecords(),media=records['sealseek-media'];
+export function componentEnvironment(id,env=process.env,records=componentRecords()){
+ const media=records['sealseek-media'];
+ let reportEntries={};
+ if(id==='dmp-product-report'){if(!records.tbcli?.entry)throw fail('COMPONENT_NOT_INSTALLED','DMP report requires the registered tbcli component');reportEntries={DMP_REPORT_TBCLI_ENTRY:records.tbcli.entry,AGENT_PACKAGE_UPDATE_CHECK:'0'};}
  const canvasEntries=id==='competitor-visual-canvas'?Object.fromEntries([['tbcli','TBCLI_ENTRY'],['sealseek-media','SEALSEEK_MEDIA_ENTRY'],['boardmixcli','BOARDMIXCLI_ENTRY']].filter(([key])=>records[key]?.entry).map(([key,variable])=>[variable,records[key].entry])):{};
- return {...env,...canvasEntries,BOARDMIXCLI_UPDATE_CHECK:'0',TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0',...(id==='cloud-hug-style-transfer'&&media&&!env.CLOUD_HUG_MEDIA_ROOT?{CLOUD_HUG_MEDIA_ROOT:media.root}:{})};
+ return {...env,...canvasEntries,...reportEntries,BOARDMIXCLI_UPDATE_CHECK:'0',TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0',...(id==='cloud-hug-style-transfer'&&media&&!env.CLOUD_HUG_MEDIA_ROOT?{CLOUD_HUG_MEDIA_ROOT:media.root}:{})};
 }
 export function pythonEnvironment(env=process.env){
  return {...env,PYTHONUTF8:'1',PYTHONIOENCODING:'utf-8',PYTHONDONTWRITEBYTECODE:'1'};
@@ -93,6 +95,19 @@ export async function doctor(id,mode='excel'){
   checks.push({id:'boardmix-runtime',ok:result.status===0&&version===record.version,value:version});
   checks.push({id:'boardmix-contract',ok:fs.existsSync(path.join(record.root,'capabilities.json'))});
  }
+ if(n.component==='dmp-product-report'){
+  const record=componentRecord(n.component),records=componentRecords();
+  const atLeast=(value,min)=>{if(!/^\d+\.\d+\.\d+$/.test(value??''))return false;const a=value.split('.').map(Number),b=min.split('.').map(Number);for(let i=0;i<3;i++)if(a[i]!==b[i])return a[i]>b[i];return true;};
+  checks.push({id:'dmp-report-version',ok:atLeast(record.version,'0.1.2'),value:record.version,minimum:'0.1.2'});
+  checks.push({id:'dmp-report-tbcli',ok:atLeast(records.tbcli?.version,'0.11.3'),value:records.tbcli?.version??null,minimum:'0.11.3'});
+  try{
+   const environment=componentEnvironment(n.component);
+   const versionRun=spawnSync(process.execPath,[record.entry,'version','--json'],{encoding:'utf8',timeout:15000,env:environment});let version;try{version=JSON.parse(versionRun.stdout);}catch{}
+   checks.push({id:'dmp-report-runtime',ok:versionRun.status===0&&version?.package===MANIFEST.components[n.component].package&&version?.version===record.version,value:version?.version??null});
+   const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:90000,env:environment});let detail;try{detail=JSON.parse(result.stdout||result.stderr);}catch{detail={ok:false,code:'COMPONENT_DOCTOR_FAILED'};}
+   checks.push({id:'dmp-report-capabilities',ok:result.status===0&&detail.ok===true&&detail.tbcliSnapshot===1&&detail.tbcliItemSummary===1,value:detail});
+  }catch(e){checks.push({id:'dmp-report-dependencies',ok:false,code:e.code??'CAPABILITY_UNAVAILABLE',message:e.message});}
+ }
  if(n.component==='competitor-visual-canvas'){
   const record=componentRecord(n.component);
   const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:30000,env:componentEnvironment(n.component)});
@@ -108,5 +123,5 @@ export async function doctor(id,mode='excel'){
  }
  if(!['excel','nas'].includes(mode))throw fail('USAGE','Doctor mode must be excel or nas');
  if(mode==='nas'&&n.id==='category-research')for(const id of ['tbcli','yccli']){try{const tool=toolEntry(id);const r=spawnSync(tool.command,[...tool.args,'--version'],{encoding:'utf8',timeout:15000,env:{...process.env,TBCLI_UPDATE_CHECK:'0'}});checks.push({id,ok:r.status===0,value:r.stdout?.trim()});}catch(e){checks.push({id,ok:false,message:e.message});}}
- return {ok:checks.every(c=>c.ok),package:PACKAGE.name,version:PACKAGE.version,node:n.id,mode,checks,native_requirements:n.native_requirements.map(id=>({id,status:'requires-active-agent-verification'})),service_access:mode==='nas'||['procli','sealseek-media','boardmixcli','competitor-visual-canvas','cloud-hug-style-transfer'].includes(n.component)||['1688cli','1688-product-sourcing','1688-opportunity-sourcing-research'].includes(n.component)?'not-probed':'not-required'};
+ return {ok:checks.every(c=>c.ok),package:PACKAGE.name,version:PACKAGE.version,node:n.id,mode,checks,native_requirements:n.native_requirements.map(id=>({id,status:'requires-active-agent-verification'})),service_access:mode==='nas'||n.component==='dmp-product-report'||['procli','sealseek-media','boardmixcli','competitor-visual-canvas','cloud-hug-style-transfer'].includes(n.component)||['1688cli','1688-product-sourcing','1688-opportunity-sourcing-research'].includes(n.component)?'not-probed':'not-required'};
 }

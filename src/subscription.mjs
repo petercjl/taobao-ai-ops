@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
+import {componentEnvironment} from './runtime.mjs';
 import {ROOT,PACKAGE,MANIFEST,fail,stat,fileHashes} from './core.mjs';
 
 const stable=v=>typeof v==='string'&&/^\d+\.\d+\.\d+$/.test(v);
@@ -97,7 +98,10 @@ export async function collectionPrepare(opts,services={}){
   const state=path.join(directory,'state');await fs.mkdir(state);
   await fs.writeFile(path.join(state,'components.json'),JSON.stringify({schema_version:1,components:records}),{flag:'wx',mode:0o600});
   const receipt={...plan,skillsDirectory:skills,skills:installed,environment:{TAOBAO_AI_OPS_STATE_DIR:state,TAOBAO_AI_OPS_AUTO_UPDATE:'0',AGENT_PACKAGE_UPDATE_CHECK:'0'}};
-  for(const skill of installed)await fs.writeFile(path.join(skill.directory,'.collection-runtime.json'),JSON.stringify({runtimeEntry:skill.runtimeEntry,environment:receipt.environment,package:skill.package,version:skill.version}),{flag:'wx',mode:0o600});
+  for(const skill of installed){
+   const environment=skill.package===MANIFEST.components['dmp-product-report']?.package?componentEnvironment('dmp-product-report',receipt.environment,records):receipt.environment;
+   await fs.writeFile(path.join(skill.directory,'.collection-runtime.json'),JSON.stringify({runtimeEntry:skill.runtimeEntry,environment,package:skill.package,version:skill.version}),{flag:'wx',mode:0o600});
+  }
   await fs.writeFile(path.join(directory,'collection.json'),JSON.stringify(receipt,null,2),{flag:'wx',mode:0o600});
   await fs.writeFile(path.join(directory,'integrity.json'),JSON.stringify(await fileHashes(skills)),{flag:'wx',mode:0o600});
   return receipt;
