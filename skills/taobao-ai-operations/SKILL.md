@@ -95,12 +95,12 @@ For explicit Boardmix file, media or object operations, select `boardmix-tools`.
 
 ## DMP 商品经营报告
 
-用户提供淘宝/天猫商品ID，希望查看竞品经营趋势、推广方式/力度/效果、新老客成交结构或完整商品经营HTML报告时，选择 `dmp-product-report` 节点。独立拥有包为 `@petercjl/dmp-product-report`，逻辑Skill为 `dmp-product-report`；所需能力是 `@petercjl/tbcli` 的 DMP snapshot v1 与 itemSummary v1。兼容起点分别为报告包0.1.2、tbcli 0.11.3。
+用户提供淘宝/天猫商品ID，希望查看竞品经营趋势、推广方式/力度/效果、新老客成交结构或完整商品经营HTML报告时，选择 `dmp-product-report` 节点。独立拥有包为 `@petercjl/dmp-product-report`，逻辑Skill为 `dmp-product-report`；所需能力是 `@petercjl/tbcli` 的 DMP snapshot v2 与 itemSummary v1。兼容起点分别为报告包0.2.0、tbcli 0.12.0。
 
 先运行 `taobao-ai-ops skill source --name dmp-product-report --json`，完整读取返回的当前Skill，按该Skill按需加载知识、适配与tbcli依赖，再运行 `taobao-ai-ops doctor --node dmp-product-report --json`。Doctor检查套件所选报告组件、Python与tbcli合同，不查询经营数据或证明账号权限。缺失/不兼容时保留结构化错误，恢复后回到预检；不借用另一全局tbcli来掩盖依赖问题。
 
 通过 `taobao-ai-ops component run dmp-product-report ...` 执行子CLI主线。套件将其已注册tbcli入口传入应用；宿主能力集合的子Skill回执也包含同一依赖入口，任务内保留该版本集合。商品名称、链接、5张主图、店铺、已售、入口价和评价数由橙色淘宝买家浏览器读取；DMP统计由蓝色商家电商浏览器读取，两个角色的会话参数分别保留。登录和验证码由用户在对应窗口处理。
 
-输入为目标商品ID，可补充已选本店锚点、报告日与新输出目录；已有证据可按子合同离线build/finalize。锚点未选时由子Skill列出本店商品供用户选择。输出包括自包含HTML、商品资料、近7天/前7天、近30天/前30天及8个完整自然周证据、CSV、ViewModel、分析和校验。run产生draft后继续按子Skill完成分析和finalize；一句结论与编号证据、经营策略解读及最终概览均由子应用的当前知识方法承接。返回套件主线第4步保留成果或第6步交付。
+输入为目标商品ID，可补充报告日与新输出目录；已有证据可按子合同离线build/finalize。接口需要的本店商品参数由tbcli自动从当前账户发现，报告仅采用目标商品侧数据。输出包括自包含HTML、商品资料、近7天/前7天、近30天/前30天及8个完整自然周证据、CSV、ViewModel、分析和校验。run产生draft后继续按子Skill完成分析和finalize；一句结论与编号证据、经营策略解读及最终概览均由子应用的当前知识方法承接。返回套件主线第4步保留成果或第6步交付。
 
 报告模板和分析知识继续由独立报告包维护，运行不依赖commerce-ui。套件负责注册、安装更新、精确Skill来源解析、依赖传递和预检。商品资料的页面展示口径与DMP分期统计分别解释；本次可用范围以平台实际返回为准。

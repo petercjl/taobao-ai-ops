@@ -277,7 +277,7 @@
       "skill": "dmp-product-report",
       "component": "dmp-product-report",
       "stage": "competitor-performance-research",
-      "method_version": "dmp-product-report@1",
+      "method_version": "dmp-product-report@2",
       "requires_skills": [
         "tbcli"
       ],
@@ -292,7 +292,6 @@
           "authorized merchant and buyer browser sessions"
         ],
         "optional": [
-          "explicit owned anchor ID",
           "report date",
           "new output directory",
           "previous collected run for offline build/finalize"
@@ -304,8 +303,8 @@
         "state": "child owns collection checkpoints, browser-role guards and report artifacts"
       },
       "required_component_contracts": {
-        "dmp-product-report": "0.1.2+; bundled renderer and finalization contract",
-        "tbcli": "0.11.3+; dmp snapshot version 1 and itemSummary version 1"
+        "dmp-product-report": "0.2.0+; bundled renderer and finalization contract",
+        "tbcli": "0.12.0+; dmp snapshot version 2 target-only subject, automatic owned-item execution context and itemSummary version 1"
       },
       "contract_resolution": "Resolve current exact child Skill and CLI capabilities; preserve the selected merchant/buyer endpoints and returned data availability."
     }

@@ -19,13 +19,13 @@ test('missing, old or contract-incompatible report dependencies fail preflight w
  const prev=process.env.TAOBAO_AI_OPS_STATE_DIR,dir=await fs.mkdtemp(path.join(os.tmpdir(),'ops-dmp-negative-'));
  try{
   process.env.TAOBAO_AI_OPS_STATE_DIR=dir;const skill=path.join(dir,'skill');await fs.mkdir(skill);await fs.writeFile(path.join(skill,'SKILL.md'),'fixture');
-  const entry=path.join(dir,'app.mjs');await fs.writeFile(entry,`const version=process.argv.includes('version');console.log(JSON.stringify(version?{package:'@petercjl/dmp-product-report',version:'0.1.2'}:{ok:true,tbcliSnapshot:1,tbcliItemSummary:1,selected:process.env.DMP_REPORT_TBCLI_ENTRY}));`);
-  const records={[name]:{package:'@petercjl/'+name,version:'0.1.2',root:dir,entry,sources:{[name]:skill}}};
+  const entry=path.join(dir,'app.mjs');await fs.writeFile(entry,`const version=process.argv.includes('version');console.log(JSON.stringify(version?{package:'@petercjl/dmp-product-report',version:'0.2.0'}:{ok:true,tbcliSnapshot:2,subjectMode:'target-only',tbcliItemSummary:1,selected:process.env.DMP_REPORT_TBCLI_ENTRY}));`);
+  const records={[name]:{package:'@petercjl/'+name,version:'0.2.0',root:dir,entry,sources:{[name]:skill}}};
   const save=()=>fs.writeFile(path.join(dir,'components.json'),JSON.stringify({components:records}));await save();
   let result=await doctor(name);assert.equal(result.ok,false);assert.ok(result.checks.some(c=>c.code==='COMPONENT_NOT_INSTALLED'));
   records.tbcli={version:'0.11.2',entry:path.join(dir,'managed-tbcli.mjs')};await save();result=await doctor(name);assert.equal(result.ok,false);assert.equal(result.checks.find(c=>c.id==='dmp-report-tbcli').ok,false);
-  records.tbcli.version='0.11.3';await save();result=await doctor(name);assert.equal(result.ok,true);assert.equal(result.checks.find(c=>c.id==='dmp-report-capabilities').value.selected,records.tbcli.entry);
-  await fs.writeFile(entry,`console.log(JSON.stringify(process.argv.includes('version')?{package:'@petercjl/dmp-product-report',version:'0.1.2'}:{ok:true,tbcliSnapshot:1,tbcliItemSummary:null}));`);assert.equal((await doctor(name)).ok,false);
+  records.tbcli.version='0.12.0';await save();result=await doctor(name);assert.equal(result.ok,true);assert.equal(result.checks.find(c=>c.id==='dmp-report-capabilities').value.selected,records.tbcli.entry);
+  await fs.writeFile(entry,`console.log(JSON.stringify(process.argv.includes('version')?{package:'@petercjl/dmp-product-report',version:'0.2.0'}:{ok:true,tbcliSnapshot:2,subjectMode:'target-only',tbcliItemSummary:null}));`);assert.equal((await doctor(name)).ok,false);
  }finally{if(prev===undefined)delete process.env.TAOBAO_AI_OPS_STATE_DIR;else process.env.TAOBAO_AI_OPS_STATE_DIR=prev;await fs.rm(dir,{recursive:true,force:true});}
 });
 test('host-owned report Skill receipt binds the tbcli in the same collection generation',async()=>{
