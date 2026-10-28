@@ -104,3 +104,7 @@ For explicit Boardmix file, media or object operations, select `boardmix-tools`.
 输入为目标商品ID，可补充报告日与新输出目录；已有证据可按子合同离线build/finalize。接口需要的本店商品参数由tbcli自动从当前账户发现，报告仅采用目标商品侧数据。输出包括自包含HTML、商品资料、近7天/前7天、近30天/前30天及8个完整自然周证据、CSV、ViewModel、分析和校验。run产生draft后继续按子Skill完成分析和finalize；一句结论与编号证据、经营策略解读及最终概览均由子应用的当前知识方法承接。返回套件主线第4步保留成果或第6步交付。
 
 报告模板和分析知识继续由独立报告包维护，运行不依赖commerce-ui。套件负责注册、安装更新、精确Skill来源解析、依赖传递和预检。商品资料的页面展示口径与DMP分期统计分别解释；本次可用范围以平台实际返回为准。
+
+### DMP配套版本迁移
+
+用户授权更新DMP报告和取数链路时，检查当前集合的blocked成员。若报告包0.2与tbcli 0.12因跨兼容版本而保留旧版，使用旧回执和 `collection prepare --accept-component-upgrades tbcli,dmp-product-report` 明确迁移这两个组件；其他不兼容组件维持原选择。核对候选DMP doctor及真实版本后再切换宿主入口。该操作按用户已授权的组件范围执行，不扩大到其他Agent或未选组件。

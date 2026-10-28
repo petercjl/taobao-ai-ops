@@ -55,3 +55,10 @@ test('real npm candidate owns complete multi-Skill resources and survives bootst
   await assert.rejects(collectionPrepare({directory:path.join(temp,'failed'),yes:true},{registry,run:async()=>{throw Error('npm failed');}}),/npm failed/);await assert.rejects(fs.stat(path.join(temp,'failed')));
  }finally{MANIFEST.components=original;if(npmEnv===undefined)delete process.env.npm_execpath;else process.env.npm_execpath=npmEnv;await fs.rm(temp,{recursive:true,force:true});}
 });
+
+test('explicit contract migration updates only selected components and never permits a downgrade',async()=>{
+ const first=await collectionCheck(undefined,registry);const next=async url=>({ok:true,json:async()=>({name:decodeURIComponent(url.split('/').at(-2)),version:'2.0.0'})});
+ const migrated=await collectionCheck(first,next,['tbcli','dmp-product-report']);assert.deepEqual(migrated.members.filter(m=>m.explicitMigration).map(m=>m.id).sort(),['dmp-product-report','tbcli']);assert.ok(migrated.members.filter(m=>!m.explicitMigration).every(m=>m.blocked&&m.version==='1.0.0'));
+ const downgraded=await collectionCheck(migrated,registry,['tbcli','dmp-product-report']);assert.ok(downgraded.members.filter(m=>['tbcli','dmp-product-report'].includes(m.id)).every(m=>m.blocked&&m.version==='2.0.0'));
+ await assert.rejects(collectionCheck(first,next,['unknown-component']),e=>e.code==='UNKNOWN_COMPONENT');
+});

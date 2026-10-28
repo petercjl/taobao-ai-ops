@@ -10,7 +10,9 @@ export function compatible(current,next){
  const a=current.split('.').map(Number),b=next.split('.').map(Number);
  return a[0]===b[0]&&(a[0]!==0||a[1]===b[1])&&next.localeCompare(current,undefined,{numeric:true})>=0;
 }
-export async function collectionCheck(previous,registry=fetch){
+export async function collectionCheck(previous,registry=fetch,approved=[]){
+ const selected=new Set(typeof approved==='string'?approved.split(',').map(x=>x.trim()).filter(Boolean):approved);
+ for(const id of selected)if(!Object.hasOwn(MANIFEST.components,id))throw fail('UNKNOWN_COMPONENT',id);
  if(previous&&(previous.package!==PACKAGE.name||!Array.isArray(previous.members)||!stable(previous.version)))throw fail('INVALID_PREVIOUS_COLLECTION','Previous receipt must belong to this collection');
  const members=[];
  for(const [id,c] of Object.entries(MANIFEST.components)){
@@ -19,9 +21,10 @@ export async function collectionCheck(previous,registry=fetch){
   const metadata=await response.json();
   if(metadata.name!==c.package||!stable(metadata.version))throw fail('INVALID_REGISTRY_IDENTITY',c.package);
   const old=previous?.members?.find(m=>m.package===c.package);
-  const accepted=!old||compatible(old.version,metadata.version);
+  const explicitMigration=Boolean(old&&selected.has(id)&&metadata.version.localeCompare(old.version,undefined,{numeric:true})>=0);
+  const accepted=!old||compatible(old.version,metadata.version)||explicitMigration;
   members.push({id,package:c.package,version:accepted?metadata.version:old.version,available:metadata.version,
-   bin:c.bin,skills:c.skills,blocked:!accepted});
+   bin:c.bin,skills:c.skills,blocked:!accepted,explicitMigration});
  }
  const changed=previous?.version!==PACKAGE.version||JSON.stringify(members.map(m=>[m.id,m.package,m.version,m.skills]))!==JSON.stringify(previous?.members?.map(m=>[m.id,m.package,m.version,m.skills]));
  return {ok:true,schemaVersion:1,package:PACKAGE.name,version:PACKAGE.version,changed,members};
@@ -69,7 +72,7 @@ export async function collectionPrepare(opts,services={}){
  const directory=path.resolve(opts.directory);
  if(await stat(directory))throw fail('TARGET_EXISTS','Candidate directory must be new');
  const previous=opts.previous?JSON.parse(await fs.readFile(opts.previous,'utf8')):undefined;
- const plan=await collectionCheck(previous,services.registry);
+ const plan=await collectionCheck(previous,services.registry,opts.acceptComponentUpgrades);
  await fs.mkdir(directory,{recursive:true,mode:0o700});
  try{
   const shell=path.join(directory,'shell'),runtime=path.join(directory,'runtime'),skills=path.join(directory,'skills');
