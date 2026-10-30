@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
+import {materializeComponentSkill} from './component-skill-install.mjs';
 import {componentEnvironment} from './runtime.mjs';
 import {ROOT,PACKAGE,MANIFEST,fail,stat,fileHashes} from './core.mjs';
 
@@ -84,7 +85,7 @@ export async function collectionPrepare(opts,services={}){
   const installed=[],records={};
   async function copySkill(name,source,entry,member){
    if(installed.some(s=>s.name===name))throw fail('DUPLICATE_SKILL',name);
-   const destination=path.join(skills,name);await fileHashes(source);await fs.cp(source,destination,{recursive:true,dereference:true});
+   const destination=path.join(skills,name);await fileHashes(source);if(MANIFEST.components[member.id]?.skill_installation==='component-managed')await materializeComponentSkill({entry,package:member.package,version:member.version},name,destination);else await fs.cp(source,destination,{recursive:true,dereference:true});
    installed.push({name,package:member.package,version:member.version,source,directory:destination,runtimeEntry:entry});
   }
   for(const member of plan.members){

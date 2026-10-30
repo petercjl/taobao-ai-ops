@@ -9,7 +9,8 @@ Input: an operator's goal, supplied workbooks or authorized data sources, option
 
 ## Main line
 
-1. For a Taobao/Tmall item ID requiring operating, promotion and new/returning-customer analysis, select `dmp-product-report`; its method and standalone report contract are below. Resolve other requested business results with `taobao-ai-ops nodes list --json`. A category/monthly market question uses `category-research`; a search-result workbook and concrete research object use `product-research`. Existing product scope can enter product research directly. If no supported node covers the request, report the missing node.
+1. For creating, updating, reviewing, testing or porting an Agent Skill, select `portable-skill-creator` and follow its exact current main line. Resolve other business requests below.
+   For a Taobao/Tmall item ID requiring operating, promotion and new/returning-customer analysis, select `dmp-product-report`; its method and standalone report contract are below. Resolve other requested business results with `taobao-ai-ops nodes list --json`. A category/monthly market question uses `category-research`; a search-result workbook and concrete research object use `product-research`. Existing product scope can enter product research directly. If no supported node covers the request, report the missing node.
    An explicit request to use `procli` for project/task information, SOP progression, knowledge reuse or result publication uses `project-management`. Preserve this child's explicit-trigger contract; offering project integration does not authorize service reads or writes. For an authorized project-backed research request, resolve the project and read its task context and compiled Wiki before selecting the business research node. Preserve the target profile, exact project/task identities, observation windows, provenance and unresolved questions in the handoff.
    A supplied analysis or compatible ViewModel requiring a reusable HTML report uses `html-report`, whose exact Skill is `compact-commerce-ui`. It supplies reporting methods, not business conclusions; existing category/product outputs keep their own declared contracts.
    A Cloud Hug brand conversion request for supplied detail pages, photography, main KV or SKU images uses `cloud-hug-style-transfer`; its brand-production contract is below.
@@ -108,3 +109,13 @@ For explicit Boardmix file, media or object operations, select `boardmix-tools`.
 ### DMP配套版本迁移
 
 用户授权更新DMP报告和取数链路时，检查当前集合的blocked成员。若报告包0.2与tbcli 0.12因跨兼容版本而保留旧版，使用旧回执和 `collection prepare --accept-component-upgrades tbcli,dmp-product-report` 明确迁移这两个组件；其他不兼容组件维持原选择。核对候选DMP doctor及真实版本后再切换宿主入口。该操作按用户已授权的组件范围执行，不扩大到其他Agent或未选组件。
+
+## Skill 创建与维护
+
+用户要求创建、更新、审查、测试或迁移Skill时，选择 `portable-skill-creator` 节点。独立拥有包为 `@petercjl/portable-skill-creator`（0.2.1+）；创建方法、策略来源、可移植性、业务流程台账和验证规则由该包维护。
+
+通过 `taobao-ai-ops skill source --name portable-skill-creator --json` 解析准确来源，完整读取当前SKILL.md。运行 `taobao-ai-ops doctor --node portable-skill-creator --json` 核对Node、Python及组件版本；当前Agent另外解析并完整读取系统提供的准确逻辑名 `skill-creator`，其缺失返回DEPENDENCY_MISSING，不由套件复制替代。宿主基础Creator解析是运行前置能力，doctor的本地成功不证明它存在。
+
+规范来源在组件npm包内，可使用 `taobao-ai-ops component run portable-skill-creator ...` 运行其实际CLI；本机受管安装副本带有自身 `.runtime`。输入是本次创建/维护意图、可选自然语言流程或脑图、既有资源与知识；输出是子Skill约定的规划、完整资源和验证证据。尊重子Skill当前的规划确认、隐私、独立回归授权和失败恢复规则；来源或能力缺失时停止相应阶段并保留原错误。完成后回到套件主线第4步保留成果、第6步交付。
+
+套件只登记并管理独立组件，普通业务调用保持已安装版本；用户显式更新时获取正式latest。台账按用户熟悉的业务流程图展示。基础Skill创建器仍由当前宿主动态提供。

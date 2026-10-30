@@ -18,7 +18,8 @@
       "competitor-visual-canvas",
       "cloud-hug-style-transfer",
       "boardmix-tools",
-      "dmp-product-report"
+      "dmp-product-report",
+      "portable-skill-creator"
     ]
   },
   "nodes": [
@@ -50,7 +51,8 @@
         "1688-product-sourcing",
         "1688-opportunity-sourcing-research",
         "cloud-hug-style-transfer",
-        "dmp-product-report"
+        "dmp-product-report",
+        "portable-skill-creator"
       ],
       "python_imports": [],
       "scripts": [],
@@ -307,6 +309,36 @@
         "tbcli": "0.12.0+; dmp snapshot version 2 target-only subject, automatic owned-item execution context and itemSummary version 1"
       },
       "contract_resolution": "Resolve current exact child Skill and CLI capabilities; preserve the selected merchant/buyer endpoints and returned data availability."
+    },
+    {
+      "id": "portable-skill-creator",
+      "skill": "portable-skill-creator",
+      "component": "portable-skill-creator",
+      "stage": "skill-authoring",
+      "method_version": "portable-skill-creator@0.2",
+      "requires_skills": [],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": [
+        "agent.skill.base-creator.resolve"
+      ],
+      "input_contract": {
+        "required": [
+          "Skill creation, update, review or test intent"
+        ],
+        "optional": [
+          "business flow in natural language or diagram",
+          "existing Skill and knowledge sources"
+        ]
+      },
+      "output_contract": {
+        "result": "child-scoped design, complete Skill resources and verification evidence",
+        "state": "child owns business flow, strategies, privacy, run ledger and confirmation boundaries"
+      },
+      "required_component_contracts": {
+        "portable-skill-creator": "0.2.1+; business-flow ledger presentation; Node 22+ and Python 3.10+"
+      },
+      "contract_resolution": "Resolve the exact current child Skill and live CLI; dynamically load the host-provided base skill-creator, preserving the child confirmation and regression boundaries."
     }
   ],
   "tools": {
@@ -382,6 +414,11 @@
       "package": "@petercjl/dmp-product-report",
       "component": "dmp-product-report",
       "role": "DMP product performance, promotion and customer composition report with buyer-page product identity"
+    },
+    "portable-skill-creator": {
+      "package": "@petercjl/portable-skill-creator",
+      "component": "portable-skill-creator",
+      "role": "Skill creation, maintenance, portability QA and business-flow run ledger design"
     }
   },
   "targets": {
@@ -509,6 +546,14 @@
       "skills": [
         "dmp-product-report"
       ]
+    },
+    "portable-skill-creator": {
+      "package": "@petercjl/portable-skill-creator",
+      "bin": "portable-skill-creator",
+      "skills": [
+        "portable-skill-creator"
+      ],
+      "skill_installation": "component-managed"
     }
   }
 }

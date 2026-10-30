@@ -2,7 +2,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import {randomUUID,createHash} from 'node:crypto';
-import {PACKAGE,source,nodeVersion,closure,json,stat,fileHashes,digest,fail,stateRoot} from './core.mjs';
+import {materializeComponentSkill} from './component-skill-install.mjs';
+import {MANIFEST,componentRecord,PACKAGE,source,nodeVersion,closure,json,stat,fileHashes,digest,fail,stateRoot} from './core.mjs';
 
 const OWNER='.taobao-ai-ops-managed.json';
 export function targetRoot(opts){
@@ -39,9 +40,11 @@ export async function status(root,n){
  return {...base,mode:'copy',managed:true,state:!same?'modified':meta.sourceDigest===base.sourceDigest?'current':'stale'};
 }
 async function makeCopy(dest,n){
- const files=await fileHashes(source(n));await fs.mkdir(dest,{recursive:true});
- for(const relative of Object.keys(files)){const d=path.join(dest,relative);await fs.mkdir(path.dirname(d),{recursive:true});await fs.copyFile(path.join(source(n),relative),d);}
- await fs.writeFile(path.join(dest,'.suite-install.json'),JSON.stringify({package:PACKAGE.name,skill:n.skill,version:nodeVersion(n),sourceDigest:digest(files),files}),{flag:'wx'});
+ const canonical=await fileHashes(source(n));
+ if(MANIFEST.components[n.component]?.skill_installation==='component-managed')await materializeComponentSkill(componentRecord(n.component),n.skill,dest);
+ else{await fs.mkdir(dest,{recursive:true});for(const relative of Object.keys(canonical)){const d=path.join(dest,relative);await fs.mkdir(path.dirname(d),{recursive:true});await fs.copyFile(path.join(source(n),relative),d);}}
+ const files=await fileHashes(dest);
+ await fs.writeFile(path.join(dest,'.suite-install.json'),JSON.stringify({package:PACKAGE.name,skill:n.skill,version:nodeVersion(n),sourceDigest:digest(canonical),files}),{flag:'wx'});
  await fs.writeFile(path.join(dest,'.install-meta.json'),JSON.stringify({title:n.skill,description:`Taobao AI operations: ${n.id}`}),{flag:'wx'});
 }
 async function restore(backup,dest,inPlace){
@@ -67,7 +70,7 @@ export async function install(opts,options={}){
     if(inPlace)await fs.cp(dest,backup,{recursive:true,errorOnExist:true,force:false});
    }
    const record={dest,backup:await stat(backup)?backup:null,inPlace};changed.push(record);
-   const mode=item.mode==='copy'&&item.managed?'copy':(opts.mode||'auto')==='auto'?(process.platform==='win32'?'copy':'link'):opts.mode;
+   const mode=MANIFEST.components[n.component]?.skill_installation==='component-managed'?'copy':item.mode==='copy'&&item.managed?'copy':(opts.mode||'auto')==='auto'?(process.platform==='win32'?'copy':'link'):opts.mode;
    if(!['link','copy'].includes(mode))throw fail('USAGE','Mode must be auto, link or copy');
    if(inPlace){for(const e of await fs.readdir(dest))await fs.rm(path.join(dest,e),{recursive:true,force:true});}
    if(mode==='link')await fs.symlink(source(n),dest,process.platform==='win32'?'junction':'dir');else await makeCopy(dest,n);

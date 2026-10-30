@@ -101,3 +101,13 @@ Each component is an independent `@petercjl` npm package with its own canonical 
 当前Agent通过 `dmp-product-report` 节点加载独立报告Skill，按需确认本店锚点。商品资料从橙色淘宝买家浏览器读取，DMP统计从蓝色商家电商浏览器读取；报告包含5张主图、店铺与页面指标，以及经营、推广、人群的四周期对比和8周趋势。子应用负责分析方法、独立模板、原始证据与最终校验。套件统一管理报告包和tbcli，保留独立包的升级边界。
 
 开发者入口：`taobao-ai-ops doctor --node dmp-product-report --json`、`taobao-ai-ops component run dmp-product-report ...`。
+
+## Skill 创建与维护
+
+独立组件 `@petercjl/portable-skill-creator` 提供Skill创建、更新、审查、测试与迁移方法，台账按用户业务流程图展示。当前Agent需要Node.js 22+、Python 3.10+及可动态加载的基础 `skill-creator`。套件管理独立包的安装和显式更新。
+
+> 用 portable-skill-creator 创建一个Skill：【说明业务目标与流程】。
+
+> 用 portable-skill-creator 优化这个Skill：【说明本次调整目标】。
+
+开发者入口：`taobao-ai-ops doctor --node portable-skill-creator --json`、`skill source --name portable-skill-creator --json` 与 `component run portable-skill-creator ...`。组件业务方法和资源由其独立包拥有；套件安装生成完整的独立运行副本。
