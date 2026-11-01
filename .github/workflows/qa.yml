@@ -3,8 +3,8 @@ on: [push, pull_request, workflow_dispatch, workflow_call]
 jobs:
   qa:
     env:
-      TAOBAO_AI_OPS_STATE_DIR: ${{ runner.temp }}/taobao-ai-ops-qa/state
-      TAOBAO_AI_OPS_TEST_STATE_DIR: ${{ runner.temp }}/taobao-ai-ops-qa/state
+      TAOBAO_AI_OPS_STATE_DIR: ${{ github.workspace }}/../taobao-ai-ops-qa/state
+      TAOBAO_AI_OPS_TEST_STATE_DIR: ${{ github.workspace }}/../taobao-ai-ops-qa/state
       TAOBAO_AI_OPS_AUTO_UPDATE: '0'
       PRODUCT_REFERENCE_REPLACEMENT_UPDATE_CHECK: '0'
     strategy:
