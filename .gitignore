@@ -5,3 +5,6 @@ __pycache__/
 .venv/
 *.private.json
 evaluation/private/
+
+# Local development evidence and isolated QA installations.
+dev/

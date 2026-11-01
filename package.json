@@ -36,7 +36,7 @@
     "tag": "latest"
   },
   "scripts": {
-    "test": "node --test test/*.test.mjs",
+    "test": "node scripts/run-tests.mjs",
     "test:business": "node scripts/test-business.mjs",
     "check": "node scripts/validate-suite.mjs",
     "prepack": "npm run check"

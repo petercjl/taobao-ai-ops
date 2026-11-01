@@ -1,6 +1,6 @@
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
-import {MANIFEST,PACKAGE,nodeFor,source,nodeVersion,fileHashes,digest,fail,componentRecords,componentRecord} from './core.mjs';
+import {MANIFEST,PACKAGE,closure,nodeFor,source,nodeVersion,fileHashes,digest,fail,componentRecords,componentRecord} from './core.mjs';
 import {checkComponents,installComponents,registerComponent,prepareComponentRun} from './components.mjs';
 import {targetRoot,status,install} from './skill-manager.mjs';
 import {runScript,doctor,toolEntry,componentEnvironment} from './runtime.mjs';
@@ -42,7 +42,7 @@ export async function main(argv){
  if(command==='skill'){
   if(action==='source'){const selected=opts.name?[nodeFor(opts.name)]:MANIFEST.nodes;const sources=await Promise.all(selected.map(async n=>({skill:n.skill,node:n.id,source:source(n),sourceDigest:digest(await fileHashes(source(n))),version:nodeVersion(n)})));return print(opts.name?sources[0]:{package:PACKAGE.name,version:PACKAGE.version,skills:sources});}
   if(action==='status'){const root=targetRoot(opts);return print({package:PACKAGE.name,root,skills:await Promise.all(MANIFEST.nodes.map(n=>status(root,n)))});}
-  if(['install','update'].includes(action)){const records=componentRecords();return print(Object.keys(MANIFEST.components).every(id=>records[id])?await install(opts):await installComponents({...opts,yes:true}));}
+  if(['install','update'].includes(action)){const records=componentRecords();return print(closure(opts).filter(n=>n.component).every(n=>records[n.component])?await install(opts):await installComponents({...opts,yes:true}));}
  }
  if(command==='workflow'&&action==='plan')return print(await plan(opts));
  if(command==='workflow'&&action==='status')return print(await workflowStatus(opts));

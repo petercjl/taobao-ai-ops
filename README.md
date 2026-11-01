@@ -29,6 +29,7 @@
 - @petercjl/procli：项目 SOP、任务依赖与成果归档，配套 `project-management` Skill。任务卡组织工作，项目 Wiki 积累可复用的证据与结论。
 - @petercjl/sealseek-media-cli：生图、生视频、已有素材贴入及画板操作，配套 `sealseek-media` Skill。应用层负责素材选择与布局；接入不修改宿主的默认生图生视频路由。该组件需要 Node.js >=22。
 - @petercjl/cloud-hug-style-transfer：抱抱云朵社品牌视觉转换，提供完整品牌素材、人物设定、摄影排版方法和效果验收流程。实际生图需要宿主参考图编辑能力。
+- @petercjl/product-reference-replacement：可复用产品资产图、单格调整和单张/明确批量场景产品替换；使用独立实体 Skill 与目标自有运行时，生成依赖套件管理的 sealseek-media。
 - taobao-ai-operations：套件自带的管理与业务路由 Skill。
 
 yccli 为取数时按需准备的外部工具，可用 TAOBAO_AI_OPS_YCCLI 指定；Excel 分析不需要 NAS、VPN 或平台登录。账号与授权留在包外，安装不会获得服务权限。
@@ -111,3 +112,19 @@ Each component is an independent `@petercjl` npm package with its own canonical 
 > 用 portable-skill-creator 优化这个Skill：【说明本次调整目标】。
 
 开发者入口：`taobao-ai-ops doctor --node portable-skill-creator --json`、`skill source --name portable-skill-creator --json` 与 `component run portable-skill-creator ...`。组件业务方法和资源由其独立包拥有；套件安装生成完整的独立运行副本。
+
+## 产品资产图与产品替换
+
+独立组件 `@petercjl/product-reference-replacement` 纳入统一安装、更新和精确 Skill 发现。制作资产时附上产品图片组或详情页；替换时附上一张产品资产图及需要修改的图片，明确批量后才整组处理。
+
+> 用 product-reference-replacement 为所附产品图片制作产品资产图。
+
+> 用 product-reference-replacement，以所附产品资产图替换这张场景图里的产品。
+
+生成前执行子 Skill 的产品形态筛查与基准确认；逐格生成、局部调整、合成和验收由独立组件维护。生图需要 sealseek-media 依赖、服务登录及本次任务授权；长详情按需使用切片工具。更新由套件或当前宿主能力集合统一管理，任务期间保持选定版本。
+
+## 开发者验证环境
+
+`npm test` 默认在独立临时目录安装正式组件并运行全量测试，成功后清理，不读取或修改日常使用的组件状态和 Agent Skill 目录。已有独立 QA 环境可通过 `TAOBAO_AI_OPS_TEST_STATE_DIR` 指定其状态目录；执行测试前会核验完整组件清单、实际包名和版本、真实 CLI 入口。缺失组件或版本漂移会明确失败，按组件安装流程准备环境后再运行。
+
+CI 在各自 runner 的临时状态目录中准备完整组件，并让单元、安装恢复和业务合同检查共用同一版本集合。服务授权和实际生图质量验证另行记录；测试环境准备不授权登录或付费生成。

@@ -9,7 +9,7 @@ export function componentEnvironment(id,env=process.env,records=componentRecords
  let reportEntries={};
  if(id==='dmp-product-report'){if(!records.tbcli?.entry)throw fail('COMPONENT_NOT_INSTALLED','DMP report requires the registered tbcli component');reportEntries={DMP_REPORT_TBCLI_ENTRY:records.tbcli.entry,AGENT_PACKAGE_UPDATE_CHECK:'0'};}
  const canvasEntries=id==='competitor-visual-canvas'?Object.fromEntries([['tbcli','TBCLI_ENTRY'],['sealseek-media','SEALSEEK_MEDIA_ENTRY'],['boardmixcli','BOARDMIXCLI_ENTRY']].filter(([key])=>records[key]?.entry).map(([key,variable])=>[variable,records[key].entry])):{};
- return {...env,...(id==='portable-skill-creator'?{PORTABLE_SKILL_UPDATE_CHECK:'0'}:{}),...canvasEntries,...reportEntries,BOARDMIXCLI_UPDATE_CHECK:'0',TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0',...(id==='cloud-hug-style-transfer'&&media&&!env.CLOUD_HUG_MEDIA_ROOT?{CLOUD_HUG_MEDIA_ROOT:media.root}:{})};
+ return {...env,...(id==='product-reference-replacement'?{PRODUCT_REFERENCE_REPLACEMENT_UPDATE_CHECK:'0'}:{}),...(id==='portable-skill-creator'?{PORTABLE_SKILL_UPDATE_CHECK:'0'}:{}),...canvasEntries,...reportEntries,BOARDMIXCLI_UPDATE_CHECK:'0',TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0',...(id==='cloud-hug-style-transfer'&&media&&!env.CLOUD_HUG_MEDIA_ROOT?{CLOUD_HUG_MEDIA_ROOT:media.root}:{})};
 }
 export function pythonEnvironment(env=process.env){
  return {...env,PYTHONUTF8:'1',PYTHONIOENCODING:'utf-8',PYTHONDONTWRITEBYTECODE:'1'};
@@ -75,7 +75,8 @@ export async function doctor(id,mode='excel'){
  if(n.component==='sealseek-media'){
   const record=componentRecord(n.component);
   const result=spawnSync(process.execPath,[record.entry,'version'],{encoding:'utf8',timeout:15000,env:{...process.env,SEALSEEK_MEDIA_AUTO_UPDATE:'0'}});
-  const version=result.stdout?.trim().replace(/^sealseek-media\s+/,'');
+  let version=result.stdout?.trim().replace(/^sealseek-media\s+/,'');
+  try{const identity=JSON.parse(result.stdout);version=identity.name===record.package||identity.package===record.package?identity.version:null;}catch{}
   checks.push({id:'sealseek-media-node',ok:Number(process.versions.node.split('.')[0])>=22,value:process.version,minimum:22});
   checks.push({id:'sealseek-media-runtime',ok:result.status===0&&version===record.version,value:version});
   checks.push({id:'sealseek-media-contract',ok:fs.existsSync(path.join(source(n),'capabilities.json'))});
@@ -108,6 +109,18 @@ export async function doctor(id,mode='excel'){
    checks.push({id:'dmp-report-capabilities',ok:result.status===0&&detail.ok===true&&detail.tbcliSnapshot===2&&detail.subjectMode==='target-only'&&detail.tbcliItemSummary===1,value:detail});
   }catch(e){checks.push({id:'dmp-report-dependencies',ok:false,code:e.code??'CAPABILITY_UNAVAILABLE',message:e.message});}
  }
+ if(n.component==='product-reference-replacement'){
+  const record=componentRecord(n.component),records=componentRecords();
+  const atLeast=(value,min)=>{if(!/^\d+\.\d+\.\d+$/.test(value??''))return false;const a=value.split('.').map(Number),b=min.split('.').map(Number);for(let i=0;i<3;i++)if(a[i]!==b[i])return a[i]>b[i];return true;};
+  const environment=componentEnvironment(n.component);
+  const probe=args=>{const result=spawnSync(process.execPath,[record.entry,...args],{encoding:'utf8',timeout:45000,env:environment});let detail;try{detail=JSON.parse(result.stdout||result.stderr);}catch{detail={ok:false,code:'COMPONENT_PROBE_FAILED'};}return {result,detail};};
+  const version=probe(['version','--json']),local=probe(['doctor','--json']);
+  checks.push({id:'product-reference-version',ok:atLeast(record.version,'0.3.6')&&version.result.status===0&&version.detail.ok===true&&version.detail.name===MANIFEST.components[n.component].package&&version.detail.version===record.version,value:version.detail.version??null,minimum:'0.3.6'});
+  checks.push({id:'product-reference-local-runtime',ok:local.result.status===0&&local.detail.ok===true&&local.detail.local_ready===true,value:local.detail});
+  // Probe the selected media record, never infer it from another CLI on PATH.
+  if(!records['sealseek-media'])checks.push({id:'product-reference-media',ok:false,code:'COMPONENT_NOT_INSTALLED'});
+  else{const media=await doctor('sealseek-media-tools',mode);checks.push({id:'product-reference-media',ok:media.ok,value:media});}
+ }
  if(n.component==='portable-skill-creator'){
   const record=componentRecord(n.component);
   const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:30000,env:componentEnvironment(n.component)});
@@ -131,5 +144,5 @@ export async function doctor(id,mode='excel'){
  }
  if(!['excel','nas'].includes(mode))throw fail('USAGE','Doctor mode must be excel or nas');
  if(mode==='nas'&&n.id==='category-research')for(const id of ['tbcli','yccli']){try{const tool=toolEntry(id);const r=spawnSync(tool.command,[...tool.args,'--version'],{encoding:'utf8',timeout:15000,env:{...process.env,TBCLI_UPDATE_CHECK:'0'}});checks.push({id,ok:r.status===0,value:r.stdout?.trim()});}catch(e){checks.push({id,ok:false,message:e.message});}}
- return {ok:checks.every(c=>c.ok),package:PACKAGE.name,version:PACKAGE.version,node:n.id,mode,checks,native_requirements:n.native_requirements.map(id=>({id,status:'requires-active-agent-verification'})),service_access:mode==='nas'||n.component==='dmp-product-report'||['procli','sealseek-media','boardmixcli','competitor-visual-canvas','cloud-hug-style-transfer'].includes(n.component)||['1688cli','1688-product-sourcing','1688-opportunity-sourcing-research'].includes(n.component)?'not-probed':'not-required'};
+ return {ok:checks.every(c=>c.ok),package:PACKAGE.name,version:PACKAGE.version,node:n.id,mode,checks,native_requirements:n.native_requirements.map(id=>({id,status:'requires-active-agent-verification'})),service_access:mode==='nas'||n.component==='dmp-product-report'||['procli','sealseek-media','boardmixcli','competitor-visual-canvas','cloud-hug-style-transfer','product-reference-replacement'].includes(n.component)||['1688cli','1688-product-sourcing','1688-opportunity-sourcing-research'].includes(n.component)?'not-probed':'not-required'};
 }

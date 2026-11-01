@@ -7,13 +7,15 @@ import {componentRecords,PACKAGE,MANIFEST,closure} from '../src/core.mjs';
 import {checkComponents,installComponents,inspectComponent,prepareComponentRun} from '../src/components.mjs';
 
 async function fixture(fn){
- const originals=componentRecords(),env=process.env.TAOBAO_AI_OPS_STATE_DIR;
+ const originals=componentRecords(),env=process.env.TAOBAO_AI_OPS_STATE_DIR,auto=process.env.TAOBAO_AI_OPS_AUTO_UPDATE;
+ // Simulated updater cases control their own policy, independently of CI's frozen runtime.
+ process.env.TAOBAO_AI_OPS_AUTO_UPDATE='1';
  const root=await fs.mkdtemp(path.join(os.tmpdir(),'ops-components-'));process.env.TAOBAO_AI_OPS_STATE_DIR=root;
  const records=structuredClone(originals);
  for(const r of Object.values(records))r.development=true;
  records.tbcli.development=false;
  await fs.writeFile(path.join(root,'components.json'),JSON.stringify({components:records}));
- try{await fn(root,records);}finally{if(env===undefined)delete process.env.TAOBAO_AI_OPS_STATE_DIR;else process.env.TAOBAO_AI_OPS_STATE_DIR=env;}
+ try{await fn(root,records);}finally{if(env===undefined)delete process.env.TAOBAO_AI_OPS_STATE_DIR;else process.env.TAOBAO_AI_OPS_STATE_DIR=env;if(auto===undefined)delete process.env.TAOBAO_AI_OPS_AUTO_UPDATE;else process.env.TAOBAO_AI_OPS_AUTO_UPDATE=auto;}
 }
 const check=()=>Promise.resolve({ok:true,components:[{id:'tbcli',package:'@petercjl/tbcli',current:'0.10.4',available:'0.10.5',updateAvailable:true}]});
 function fakeNpm(args){
