@@ -80,6 +80,7 @@ test('component installer creates physical independent runtimes; repeat, edits a
  assert.equal((await fs.lstat(target)).isSymbolicLink(),false);assert.notEqual((await fs.stat(entry)).ino,(await fs.stat(sibling)).ino);
  const receipt=JSON.parse(await fs.readFile(path.join(target,'.product-reference-install.json'),'utf8'));
  assert.equal(receipt.version,product.version);assert.equal(receipt.runtime_version,product.version);
+ await assert.rejects(fs.lstat(path.join(target,'.runtime/node_modules/@petercjl/taobao-ai-ops')),e=>e.code==='ENOENT');
  await fs.appendFile(path.join(target,'SKILL.md'),'\nUser-owned local change.');
  await assert.rejects(install({name,targetDir:b}),e=>e.code==='LOCAL_CHANGES');
  await fs.rm(clone,{recursive:true});await fs.rm(a,{recursive:true});
