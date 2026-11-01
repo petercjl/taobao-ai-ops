@@ -4,7 +4,6 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
-import {createRequire} from 'node:module';
 import {MANIFEST,ROOT,closure,componentRecords,nodeFor,source} from '../src/core.mjs';
 import {inspectComponent,checkComponents} from '../src/components.mjs';
 import {install,status} from '../src/skill-manager.mjs';
@@ -86,8 +85,10 @@ test('component installer creates physical independent runtimes; repeat, edits a
  await fs.rm(clone,{recursive:true});await fs.rm(a,{recursive:true});
  assert.equal(command(entry,['version','--json']).version,product.version);
  // Execute a real local business operation using target-owned sharp and assets.
- const sharp=createRequire(path.join(target,'.runtime/package.json'))('sharp');
- const input=path.join(root,'product.png');await sharp({create:{width:160,height:90,channels:3,background:'#e8bb53'}}).png().toFile(input);
+ const input=path.join(root,'product.png');
+ // Native DLLs stay in a child process so Windows can remove the fixture afterward.
+ const render=spawnSync(process.execPath,['--input-type=module','-e',"import {createRequire} from 'node:module';const sharp=createRequire(process.argv[1])('sharp');await sharp({create:{width:160,height:90,channels:3,background:'#e8bb53'}}).png().toFile(process.argv[2]);",path.join(target,'.runtime/package.json'),input],{encoding:'utf8',timeout:30000});
+ assert.equal(render.status,0,render.stderr);
  const review=path.join(root,'external-review.json');await fs.writeFile(review,JSON.stringify({inspected:true,asset_id:'fixture',variant:'synthetic',coverage:['synthetic local smoke'],provided_for_use:true,approval_evidence:'Authorized synthetic test fixture; not a real product or business approval.'}));
  const imported=command(entry,['asset','import','--image',input,'--record',path.join(root,'asset.json'),'--review',review,'--json']);
  assert.equal(imported.ok,true);await fs.access(path.join(root,'asset.json'));

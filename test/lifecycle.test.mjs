@@ -33,6 +33,18 @@ test('failed multi-Skill adoption restores all originals',async()=>{
  const root=await temp();for(const n of closure()){await fs.mkdir(path.join(root,n.skill));await fs.writeFile(path.join(root,n.skill,'SKILL.md'),`original-${n.id}`);}
  await assert.rejects(install({targetDir:root,adopt:true,mode:'copy'},{failAfter:2}));for(const n of closure())assert.equal(await fs.readFile(path.join(root,n.skill,'SKILL.md'),'utf8'),`original-${n.id}`);
 });
+test('cross-device backups preserve user bytes and roll back a failed adoption',async()=>{
+ const root=await temp(),n=nodeFor('category-research'),dest=path.join(root,n.skill);
+ await fs.mkdir(dest);await fs.writeFile(path.join(dest,'SKILL.md'),'用户原件');await fs.writeFile(path.join(dest,'.install-meta.json'),'custom-ui');
+ const rename=async()=>{throw Object.assign(new Error('cross-device rename'),{code:'EXDEV'});};
+ await assert.rejects(install({targetDir:root,node:n.id,mode:'copy',adopt:true},{rename,failAfter:1}),e=>e.code==='TEST_INJECTED_FAILURE');
+ assert.equal(await fs.readFile(path.join(dest,'SKILL.md'),'utf8'),'用户原件');
+ assert.equal(await fs.readFile(path.join(dest,'.install-meta.json'),'utf8'),'custom-ui');
+ const result=await install({targetDir:root,node:n.id,mode:'copy',adopt:true},{rename});
+ assert.equal(result.skills[0].strategy,'in-place');assert.equal(result.skills[0].state,'current');
+ assert.equal(await fs.readFile(path.join(result.skills[0].backup,'SKILL.md'),'utf8'),'用户原件');
+ assert.equal(await fs.readFile(path.join(dest,'.install-meta.json'),'utf8'),'custom-ui');
+});
 test('unknown targets and path traversal cannot select arbitrary scripts',()=>{
  assert.throws(()=>targetRoot({agent:'unknown'}),e=>e.code==='UNKNOWN_AGENT');assert.throws(()=>runScript('product-research','../../evil.py',[]),e=>e.code==='SCRIPT_NOT_ALLOWED');
  const windows=pythonCandidates('win32','C:/User',{SEALSEEK_HOME:'C:/Agent'});assert.ok(windows.some(p=>p.includes('binaries')&&p.endsWith('python.exe')));

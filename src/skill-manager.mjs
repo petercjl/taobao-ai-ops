@@ -66,8 +66,8 @@ export async function install(opts,options={}){
    const dest=item.destination,backup=path.join(transaction,n.skill);let inPlace=false;
    if(await stat(dest)){
     if(options.forceInPlace&&item.mode==='copy')inPlace=true;
-    else try{await fs.rename(dest,backup);}catch(e){if(!['EPERM','EBUSY','EACCES'].includes(e.code)||(await stat(dest)).isSymbolicLink())throw e;inPlace=true;}
-    if(inPlace)await fs.cp(dest,backup,{recursive:true,errorOnExist:true,force:false});
+    else try{await (options.rename??fs.rename)(dest,backup);}catch(e){if(!['EPERM','EBUSY','EACCES','EXDEV'].includes(e.code)||(await stat(dest)).isSymbolicLink())throw e;inPlace=true;}
+    if(inPlace){await fs.cp(dest,backup,{recursive:true,errorOnExist:true,force:false});if(digest(await fileHashes(dest))!==digest(await fileHashes(backup)))throw fail('BACKUP_VERIFY_FAILED','Backup differs from the current Skill; preserving original target');}
    }
    const record={dest,backup:await stat(backup)?backup:null,inPlace};changed.push(record);
    const mode=MANIFEST.components[n.component]?.skill_installation==='component-managed'?'copy':item.mode==='copy'&&item.managed?'copy':(opts.mode||'auto')==='auto'?(process.platform==='win32'?'copy':'link'):opts.mode;
