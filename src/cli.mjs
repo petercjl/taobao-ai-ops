@@ -17,7 +17,7 @@ export async function main(argv){
  if(command==='script')return runScript(action,rest[0],rest.slice(1));
  if(command==='component'&&action==='run'){
   await prepareComponentRun(rest[0]);
-  const record=componentRecord(rest[0]);const r=spawnSync(process.execPath,[record.entry,...rest.slice(1)],{stdio:'inherit',env:componentEnvironment(rest[0])});if(r.error)throw fail('EXECUTION_FAILED',r.error.message);process.exitCode=r.status??1;return;
+  const record=componentRecord(rest[0]);if(!record.entry)throw fail('INVALID_COMPONENT_ENTRY','Use skill source for this application Skill');const r=spawnSync(process.execPath,[record.entry,...rest.slice(1)],{stdio:'inherit',env:componentEnvironment(rest[0])});if(r.error)throw fail('EXECUTION_FAILED',r.error.message);process.exitCode=r.status??1;return;
  }
  if(command==='tool'&&action==='run'){
   await prepareComponentRun(MANIFEST.tools[rest[0]]?.component);

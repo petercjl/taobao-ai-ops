@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {ROOT,MANIFEST,PACKAGE,nodeFor,source,closure} from '../src/core.mjs';
-import {skillName} from './skill-identity.mjs';
+import {skillName} from '../src/skill-identity.mjs';
 const seen=new Set();const skills=new Set();
 for(const n of MANIFEST.nodes){
  if(!/^[a-z][a-z0-9-]+$/.test(n.id)||seen.has(n.id)||skills.has(n.skill))throw Error('Duplicate or invalid suite identity');seen.add(n.id);skills.add(n.skill);

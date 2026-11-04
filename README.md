@@ -113,6 +113,14 @@ Each component is an independent `@petercjl` npm package with its own canonical 
 
 开发者入口：`taobao-ai-ops doctor --node portable-skill-creator --json`、`skill source --name portable-skill-creator --json` 与 `component run portable-skill-creator ...`。组件业务方法和资源由其独立包拥有；套件安装生成完整的独立运行副本。
 
+## 产品资产生成与场景替换
+
+> 用 product-asset-set 为所附产品图制作产品资产包。
+
+> 用 product-scene-replacement 和所附资产包，替换场景图中的产品。
+
+资产包包含独立参考图和资产说明。场景替换按图选择参考，使用 Nano Banana Pro，需要可用的媒体组件、服务登录和生成授权。
+
 ## 开发者验证环境
 
 `npm test` 默认在独立临时目录安装正式组件并运行全量测试，成功后清理，不读取或修改日常使用的组件状态和 Agent Skill 目录。已有独立 QA 环境可通过 `TAOBAO_AI_OPS_TEST_STATE_DIR` 指定其状态目录；执行测试前会核验完整组件清单、实际包名和版本、真实 CLI 入口。缺失组件或版本漂移会明确失败，按组件安装流程准备环境后再运行。

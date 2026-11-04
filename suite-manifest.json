@@ -19,7 +19,9 @@
       "cloud-hug-style-transfer",
       "boardmix-tools",
       "dmp-product-report",
-      "portable-skill-creator"
+      "portable-skill-creator",
+      "product-asset-set",
+      "product-scene-replacement"
     ]
   },
   "nodes": [
@@ -52,7 +54,9 @@
         "1688-opportunity-sourcing-research",
         "cloud-hug-style-transfer",
         "dmp-product-report",
-        "portable-skill-creator"
+        "portable-skill-creator",
+        "product-asset-set",
+        "product-scene-replacement"
       ],
       "python_imports": [],
       "scripts": [],
@@ -339,6 +343,34 @@
         "portable-skill-creator": "0.2.1+; business-flow ledger presentation; Node 22+ and Python 3.10+"
       },
       "contract_resolution": "Resolve the exact current child Skill and live CLI; dynamically load the host-provided base skill-creator, preserving the child confirmation and regression boundaries."
+    },
+    {
+      "id": "product-asset-set",
+      "skill": "product-asset-set",
+      "component": "product-asset-set",
+      "stage": "product-asset-generation",
+      "method_version": "product-asset-set@0.1",
+      "requires_skills": [],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": [
+        "media.image.inspect"
+      ]
+    },
+    {
+      "id": "product-scene-replacement",
+      "skill": "product-scene-replacement",
+      "component": "product-scene-replacement",
+      "stage": "scene-product-replacement",
+      "method_version": "product-scene-replacement@0.1",
+      "requires_skills": [
+        "sealseek-media"
+      ],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": [
+        "media.image.inspect"
+      ]
     }
   ],
   "tools": {
@@ -554,6 +586,20 @@
         "portable-skill-creator"
       ],
       "skill_installation": "component-managed"
+    },
+    "product-asset-set": {
+      "package": "@petercjl/product-asset-set",
+      "kind": "application-skill",
+      "skills": [
+        "product-asset-set"
+      ]
+    },
+    "product-scene-replacement": {
+      "package": "@petercjl/product-scene-replacement",
+      "kind": "application-skill",
+      "skills": [
+        "product-scene-replacement"
+      ]
     }
   }
 }

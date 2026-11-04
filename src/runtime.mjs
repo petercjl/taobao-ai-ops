@@ -35,6 +35,7 @@ export function runScript(id,name,args){
  const n=nodeFor(id);if(!n.component||!/^[a-z][a-z0-9_]*\.(py|mjs)$/.test(name))throw fail('SCRIPT_NOT_ALLOWED',`Invalid component script ${name}`);
  // The independent CLI owns its current allowlist and runtime; new component scripts need no shell release.
  const record=componentRecord(n.component);
+ if(!record.entry)throw fail('SCRIPT_NOT_ALLOWED','Load the application Skill to use its bundled resources');
  const r=spawnSync(process.execPath,[record.entry,'script',name,...args],{stdio:'inherit',env:pythonEnvironment()});
  if(r.error)throw fail('EXECUTION_FAILED',r.error.message);process.exitCode=r.status??1;
 }
@@ -46,6 +47,7 @@ export async function doctor(id,mode='excel'){
   const children=await Promise.all(n.requires_skills.map(skill=>doctor(skill,mode)));
   return {ok:checks.every(c=>c.ok)&&children.every(c=>c.ok),package:PACKAGE.name,version:PACKAGE.version,node:n.id,checks,children,native_requirements:children.flatMap(c=>c.native_requirements)};
  }
+ if(MANIFEST.components[n.component]?.kind==='application-skill')checks.push({id:'application-node',ok:Number(process.versions.node.split('.')[0])>=22,value:process.version,minimum:'22'});
  if(n.python_imports.length&&n.id!=='html-report'){const python=resolvePython(n.python_imports);checks.push({id:'python',ok:Boolean(python),value:python,required_imports:n.python_imports});}
  if(n.id==='html-report'){
   const record=componentRecord(n.component);

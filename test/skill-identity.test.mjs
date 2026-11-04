@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {skillName} from '../scripts/skill-identity.mjs';
+import {skillName} from '../src/skill-identity.mjs';
 test('Skill identity uses frontmatter across LF, CRLF and CR checkouts',()=>{
  for(const ending of ['\n','\r\n','\r'])assert.equal(skillName(['---','name: example-skill','description: valid','---','body'].join(ending)),'example-skill');
 });

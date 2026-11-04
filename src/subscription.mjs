@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
+import {skillName} from './skill-identity.mjs';
 import {materializeComponentSkill} from './component-skill-install.mjs';
 import {componentEnvironment} from './runtime.mjs';
 import {ROOT,PACKAGE,MANIFEST,fail,stat,fileHashes} from './core.mjs';
@@ -45,6 +46,19 @@ async function run(command,args,timeout=300000){
 function within(root,value){const p=path.resolve(root,value),r=path.relative(root,p);if(!r||r==='..'||r.startsWith('..'+path.sep)||path.isAbsolute(r))throw fail('UNSAFE_COMPONENT_PATH',value);return p;}
 export async function readSources(entry,root,member){
  root=await fs.realpath(root);
+ if(member.kind==='application-skill'){
+  const pkg=JSON.parse(await fs.readFile(path.join(root,'package.json'),'utf8'));
+  const declarations=pkg.agentPackage?.skills;
+  if(pkg.name!==member.package||pkg.bin||pkg.agentPackage?.kind!=='application-skill'||!Array.isArray(declarations)||declarations.length!==member.skills.length)throw fail('INVALID_COMPONENT_SOURCE',member.package);
+  return Promise.all(member.skills.map(async name=>{
+   const declaration=declarations.find(item=>item?.name===name);
+   if(declaration?.path!=='skills/'+name)throw fail('INVALID_COMPONENT_SOURCE',name);
+   const source=await fs.realpath(within(root,declaration.path));within(root,source);
+   if(skillName(await fs.readFile(path.join(source,'SKILL.md'),'utf8'))!==name)throw fail('SKILL_IDENTITY_MISMATCH',name);
+   await fileHashes(source);
+   return {name,source};
+  }));
+ }
  let capabilities={};
  try{capabilities=JSON.parse(await fs.readFile(path.join(root,'capabilities.json'),'utf8'));}catch{}
  const collection=capabilities.discoveryContract?.skillCollection;
@@ -92,9 +106,10 @@ export async function collectionPrepare(opts,services={}){
    const root=path.join(runtime,'node_modules',...member.package.split('/'));
    const identity=JSON.parse(await fs.readFile(path.join(root,'package.json'),'utf8'));
    if(identity.name!==member.package||identity.version!==member.version)throw fail('COMPONENT_IDENTITY_MISMATCH',member.package);
-   const entry=within(root,typeof identity.bin==='string'?identity.bin:identity.bin?.[member.bin]??'');
-   await fs.access(entry);
-   const sources=await readSources(entry,root,member);
+   const component=MANIFEST.components[member.id];
+   const entry=component.kind==='application-skill'?null:within(root,typeof identity.bin==='string'?identity.bin:identity.bin?.[member.bin]??'');
+   if(entry)await fs.access(entry);
+   const sources=await readSources(entry,root,component);
    records[member.id]={package:member.package,version:member.version,root,entry,sources:Object.fromEntries(sources.map(s=>[s.name,s.source]))};
    for(const s of sources)await copySkill(s.name,s.source,entry,member);
   }
