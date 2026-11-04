@@ -19,8 +19,7 @@
       "cloud-hug-style-transfer",
       "boardmix-tools",
       "dmp-product-report",
-      "portable-skill-creator",
-      "product-reference-replacement"
+      "portable-skill-creator"
     ]
   },
   "nodes": [
@@ -53,8 +52,7 @@
         "1688-opportunity-sourcing-research",
         "cloud-hug-style-transfer",
         "dmp-product-report",
-        "portable-skill-creator",
-        "product-reference-replacement"
+        "portable-skill-creator"
       ],
       "python_imports": [],
       "scripts": [],
@@ -341,44 +339,6 @@
         "portable-skill-creator": "0.2.1+; business-flow ledger presentation; Node 22+ and Python 3.10+"
       },
       "contract_resolution": "Resolve the exact current child Skill and live CLI; dynamically load the host-provided base skill-creator, preserving the child confirmation and regression boundaries."
-    },
-    {
-      "id": "product-reference-replacement",
-      "skill": "product-reference-replacement",
-      "component": "product-reference-replacement",
-      "stage": "product-reference-assets-and-replacement",
-      "method_version": "product-reference-replacement@0.3",
-      "requires_skills": [
-        "sealseek-media"
-      ],
-      "python_imports": [],
-      "scripts": [],
-      "native_requirements": [
-        "media.image.inspect",
-        "command.execute",
-        "artifact.deliver"
-      ],
-      "input_contract": {
-        "asset_creation": "Product photos or detail pages; compare all supplied product forms and resolve material conflicts before planning.",
-        "replacement": "One product asset board and one scene image, or an explicitly authorized batch.",
-        "optional": [
-          "confirmed product-form baseline",
-          "existing asset and requested panel changes"
-        ]
-      },
-      "output_contract": {
-        "asset_creation": "Independent high-resolution panels, one 16:9 board, source/plan/task/review records and user-approved asset version.",
-        "replacement": "Per-image accepted result or truthful failure status, round records and shared asset version.",
-        "state": "Child owns product-form decisions, panel layout, prompts, paid-task budgets, original artifacts and acceptance."
-      },
-      "required_component_contracts": {
-        "product-reference-replacement": "0.3.6+; physical isolated Skill/runtime installation, versioned maintenance and product-form screening",
-        "sealseek-media": "Current discoverable nano-banana-pro reference editing, single image, dry-run, task recovery and download"
-      },
-      "optional_dependencies": {
-        "semantic-image-slicer": "Resolve longslice and its exact current Skill only for long detail-page inputs."
-      },
-      "contract_resolution": "Load the exact current child Skill and live CLI contracts; resolve registered media through the suite and preserve child reference roles, budgets and acceptance."
     }
   ],
   "tools": {
@@ -459,11 +419,6 @@
       "package": "@petercjl/portable-skill-creator",
       "component": "portable-skill-creator",
       "role": "Skill creation, maintenance, portability QA and business-flow run ledger design"
-    },
-    "product-reference-replacement": {
-      "package": "@petercjl/product-reference-replacement",
-      "component": "product-reference-replacement",
-      "role": "Reusable product asset boards, independent panel revisions and single-image or explicitly batched product replacement"
     }
   },
   "targets": {
@@ -597,14 +552,6 @@
       "bin": "portable-skill-creator",
       "skills": [
         "portable-skill-creator"
-      ],
-      "skill_installation": "component-managed"
-    },
-    "product-reference-replacement": {
-      "package": "@petercjl/product-reference-replacement",
-      "bin": "product-reference-replacement",
-      "skills": [
-        "product-reference-replacement"
       ],
       "skill_installation": "component-managed"
     }

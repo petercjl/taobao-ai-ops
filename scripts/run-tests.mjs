@@ -11,7 +11,6 @@ const base=selected?null:await fs.mkdtemp(path.join(os.tmpdir(),'taobao-ai-ops-t
 const state=selected?path.resolve(selected):path.join(base,'state');
 process.env.TAOBAO_AI_OPS_STATE_DIR=state;
 process.env.TAOBAO_AI_OPS_AUTO_UPDATE='0';
-process.env.PRODUCT_REFERENCE_REPLACEMENT_UPDATE_CHECK='0';
 try{
  if(base){
   console.log('Preparing independent published components for tests.');

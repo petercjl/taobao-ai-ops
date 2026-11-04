@@ -12,7 +12,7 @@ export const json=p=>fs.readFile(p,'utf8').then(JSON.parse);
 export const stat=p=>fs.lstat(p).catch(e=>{if(e.code==='ENOENT')return null;throw e;});
 export const hash=data=>createHash('sha256').update(data).digest('hex');
 export function nodeFor(id){const n=MANIFEST.nodes.find(n=>n.id===id||n.skill===id);if(!n)throw fail('UNKNOWN_NODE',`Unknown node: ${id}`);return n;}
-export function componentRecords(){const file=path.join(stateRoot(),'components.json');return existsSync(file)?JSON.parse(readFileSync(file,'utf8')).components||{}:{};}
+export function componentRecords(){const file=path.join(stateRoot(),'components.json');const records=existsSync(file)?JSON.parse(readFileSync(file,'utf8')).components||{}:{};return Object.fromEntries(Object.entries(records).filter(([id])=>Object.hasOwn(MANIFEST.components,id)));}
 export function componentRecord(id){const r=componentRecords()[id];if(!r)throw fail('COMPONENT_NOT_INSTALLED',`Install registered component ${id} with components install`);return r;}
 export const source=n=>n.component?componentRecord(n.component).sources[n.skill]||(()=>{throw fail('SKILL_SOURCE_MISSING',n.skill);})():path.join(ROOT,'skills',n.skill);
 export const nodeVersion=n=>n.component?componentRecord(n.component).version:PACKAGE.version;

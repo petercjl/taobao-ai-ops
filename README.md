@@ -113,16 +113,6 @@ Each component is an independent `@petercjl` npm package with its own canonical 
 
 开发者入口：`taobao-ai-ops doctor --node portable-skill-creator --json`、`skill source --name portable-skill-creator --json` 与 `component run portable-skill-creator ...`。组件业务方法和资源由其独立包拥有；套件安装生成完整的独立运行副本。
 
-## 产品资产图与产品替换
-
-独立组件 `@petercjl/product-reference-replacement` 纳入统一安装、更新和精确 Skill 发现。制作资产时附上产品图片组或详情页；替换时附上一张产品资产图及需要修改的图片，明确批量后才整组处理。
-
-> 用 product-reference-replacement 为所附产品图片制作产品资产图。
-
-> 用 product-reference-replacement，以所附产品资产图替换这张场景图里的产品。
-
-生成前执行子 Skill 的产品形态筛查与基准确认；逐格生成、局部调整、合成和验收由独立组件维护。生图需要 sealseek-media 依赖、服务登录及本次任务授权；长详情按需使用切片工具。更新由套件或当前宿主能力集合统一管理，任务期间保持选定版本。
-
 ## 开发者验证环境
 
 `npm test` 默认在独立临时目录安装正式组件并运行全量测试，成功后清理，不读取或修改日常使用的组件状态和 Agent Skill 目录。已有独立 QA 环境可通过 `TAOBAO_AI_OPS_TEST_STATE_DIR` 指定其状态目录；执行测试前会核验完整组件清单、实际包名和版本、真实 CLI 入口。缺失组件或版本漂移会明确失败，按组件安装流程准备环境后再运行。

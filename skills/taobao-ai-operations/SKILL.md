@@ -14,7 +14,6 @@ Input: an operator's goal, supplied workbooks or authorized data sources, option
    An explicit request to use `procli` for project/task information, SOP progression, knowledge reuse or result publication uses `project-management`. Preserve this child's explicit-trigger contract; offering project integration does not authorize service reads or writes. For an authorized project-backed research request, resolve the project and read its task context and compiled Wiki before selecting the business research node. Preserve the target profile, exact project/task identities, observation windows, provenance and unresolved questions in the handoff.
    A supplied analysis or compatible ViewModel requiring a reusable HTML report uses `html-report`, whose exact Skill is `compact-commerce-ui`. It supplies reporting methods, not business conclusions; existing category/product outputs keep their own declared contracts.
    A Cloud Hug brand conversion request for supplied detail pages, photography, main KV or SKU images uses `cloud-hug-style-transfer`; its brand-production contract is below.
-   Product photos/detail pages for a reusable asset board, a panel revision, or an existing asset plus scene images for product replacement use `product-reference-replacement`; its contract is below.
 2. Run `taobao-ai-ops doctor --node NODE --mode excel --json` for local workbooks, or `--mode nas` for live category data. Doctor checks deterministic resources; verify any listed native capabilities in the active Agent before their stage. A missing dependency ends the affected node with its exact error.
 3. Resolve the exact child Skill with `taobao-ai-ops skill source --name SKILL --json`. Read its complete current SKILL.md, load its platform adapter, then follow only the child node's current reference routes. The logical dependencies are `yuce-category-opportunity-report` (method contract `yuce-category-opportunity@2.0`) and `taobao-search-product-form` (imported method `0.1.1`). Their returned artifacts and source hashes are the handoff; resolution or contract failure stops with CAPABILITY_UNAVAILABLE or OUTPUT_CONTRACT_FAILED. Return here at step 4 after the child completes. Naming a Skill alone is not execution.
 4. Preserve the child's analysis, full HTML and evidence files. Use `taobao-ai-ops workflow plan --run-dir NEW_DIR --node NODE --input WORKBOOK --json` when a durable suite plan is requested; this records a plan and fixed suite/method versions, not business completion. The product node's own stage ledger remains authoritative for its detailed execution.
@@ -120,15 +119,3 @@ For explicit Boardmix file, media or object operations, select `boardmix-tools`.
 规范来源在组件npm包内，可使用 `taobao-ai-ops component run portable-skill-creator ...` 运行其实际CLI；本机受管安装副本带有自身 `.runtime`。输入是本次创建/维护意图、可选自然语言流程或脑图、既有资源与知识；输出是子Skill约定的规划、完整资源和验证证据。尊重子Skill当前的规划确认、隐私、独立回归授权和失败恢复规则；来源或能力缺失时停止相应阶段并保留原错误。完成后回到套件主线第4步保留成果、第6步交付。
 
 套件只登记并管理独立组件，普通业务调用保持已安装版本；用户显式更新时获取正式latest。台账按用户熟悉的业务流程图展示。基础Skill创建器仍由当前宿主动态提供。
-
-## 产品资产图与场景产品替换
-
-制作可复用产品资产图、调整单个资产格，或用已有资产图替换场景图片中的产品时，选择 `product-reference-replacement`。独立拥有包为 `@petercjl/product-reference-replacement`（0.3.6+）；套件负责组件登记、依赖、安装更新和入口解析，业务方法由子 Skill 当前版本维护。
-
-通过 `taobao-ai-ops skill source --name product-reference-replacement --json` 获取准确来源，完整读取当前 SKILL.md 及本节点所需资源，再运行 `taobao-ai-ops doctor --node product-reference-replacement --json`。预检核对真实组件版本、本地渲染运行时和套件选定的媒体组件；看图能力、登录及付费范围由当前 Agent 按子合同核实。长详情才按子 Skill 解析 `semantic-image-slicer` / `longslice`；普通照片不强制依赖切片器。
-
-模式A输入产品照片组或详情页，输出逐格高清原图、16:9资产图及来源、规划、任务、验收和定稿记录。模式B输入一张已有资产图与待修改图片，默认单张；明确批量后共用同一资产版本。产品形态筛查、用户基准选择、单格生成与重生、固定格位合并、最多轮次、总请求预算及用户定稿均执行子 Skill 完整主线。
-
-应用本地操作通过 `taobao-ai-ops component run product-reference-replacement ...`；媒体依赖通过精确的 `sealseek-media` Skill 来源和 `taobao-ai-ops component run sealseek-media ...` 调用，保留有序参考、nano-banana-pro、单次一张、dry-run/submit及同task恢复语义。安装与本地预检不授权付费生成。来源、版本或能力不足时保留具体错误并停止相应阶段，修复后回到子节点；完成后返回套件主线第4步保留成果、第6步交付。
-
-组件通过自身安装器生成实体 Skill、完整资源与目标自有运行时；套件和宿主集合均使用该安装合同。普通任务保持选定版本，统一更新由套件或当前宿主集合负责；每个 Agent 只更新自己的环境。独立包后续发布由成员更新流程发现，新增组件须发布套件后才能供已有订阅发现。
