@@ -12,8 +12,8 @@ export async function inspectComponent(id,root){
  const c=config(id),p=JSON.parse(await fs.readFile(path.join(root,'package.json'),'utf8'));
  if(p.name!==c.package)throw fail('COMPONENT_IDENTITY_MISMATCH',`${id}: ${p.name}`);
  const bin=typeof p.bin==='string'?p.bin:p.bin?.[c.bin];
- const entry=c.kind==='application-skill'?null:path.resolve(root,bin||'');
- if(entry&&(!bin||!entry.startsWith(root+path.sep)))throw fail('INVALID_COMPONENT_ENTRY',id);
+ const entry=path.resolve(root,bin||'');
+ if(!bin||!entry.startsWith(root+path.sep)||(await fs.lstat(entry)).isFile()!==true)throw fail('INVALID_COMPONENT_ENTRY',id);
  const {readSources}=await import('./subscription.mjs');
  const sources=Object.fromEntries((await readSources(entry,root,c)).map(s=>[s.name,s.source]));
  return {package:p.name,version:p.version,root:path.resolve(root),entry,sources};

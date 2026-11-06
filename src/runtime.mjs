@@ -47,7 +47,13 @@ export async function doctor(id,mode='excel'){
   const children=await Promise.all(n.requires_skills.map(skill=>doctor(skill,mode)));
   return {ok:checks.every(c=>c.ok)&&children.every(c=>c.ok),package:PACKAGE.name,version:PACKAGE.version,node:n.id,checks,children,native_requirements:children.flatMap(c=>c.native_requirements)};
  }
- if(MANIFEST.components[n.component]?.kind==='application-skill')checks.push({id:'application-node',ok:Number(process.versions.node.split('.')[0])>=22,value:process.version,minimum:'22'});
+ if(MANIFEST.components[n.component]?.kind==='application-skill'){
+  checks.push({id:'application-node',ok:Number(process.versions.node.split('.')[0])>=22,value:process.version,minimum:'22'});
+  const record=componentRecord(n.component);
+  const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:15000,env:{...componentEnvironment(n.component),AGENT_PACKAGE_UPDATE_CHECK:'0'}});
+  let detail;try{detail=JSON.parse(result.stdout);}catch{}
+  checks.push({id:'application-management-runtime',ok:result.status===0&&detail?.ok===true&&detail.package===record.package&&detail.version===record.version&&detail.integrity?.verified===true,value:detail});
+ }
  if(n.python_imports.length&&n.id!=='html-report'){const python=resolvePython(n.python_imports);checks.push({id:'python',ok:Boolean(python),value:python,required_imports:n.python_imports});}
  if(n.id==='html-report'){
   const record=componentRecord(n.component);

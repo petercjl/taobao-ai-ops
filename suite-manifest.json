@@ -592,14 +592,18 @@
       "kind": "application-skill",
       "skills": [
         "product-asset-set"
-      ]
+      ],
+      "bin": "product-asset-set",
+      "skill_installation": "component-managed"
     },
     "product-scene-replacement": {
       "package": "@petercjl/product-scene-replacement",
       "kind": "application-skill",
       "skills": [
         "product-scene-replacement"
-      ]
+      ],
+      "bin": "product-scene-replacement",
+      "skill_installation": "component-managed"
     }
   }
 }

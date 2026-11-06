@@ -16,3 +16,7 @@ for(const n of MANIFEST.nodes){
 for(const profile of Object.keys(MANIFEST.profiles))closure({profile});
 for(const [id,t] of Object.entries(MANIFEST.tools)){if(t.package&&MANIFEST.components[t.component]?.package!==t.package)throw Error('Unknown component tool: '+id);}
 console.log(JSON.stringify({ok:true,package:PACKAGE.name,skills:skills.size,nodes:seen.size,note:'Suite structure; runtime and native Agent checks are separate.'}));
+
+for(const [id,component] of Object.entries(MANIFEST.components)){
+ if(typeof component.bin!=='string'||!component.bin||!Array.isArray(component.skills)||!component.skills.length)throw Error('Component requires its real management bin and logical Skills: '+id);
+}
