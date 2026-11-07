@@ -20,10 +20,12 @@ export async function materializeComponentSkill(record,name,destination){
  if(!target||!commands?.['skill install']?.options?.[target]||!commands?.['skill status']?.options?.[target])throw fail('UNSUPPORTED_COMPONENT_INSTALLER',name);
  const env=Object.fromEntries(Object.entries(process.env).filter(([key])=>!/^npm_package_/i.test(key)&&!/^npm_config_(local_prefix|global|workspace|workspaces|include_workspace_root|dry_run)$/i.test(key)&&key!=='INIT_CWD'));
  const invoke=(command,extra=[])=>{
+  // Copying the full dependency tree can take longer on Windows runners.
+  const timeout=command==='install'?240000:60000;
   const selected=manifest.skills.length>1?['--name',name]:[];
-  const result=spawnSync(process.execPath,[record.entry,'skill',command,'--agent','suite-managed',target,destination,...selected,...extra,'--json'],{cwd,encoding:'utf8',timeout:60000,env:{...env,AGENT_PACKAGE_UPDATE_CHECK:'0',PORTABLE_SKILL_UPDATE_CHECK:'0'}});
+  const result=spawnSync(process.execPath,[record.entry,'skill',command,'--agent','suite-managed',target,destination,...selected,...extra,'--json'],{cwd,encoding:'utf8',timeout,env:{...env,AGENT_PACKAGE_UPDATE_CHECK:'0',PORTABLE_SKILL_UPDATE_CHECK:'0'}});
   let data;try{data=JSON.parse(result.stdout);}catch{}
-  if(result.status!==0||data?.ok!==true)throw fail('COMPONENT_SKILL_INSTALL_FAILED',name,{child:data??result.stderr});
+  if(result.status!==0||data?.ok!==true)throw fail('COMPONENT_SKILL_INSTALL_FAILED',name,{command,child:data??result.stderr,systemCode:result.error?.code});
   return data;
  };
  const owner=commands['skill install'].options['--owner']?['--owner','collection']:[];
