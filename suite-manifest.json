@@ -21,7 +21,8 @@
       "dmp-product-report",
       "portable-skill-creator",
       "product-asset-set",
-      "product-scene-replacement"
+      "product-scene-replacement",
+      "qqdocscli"
     ]
   },
   "nodes": [
@@ -56,7 +57,8 @@
         "dmp-product-report",
         "portable-skill-creator",
         "product-asset-set",
-        "product-scene-replacement"
+        "product-scene-replacement",
+        "qqdocscli"
       ],
       "python_imports": [],
       "scripts": [],
@@ -371,6 +373,17 @@
       "native_requirements": [
         "media.image.inspect"
       ]
+    },
+    {
+      "id": "qqdocscli",
+      "skill": "qqdocscli",
+      "component": "qqdocscli",
+      "stage": "external-document-tools",
+      "method_version": "qqdocscli@0.1",
+      "requires_skills": [],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": []
     }
   ],
   "tools": {
@@ -451,6 +464,11 @@
       "package": "@petercjl/portable-skill-creator",
       "component": "portable-skill-creator",
       "role": "Skill creation, maintenance, portability QA and business-flow run ledger design"
+    },
+    "qqdocscli": {
+      "package": "@petercjl/qqdocscli",
+      "component": "qqdocscli",
+      "role": "Read and edit authorized Tencent Docs"
     }
   },
   "targets": {
@@ -603,6 +621,14 @@
         "product-scene-replacement"
       ],
       "bin": "product-scene-replacement",
+      "skill_installation": "component-managed"
+    },
+    "qqdocscli": {
+      "package": "@petercjl/qqdocscli",
+      "bin": "qqdocscli",
+      "skills": [
+        "qqdocscli"
+      ],
       "skill_installation": "component-managed"
     }
   }

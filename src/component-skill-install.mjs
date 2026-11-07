@@ -27,16 +27,20 @@ export async function materializeComponentSkill(record,name,destination){
   return data;
  };
  const owner=commands['skill install'].options['--owner']?['--owner','collection']:[];
- invoke('install',owner);
+ const installation=invoke('install',owner);
  const data=invoke('status');
  const field=key=>contract.status[key]?.field?.split('.').reduce((value,part)=>value?.[part],data);
  const edited=field('edited'),verification=field('verification'),recovery=field('recovery');
  if(field('package')!==record.package||field('name')!==name||field('version')!==record.version||field('target')!==destination||field('installed')!==true||field('managed')!==true||field('current')!==true||(Array.isArray(edited)?edited.length>0:edited!==false)||verification?.verified!==true||recovery?.required===true)throw fail('COMPONENT_SKILL_INSTALL_FAILED',name,{child:data});
- if(typeof data.entry!=='string'||!data.entry.startsWith(destination+path.sep))throw fail('INVALID_COMPONENT_ENTRY',name);
- const entry=await fs.realpath(data.entry),relative=path.relative(await fs.realpath(destination),entry);
- if(relative.startsWith('..')||path.isAbsolute(relative)||!(await fs.lstat(data.entry)).isFile())throw fail('INVALID_COMPONENT_ENTRY',name);
- const probe=spawnSync(process.execPath,[entry,'version','--json'],{cwd,encoding:'utf8',timeout:15000,env:{...env,AGENT_PACKAGE_UPDATE_CHECK:'0'}});
+ const installedEntry=data.entry??installation.entry;
+ if(typeof installedEntry!=='string'||!installedEntry.startsWith(destination+path.sep))throw fail('INVALID_COMPONENT_ENTRY',name);
+ const entry=await fs.realpath(installedEntry),relative=path.relative(await fs.realpath(destination),entry);
+ if(relative.startsWith('..')||path.isAbsolute(relative)||!(await fs.lstat(installedEntry)).isFile())throw fail('INVALID_COMPONENT_ENTRY',name);
+ const versionContract=manifest.discoveryContract?.version;
+ const versionArgs=versionContract?.argv??['version','--json'];
+ const probe=spawnSync(process.execPath,[entry,...versionArgs],{cwd,encoding:'utf8',timeout:15000,env:{...env,AGENT_PACKAGE_UPDATE_CHECK:'0'}});
  let version;try{version=JSON.parse(probe.stdout);}catch{}
- if(probe.status!==0||version?.package!==record.package||version?.version!==record.version)throw fail('COMPONENT_IDENTITY_MISMATCH',name);
+ const versionField=(key)=> (versionContract?.fields?.[key]?.field??key).split('.').reduce((value,part)=>value?.[part],version);
+ if(probe.status!==0||versionField('package')!==record.package||versionField('version')!==record.version)throw fail('COMPONENT_IDENTITY_MISMATCH',name);
  return {...data,entry};
 }
