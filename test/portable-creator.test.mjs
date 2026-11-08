@@ -37,8 +37,8 @@ test('host-owned collection also materializes the creator runtime through its ac
  const root=await fs.mkdtemp(path.join(os.tmpdir(),'collection-creator-')),previous=MANIFEST.components,npm=process.env.npm_execpath,record=componentRecords()[name];
  try{
   MANIFEST.components={[name]:previous[name]};process.env.npm_execpath='fixture-npm-cli.js';
-  const result=await collectionPrepare({directory:path.join(root,'candidate'),yes:true},{registry:async()=>({ok:true,json:async()=>({name:record.package,version:record.version})}),run:async(command,args)=>{
-   const prefix=args[args.indexOf('--prefix')+1],dest=path.join(prefix,'node_modules',...record.package.split('/'));await fs.mkdir(path.dirname(dest),{recursive:true});await fs.cp(record.root,dest,{recursive:true});return '';
+  const result=await collectionPrepare({directory:path.join(root,'candidate'),yes:true},{registry:async()=>({ok:true,json:async()=>({name:record.package,version:record.version})}),run:async(_command,_args,_timeout,cwd)=>{
+   const dest=path.join(cwd,'node_modules',...record.package.split('/'));await fs.mkdir(path.dirname(dest),{recursive:true});await fs.cp(record.root,dest,{recursive:true});return '';
   }});
   const skill=result.skills.find(s=>s.name===name);assert.ok(skill);assert.equal(JSON.parse(await fs.readFile(path.join(skill.directory,'.collection-runtime.json'))).version,record.version);
   const entry=path.join(skill.directory,'.runtime/bin/portable-skill-creator.mjs');await fs.rm(path.join(root,'candidate/runtime'),{recursive:true});
