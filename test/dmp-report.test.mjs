@@ -32,10 +32,9 @@ test('host-owned report Skill receipt binds the tbcli in the same collection gen
  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'ops-dmp-receipt-')),original=MANIFEST.components,npm=process.env.npm_execpath;
  try{
   MANIFEST.components={tbcli:{package:'@petercjl/tbcli',bin:'tbcli',skills:['tbcli']},[name]:{package:'@petercjl/'+name,bin:name,skills:[name]}};process.env.npm_execpath='fixture-npm-cli.js';
-  const candidate=await collectionPrepare({directory:path.join(dir,'candidate'),yes:true},{registry:async url=>({ok:true,json:async()=>({name:decodeURIComponent(url.split('/').at(-2)),version:'1.0.0'})}),run:async(command,args)=>{
-   const prefix=args[args.indexOf('--prefix')+1];
+  const candidate=await collectionPrepare({directory:path.join(dir,'candidate'),yes:true},{registry:async url=>({ok:true,json:async()=>({name:decodeURIComponent(url.split('/').at(-2)),version:'1.0.0'})}),run:async(_command,_args,_timeout,cwd)=>{
    for(const [id,component] of Object.entries(MANIFEST.components)){
-    const root=path.join(prefix,'node_modules',...component.package.split('/')),skill=path.join(root,'skill',id);await fs.mkdir(skill,{recursive:true});
+    const root=path.join(cwd,'node_modules',...component.package.split('/')),skill=path.join(root,'skill',id);await fs.mkdir(skill,{recursive:true});
     await fs.writeFile(path.join(root,'package.json'),JSON.stringify({name:component.package,version:'1.0.0',type:'module',bin:{[id]:'cli.mjs'}}));await fs.writeFile(path.join(skill,'SKILL.md'),`---\nname: ${id}\ndescription: fixture\n---\n`);
     await fs.writeFile(path.join(root,'cli.mjs'),`import path from 'node:path';import{fileURLToPath}from'node:url';console.log(JSON.stringify({skill:'${id}',source:path.join(path.dirname(fileURLToPath(import.meta.url)),'skill','${id}')}));`);
    }

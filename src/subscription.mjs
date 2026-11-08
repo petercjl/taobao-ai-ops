@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import {constants} from 'node:fs';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
 import {materializeComponentSkill} from './component-skill-install.mjs';
@@ -31,9 +32,9 @@ export async function collectionCheck(previous,registry=fetch,approved=[]){
  return {ok:true,schemaVersion:1,package:PACKAGE.name,version:PACKAGE.version,changed,members};
 }
 export const maintenanceEnvironment=()=>({...process.env,AGENT_PACKAGE_UPDATE_CHECK:'0',TAOBAO_AI_OPS_AUTO_UPDATE:'0',TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0'});
-async function run(command,args,timeout=300000){
+async function run(command,args,timeout=300000,cwd){
  return new Promise((resolve,reject)=>{
-  const child=spawn(command,args,{env:maintenanceEnvironment(),stdio:['ignore','pipe','pipe'],windowsHide:true});
+  const child=spawn(command,args,{cwd,env:maintenanceEnvironment(),stdio:['ignore','pipe','pipe'],windowsHide:true});
   let output='',error='';
   child.stdout.on('data',b=>{output+=b;if(output.length>8_000_000)child.kill();});
   child.stderr.on('data',b=>{error=(error+b).slice(-4000);});
@@ -68,6 +69,40 @@ export async function readSources(entry,root,member){
  for(const name of member.skills)if(!result.some(s=>s.name===name))throw fail('INCOMPLETE_COMPONENT_SOURCES',`${member.package}: ${name}`);
  return result;
 }
+async function runtimeSeed(previousFile, previous, runtime){
+ if(!previousFile||!previous||process.env.SEALWORK_COLLECTION_FRESH_RUNTIME==='1')return;
+ const priorRuntime=path.join(path.dirname(path.resolve(previousFile)),'runtime');
+ const modules=path.join(priorRuntime,'node_modules');
+ const lockFile=path.join(priorRuntime,'package-lock.json');
+ const lock=await fs.readFile(lockFile,'utf8').then(JSON.parse).catch(error=>{
+  if(error.code!=='ENOENT')throw error;
+ });
+ if(lock?.lockfileVersion!==3||!lock.packages?.['']?.dependencies||!(await stat(modules))?.isDirectory())return;
+ for(const member of previous.members){
+  if(lock.packages[`node_modules/${member.package}`]?.version!==member.version)return;
+  const installed=await fs.readFile(within(modules,path.join(modules,member.package,'package.json')),'utf8').then(JSON.parse).catch(error=>{
+   if(error.code!=='ENOENT')throw error;
+  });
+  if(installed?.name!==member.package||installed?.version!==member.version)return;
+ }
+ const candidateModules=path.join(runtime,'node_modules');
+ await fs.cp(modules,candidateModules,{recursive:true,verbatimSymlinks:true,mode:constants.COPYFILE_FICLONE});
+ // Archive aliases on the previous update's loopback gateway have expired.
+ function forgetExpiredGateway(lockfile){
+  for(const entry of Object.values(lockfile.packages??{})){
+   if(typeof entry.resolved==='string'&&/^http:\/\/127\.0\.0\.1:\d+\//.test(entry.resolved))delete entry.resolved;
+  }
+  return JSON.stringify(lockfile);
+ }
+ await fs.writeFile(path.join(runtime,'package-lock.json'),forgetExpiredGateway(lock),{flag:'wx',mode:0o600});
+ const hidden=path.join(candidateModules,'.package-lock.json');
+ if(await stat(hidden)){
+  const lockfile=JSON.parse(await fs.readFile(hidden,'utf8'));
+  await fs.rm(hidden);
+  await fs.writeFile(hidden,forgetExpiredGateway(lockfile),{flag:'wx',mode:0o600});
+ }
+ return Object.fromEntries(previous.members.map(member=>[member.package,member.version]));
+}
 // Creates a whole host-owned candidate. The host alone activates it or deletes it.
 // Ordinary business calls never replace this graph underneath an active task.
 export async function collectionPrepare(opts,services={}){
@@ -83,7 +118,11 @@ export async function collectionPrepare(opts,services={}){
   await fs.mkdir(runtime);await fs.mkdir(skills);
   const npmCli=process.env.npm_execpath;
   if(!npmCli?.endsWith('npm-cli.js'))throw fail('NPM_UNAVAILABLE','Host must supply its managed npm-cli.js in npm_execpath');
-  await (services.run??run)(process.execPath,[npmCli,'install','--prefix',runtime,'--ignore-scripts','--no-audit','--no-fund','--package-lock=true',...plan.members.map(m=>`${m.package}@${m.version}`)],600000);
+  const dependencies=Object.fromEntries(plan.members.map(member=>[member.package,member.version]));
+  const seeded=await runtimeSeed(opts.previous,previous,runtime);
+  await fs.writeFile(path.join(runtime,'package.json'),JSON.stringify({private:true,dependencies}),{flag:'wx',mode:0o600});
+  const changed=Object.keys(seeded??{}).length!==plan.members.length||plan.members.some(member=>seeded?.[member.package]!==member.version);
+  if(changed||!seeded)await (services.run??run)(process.execPath,[npmCli,'install','--ignore-scripts','--save-exact','--no-update-notifier','--no-audit','--no-fund','--package-lock=true'],600000,await fs.realpath(runtime));
   const installed=[],records={};
   async function copySkill(name,source,entry,member){
    if(installed.some(s=>s.name===name))throw fail('DUPLICATE_SKILL',name);
