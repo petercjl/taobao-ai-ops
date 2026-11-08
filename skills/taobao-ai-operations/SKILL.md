@@ -15,6 +15,7 @@ Input: an operator's goal, supplied workbooks or authorized data sources, option
    For a Taobao/Tmall item ID requiring operating, promotion and new/returning-customer analysis, select `dmp-product-report`; its method and standalone report contract are below. Resolve other requested business results with `taobao-ai-ops nodes list --json`. A category/monthly market question uses `category-research`; a search-result workbook and concrete research object use `product-research`. Existing product scope can enter product research directly. If no supported node covers the request, report the missing node.
    An explicit request to use `procli` for project/task information, SOP progression, knowledge reuse or result publication uses `project-management`. Preserve this child's explicit-trigger contract; offering project integration does not authorize service reads or writes. For an authorized project-backed research request, resolve the project and read its task context and compiled Wiki before selecting the business research node. Preserve the target profile, exact project/task identities, observation windows, provenance and unresolved questions in the handoff.
    A supplied analysis or compatible ViewModel requiring a reusable HTML report uses `html-report`, whose exact Skill is `compact-commerce-ui`. It supplies reporting methods, not business conclusions; existing category/product outputs keep their own declared contracts.
+   A Taobao or Tmall product with a target duration and a request for advertising concepts or a complete ad story uses `product-ad-creative-story`.
    A Cloud Hug brand conversion request for supplied detail pages, photography, main KV or SKU images uses `cloud-hug-style-transfer`; its brand-production contract is below.
    A request for product seeding material, including 淘宝天猫搜推, uses `product-seeding-studio`. A product ID plus the request to make 种草素材 is sufficient to route here. Resolve the child in step 3. It uses `tbcli` for buyer-side item lookup, `xhscli` for reference research, `product-asset-set` for product references and `sealseek-media` for generation. Deliver the child’s candidate images, article text and separate review; the user chooses image order and cover.
 
@@ -76,6 +77,12 @@ Before every audio component invocation, the suite checks stable latest, install
 输入输出：关键词/图找货应用接收用户需求和约束，交付 HTML、完整商品 JSON 和查询视觉证据；六类应用接收兼容机会交接文件，交付类别组合报告及 sourcing-candidates.json。只有输入契约实际兼容时才串联上游研究结果，不把其他 JSON 当作机会交接文件。
 
 调用应用用 `taobao-ai-ops component run <component> <arguments...>`，原子查询可用 `taobao-ai-ops tool run 1688cli products search "关键词"`。应用方法和模板由各自 npm 包拥有，独立升级。
+
+## 商品广告创意故事
+
+运行 `taobao-ai-ops doctor --node product-ad-creative-story --json`，再用 `taobao-ai-ops skill source --name product-ad-creative-story --json` 解析并完整加载当前子 Skill。商品取证时同样解析准确名称 `tbcli`，读取当前取证契约，并通过套件的 `tool run tbcli` 调用受管 CLI。按当前买家会话的授权边界获取商品资料。
+
+输入商品链接或平台与商品 ID，以及目标时长。子 Skill 核对商品证据，提出三个创意方向，等用户选定后展开一条完整故事。交付故事、目标时长、商品事实及待验证项，随后返回套件交付。子 Skill 缺失或其来源不可验证时，保留明确的依赖错误。详细节拍和自然时长评估由下游制作流程接手。
 
 ## 抱抱云朵社品牌视觉制作
 

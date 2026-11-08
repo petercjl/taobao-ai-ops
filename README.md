@@ -29,6 +29,7 @@
 - @petercjl/procli：项目 SOP、任务依赖与成果归档，配套 `project-management` Skill。任务卡组织工作，项目 Wiki 积累可复用的证据与结论。
 - @petercjl/sealseek-media-cli：生图、生视频、已有素材贴入及画板操作，配套 `sealseek-media` Skill。应用层负责素材选择与布局；接入不修改宿主的默认生图生视频路由。该组件需要 Node.js >=22。
 - @petercjl/cloud-hug-style-transfer：抱抱云朵社品牌视觉转换，提供完整品牌素材、人物设定、摄影排版方法和效果验收流程。实际生图需要宿主参考图编辑能力。
+- @petercjl/product-ad-creative-story：输入商品链接或平台与商品 ID，以及目标时长。先给三个广告创意方向，用户选定后展开一条完整故事及制作交接稿。
 - @petercjl/product-reference-replacement：可复用产品资产图、单格调整和单张/明确批量场景产品替换；使用独立实体 Skill 与目标自有运行时，生成依赖套件管理的 sealseek-media。
 - @petercjl/product-seeding-studio：按商品制作生活化种草图文，交付八张候选图、整篇文案和独立复盘。
 - @petercjl/xhscli：只读采集小红书笔记及媒体，为种草方向研究提供参考。

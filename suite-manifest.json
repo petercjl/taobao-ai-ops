@@ -23,7 +23,8 @@
       "product-asset-set",
       "product-scene-replacement",
       "qqdocscli",
-      "product-seeding-studio"
+      "product-seeding-studio",
+      "product-ad-creative-story"
     ]
   },
   "nodes": [
@@ -60,7 +61,8 @@
         "product-asset-set",
         "product-scene-replacement",
         "qqdocscli",
-        "product-seeding-studio"
+        "product-seeding-studio",
+        "product-ad-creative-story"
       ],
       "python_imports": [],
       "scripts": [],
@@ -417,6 +419,31 @@
       "native_requirements": [
         "media.image.inspect"
       ]
+    },
+    {
+      "id": "product-ad-creative-story",
+      "skill": "product-ad-creative-story",
+      "component": "product-ad-creative-story",
+      "stage": "visual-production",
+      "method_version": "product-ad-creative-story@0.1",
+      "requires_skills": [
+        "tbcli"
+      ],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": [
+        "media.image.inspect",
+        "command.execute",
+        "artifact.deliver"
+      ],
+      "input_contract": {
+        "product": "Taobao or Tmall product link, or platform and item ID",
+        "target_duration": "User-chosen advertising duration"
+      },
+      "output_contract": {
+        "concepts": "Three distinct advertising concepts, then wait for the user to select one",
+        "story": "One complete story, target duration, product evidence and unresolved production conditions"
+      }
     }
   ],
   "tools": {
@@ -677,6 +704,14 @@
       "bin": "product-seeding-studio",
       "skills": [
         "product-seeding-studio"
+      ],
+      "skill_installation": "component-managed"
+    },
+    "product-ad-creative-story": {
+      "package": "@petercjl/product-ad-creative-story",
+      "bin": "product-ad-creative-story",
+      "skills": [
+        "product-ad-creative-story"
       ],
       "skill_installation": "component-managed"
     }

@@ -9,7 +9,7 @@ export function componentEnvironment(id,env=process.env,records=componentRecords
  let reportEntries={};
  if(id==='dmp-product-report'){if(!records.tbcli?.entry)throw fail('COMPONENT_NOT_INSTALLED','DMP report requires the registered tbcli component');reportEntries={DMP_REPORT_TBCLI_ENTRY:records.tbcli.entry,AGENT_PACKAGE_UPDATE_CHECK:'0'};}
  const canvasEntries=id==='competitor-visual-canvas'?Object.fromEntries([['tbcli','TBCLI_ENTRY'],['sealseek-media','SEALSEEK_MEDIA_ENTRY'],['boardmixcli','BOARDMIXCLI_ENTRY']].filter(([key])=>records[key]?.entry).map(([key,variable])=>[variable,records[key].entry])):{};
- return {...env,...(id==='portable-skill-creator'?{PORTABLE_SKILL_UPDATE_CHECK:'0'}:{}),...canvasEntries,...reportEntries,BOARDMIXCLI_UPDATE_CHECK:'0',TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0',...(id==='cloud-hug-style-transfer'&&media&&!env.CLOUD_HUG_MEDIA_ROOT?{CLOUD_HUG_MEDIA_ROOT:media.root}:{})};
+ return {...env,...(id==='product-ad-creative-story'?{PRODUCT_AD_CREATIVE_STORY_AUTO_UPDATE:'0'}:{}),...(id==='portable-skill-creator'?{PORTABLE_SKILL_UPDATE_CHECK:'0'}:{}),...canvasEntries,...reportEntries,BOARDMIXCLI_UPDATE_CHECK:'0',TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0',...(id==='cloud-hug-style-transfer'&&media&&!env.CLOUD_HUG_MEDIA_ROOT?{CLOUD_HUG_MEDIA_ROOT:media.root}:{})};
 }
 export function pythonEnvironment(env=process.env){
  return {...env,PYTHONUTF8:'1',PYTHONIOENCODING:'utf-8',PYTHONDONTWRITEBYTECODE:'1'};
@@ -125,6 +125,15 @@ export async function doctor(id,mode='excel'){
   checks.push({id:'creator-version',ok:Boolean(supported),value:record.version,minimum:'0.2.1'});
   checks.push({id:'creator-runtime',ok:result.status===0&&detail.ok===true&&detail.package===MANIFEST.components[n.component].package&&detail.version===record.version&&detail.python?.version?.length>=2,value:detail});
  }
+ if(n.component==='product-ad-creative-story'){
+  const record=componentRecord(n.component);
+  const environment=componentEnvironment(n.component);
+  const probe=args=>{const run=spawnSync(process.execPath,[record.entry,...args],{encoding:'utf8',timeout:15000,env:environment});try{return {status:run.status,data:JSON.parse(run.stdout)};}catch{return {status:run.status,data:{ok:false,code:'COMPONENT_PROBE_FAILED'}};}};
+  const version=probe(['version','--json']), local=probe(['doctor','--json']);
+  checks.push({id:'creative-story-version',ok:version.status===0&&version.data.ok===true&&version.data.name===record.package&&version.data.version===record.version,value:version.data.version??null});
+  checks.push({id:'creative-story-runtime',ok:local.status===0&&local.data.ok===true,value:local.data});
+  try{toolEntry('tbcli');checks.push({id:'creative-story-tbcli',ok:true});}catch(e){checks.push({id:'creative-story-tbcli',ok:false,code:e.code,message:e.message});}
+ }
  if(n.component==='competitor-visual-canvas'){
   const record=componentRecord(n.component);
   const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:30000,env:componentEnvironment(n.component)});
@@ -140,5 +149,5 @@ export async function doctor(id,mode='excel'){
  }
  if(!['excel','nas'].includes(mode))throw fail('USAGE','Doctor mode must be excel or nas');
  if(mode==='nas'&&n.id==='category-research')for(const id of ['tbcli','yccli']){try{const tool=toolEntry(id);const r=spawnSync(tool.command,[...tool.args,'--version'],{encoding:'utf8',timeout:15000,env:{...process.env,TBCLI_UPDATE_CHECK:'0'}});checks.push({id,ok:r.status===0,value:r.stdout?.trim()});}catch(e){checks.push({id,ok:false,message:e.message});}}
- return {ok:checks.every(c=>c.ok),package:PACKAGE.name,version:PACKAGE.version,node:n.id,mode,checks,native_requirements:n.native_requirements.map(id=>({id,status:'requires-active-agent-verification'})),service_access:mode==='nas'||n.component==='dmp-product-report'||['procli','sealseek-media','boardmixcli','competitor-visual-canvas','cloud-hug-style-transfer'].includes(n.component)||['1688cli','1688-product-sourcing','1688-opportunity-sourcing-research'].includes(n.component)?'not-probed':'not-required'};
+ return {ok:checks.every(c=>c.ok),package:PACKAGE.name,version:PACKAGE.version,node:n.id,mode,checks,native_requirements:n.native_requirements.map(id=>({id,status:'requires-active-agent-verification'})),service_access:mode==='nas'||n.component==='product-ad-creative-story'||n.component==='dmp-product-report'||['procli','sealseek-media','boardmixcli','competitor-visual-canvas','cloud-hug-style-transfer'].includes(n.component)||['1688cli','1688-product-sourcing','1688-opportunity-sourcing-research'].includes(n.component)?'not-probed':'not-required'};
 }
