@@ -22,7 +22,8 @@
       "portable-skill-creator",
       "product-asset-set",
       "product-scene-replacement",
-      "qqdocscli"
+      "qqdocscli",
+      "product-seeding-studio"
     ]
   },
   "nodes": [
@@ -58,7 +59,8 @@
         "portable-skill-creator",
         "product-asset-set",
         "product-scene-replacement",
-        "qqdocscli"
+        "qqdocscli",
+        "product-seeding-studio"
       ],
       "python_imports": [],
       "scripts": [],
@@ -384,6 +386,37 @@
       "python_imports": [],
       "scripts": [],
       "native_requirements": []
+    },
+    {
+      "id": "xhscli",
+      "skill": "xhscli",
+      "component": "xhscli",
+      "stage": "content-research",
+      "method_version": "xhscli@0.1.1",
+      "requires_skills": [],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": []
+    },
+    {
+      "id": "product-seeding-studio",
+      "skill": "product-seeding-studio",
+      "component": "product-seeding-studio",
+      "stage": "visual-production",
+      "method_version": "product-seeding-studio@0.3.0",
+      "requires_skills": [
+        "tbcli",
+        "xhscli",
+        "sealseek-media",
+        "product-asset-set"
+      ],
+      "python_imports": [
+        "PIL"
+      ],
+      "scripts": [],
+      "native_requirements": [
+        "media.image.inspect"
+      ]
     }
   ],
   "tools": {
@@ -628,6 +661,22 @@
       "bin": "qqdocscli",
       "skills": [
         "qqdocscli"
+      ],
+      "skill_installation": "component-managed"
+    },
+    "xhscli": {
+      "package": "@petercjl/xhscli",
+      "bin": "xhscli",
+      "skills": [
+        "xhscli"
+      ],
+      "skill_installation": "component-managed"
+    },
+    "product-seeding-studio": {
+      "package": "@petercjl/product-seeding-studio",
+      "bin": "product-seeding-studio",
+      "skills": [
+        "product-seeding-studio"
       ],
       "skill_installation": "component-managed"
     }

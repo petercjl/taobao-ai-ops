@@ -1,11 +1,11 @@
 ---
 name: taobao-ai-operations
-description: Route Taobao research, sourcing, Cloud Hug brand visuals and product asset/replacement production to independently managed tools; preserve evidence handoffs and explicit project-management authorization.
+description: Route Taobao research, sourcing, Cloud Hug brand visuals and product asset, replacement and seeding production to independently managed tools; preserve evidence handoffs and explicit project-management authorization.
 ---
 
 # Taobao AI operations
 
-Input: an operator's goal, supplied workbooks or authorized data sources, optional existing research and run directory. Output: the selected node's full deliverables, a versioned run plan and, when requested, an evidence-bound handoff. This suite implements category/product research, sourcing, DMP product operating reports, Cloud Hug brand visual production, product asset boards and scene product replacement, with independently registered media/canvas tools. Other business requests require a matching registered node.
+Input: an operator's goal, supplied workbooks or authorized data sources, optional existing research and run directory. Output: the selected node's full deliverables, a versioned run plan and, when requested, an evidence-bound handoff. This suite implements category/product research, sourcing, DMP product operating reports, Cloud Hug brand visual production, product asset boards, scene product replacement and product seeding content, with independently registered media/canvas tools. Other business requests require a matching registered node.
 
 ## Main line
 
@@ -16,6 +16,8 @@ Input: an operator's goal, supplied workbooks or authorized data sources, option
    An explicit request to use `procli` for project/task information, SOP progression, knowledge reuse or result publication uses `project-management`. Preserve this child's explicit-trigger contract; offering project integration does not authorize service reads or writes. For an authorized project-backed research request, resolve the project and read its task context and compiled Wiki before selecting the business research node. Preserve the target profile, exact project/task identities, observation windows, provenance and unresolved questions in the handoff.
    A supplied analysis or compatible ViewModel requiring a reusable HTML report uses `html-report`, whose exact Skill is `compact-commerce-ui`. It supplies reporting methods, not business conclusions; existing category/product outputs keep their own declared contracts.
    A Cloud Hug brand conversion request for supplied detail pages, photography, main KV or SKU images uses `cloud-hug-style-transfer`; its brand-production contract is below.
+   A request for product seeding material, including 淘宝天猫搜推, uses `product-seeding-studio`. A product ID plus the request to make 种草素材 is sufficient to route here. Resolve the child in step 3. It uses `tbcli` for buyer-side item lookup, `xhscli` for reference research, `product-asset-set` for product references and `sealseek-media` for generation. Deliver the child’s candidate images, article text and separate review; the user chooses image order and cover.
+
    Product photos or detail pages for a reusable image set use `product-asset-set`. An existing asset set plus target scene images uses `product-scene-replacement`. Resolve the exact child Skill in step 3. For scene replacement, resolve the registered `sealseek-media` dependency using the media node below and pass the child Skill’s ordered references, fixed model, and authorization through that entry.
 2. Run `taobao-ai-ops doctor --node NODE --mode excel --json` for local workbooks, or `--mode nas` for live category data. Doctor checks deterministic resources; verify any listed native capabilities in the active Agent before their stage. A missing dependency ends the affected node with its exact error.
 3. Resolve the exact child Skill with `taobao-ai-ops skill source --name SKILL --json`. Read its complete current SKILL.md, load its platform adapter, then follow only the child node's current reference routes. The logical dependencies are `yuce-category-opportunity-report` (method contract `yuce-category-opportunity@2.0`) and `taobao-search-product-form` (imported method `0.1.1`). Their returned artifacts and source hashes are the handoff; resolution or contract failure stops with CAPABILITY_UNAVAILABLE or OUTPUT_CONTRACT_FAILED. Return here at step 4 after the child completes. Naming a Skill alone is not execution.

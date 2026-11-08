@@ -30,6 +30,8 @@
 - @petercjl/sealseek-media-cli：生图、生视频、已有素材贴入及画板操作，配套 `sealseek-media` Skill。应用层负责素材选择与布局；接入不修改宿主的默认生图生视频路由。该组件需要 Node.js >=22。
 - @petercjl/cloud-hug-style-transfer：抱抱云朵社品牌视觉转换，提供完整品牌素材、人物设定、摄影排版方法和效果验收流程。实际生图需要宿主参考图编辑能力。
 - @petercjl/product-reference-replacement：可复用产品资产图、单格调整和单张/明确批量场景产品替换；使用独立实体 Skill 与目标自有运行时，生成依赖套件管理的 sealseek-media。
+- @petercjl/product-seeding-studio：按商品制作生活化种草图文，交付八张候选图、整篇文案和独立复盘。
+- @petercjl/xhscli：只读采集小红书笔记及媒体，为种草方向研究提供参考。
 - taobao-ai-operations：套件自带的管理与业务路由 Skill。
 
 yccli 为取数时按需准备的外部工具，可用 TAOBAO_AI_OPS_YCCLI 指定；Excel 分析不需要 NAS、VPN 或平台登录。账号与授权留在包外，安装不会获得服务权限。

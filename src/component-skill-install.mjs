@@ -34,7 +34,8 @@ export async function materializeComponentSkill(record,name,destination){
  const field=key=>contract.status[key]?.field?.split('.').reduce((value,part)=>value?.[part],data);
  const edited=field('edited'),verification=field('verification'),recovery=field('recovery');
  if(field('package')!==record.package||field('name')!==name||field('version')!==record.version||field('target')!==destination||field('installed')!==true||field('managed')!==true||field('current')!==true||(Array.isArray(edited)?edited.length>0:edited!==false)||verification?.verified!==true||recovery?.required===true)throw fail('COMPONENT_SKILL_INSTALL_FAILED',name,{child:data});
- const installedEntry=data.entry??installation.entry;
+ // runtimeEntry identifies the target-owned file; entry can be the package-relative bin.
+ const installedEntry=data.runtimeEntry??installation.runtimeEntry??data.entry??installation.entry;
  if(typeof installedEntry!=='string'||!installedEntry.startsWith(destination+path.sep))throw fail('INVALID_COMPONENT_ENTRY',name);
  const entry=await fs.realpath(installedEntry),relative=path.relative(await fs.realpath(destination),entry);
  if(relative.startsWith('..')||path.isAbsolute(relative)||!(await fs.lstat(installedEntry)).isFile())throw fail('INVALID_COMPONENT_ENTRY',name);
