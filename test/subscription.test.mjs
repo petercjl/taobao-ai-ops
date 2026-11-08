@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import {spawnSync} from 'node:child_process';
+import {execFile,spawnSync} from 'node:child_process';
+import {createServer} from 'node:http';
+import {promisify} from 'node:util';
 import {MANIFEST,PACKAGE} from '../src/core.mjs';
 import {collectionCheck,collectionPrepare,compatible} from '../src/subscription.mjs';
 
@@ -36,8 +38,8 @@ test('real npm candidate owns complete multi-Skill resources and survives bootst
   const packed=spawnSync(process.execPath,[npmCli,'pack',fixture,'--pack-destination',temp,'--ignore-scripts','--dry-run=false','--json'],{encoding:'utf8',env:Object.fromEntries(Object.entries(process.env).filter(([key])=>!/^npm_config_(dry_run|json|if_present)$/i.test(key)))});assert.equal(packed.status,0,packed.stderr);const archives=(await fs.readdir(temp)).filter(name=>name.endsWith('.tgz'));assert.equal(archives.length,1,packed.stdout);const tgz=path.join(temp,archives[0]);
   MANIFEST.components={fixture:{package:'@suite-test/member',bin:'member',skills:['member-one']}};
   process.env.npm_execpath=npmCli;
-  const prepare=directory=>collectionPrepare({directory,yes:true},{registry,run:async(command,args)=>{
-   const result=spawnSync(command,[...args.slice(0,-1),tgz],{encoding:'utf8'});assert.equal(result.status,0,result.stderr);return result.stdout;
+  const prepare=directory=>collectionPrepare({directory,yes:true},{registry,run:async(command,args,_timeout,cwd)=>{
+   const result=spawnSync(command,[...args,tgz],{encoding:'utf8',cwd});assert.equal(result.status,0,result.stderr);return result.stdout;
   }});
   const discarded=await prepare(path.join(temp,'discarded-host'));
   const candidate=await prepare(path.join(temp,'candidate'));
@@ -61,4 +63,93 @@ test('explicit contract migration updates only selected components and never per
  const migrated=await collectionCheck(first,next,['tbcli','dmp-product-report']);assert.deepEqual(migrated.members.filter(m=>m.explicitMigration).map(m=>m.id).sort(),['dmp-product-report','tbcli']);assert.ok(migrated.members.filter(m=>!m.explicitMigration).every(m=>m.blocked&&m.version==='1.0.0'));
  const downgraded=await collectionCheck(migrated,registry,['tbcli','dmp-product-report']);assert.ok(downgraded.members.filter(m=>['tbcli','dmp-product-report'].includes(m.id)).every(m=>m.blocked&&m.version==='2.0.0'));
  await assert.rejects(collectionCheck(first,next,['unknown-component']),e=>e.code==='UNKNOWN_COMPONENT');
+});
+
+test('incremental candidate keeps unchanged dependencies through a new registry gateway',async()=>{
+ const temp=await fs.mkdtemp(path.join(os.tmpdir(),'suite-incremental-'));
+ const original=MANIFEST.components,npmEnv=process.env.npm_execpath;
+ const servers=[];
+ const freshEnv=process.env.SEALWORK_COLLECTION_FRESH_RUNTIME;
+ try{
+  let npmCli=npmEnv;
+  if(!npmCli?.endsWith('npm-cli.js')){
+   const found=spawnSync(process.platform==='win32'?'where':'which',[process.platform==='win32'?'npm.cmd':'npm'],{encoding:'utf8'}).stdout.trim().split(/\r?\n/)[0];
+   npmCli=process.platform==='win32'?path.join(path.dirname(found),'node_modules','npm','bin','npm-cli.js'):await fs.realpath(found);
+  }
+  process.env.npm_execpath=npmCli;
+  const exec=promisify(execFile);
+  const archives=new Map();
+  for(const [name,version] of [['first','1.0.0'],['first','1.0.1'],['second','1.0.0'],['added','1.0.0'],['shared','1.0.0']]){
+   const fixture=path.join(temp,`${name}-${version}`);
+   await fs.mkdir(fixture);
+   const pkg={name,version,type:'module',...(name==='shared'?{}:{bin:{[name]:'cli.mjs'},dependencies:{shared:'^1.0.0'}})};
+   await fs.writeFile(path.join(fixture,'package.json'),JSON.stringify(pkg));
+   if(name!=='shared'){
+    await fs.mkdir(path.join(fixture,'skill'));
+    await fs.writeFile(path.join(fixture,'skill','SKILL.md'),`---\nname: ${name}-skill\ndescription: fixture\n---\n`);
+    await fs.writeFile(path.join(fixture,'cli.mjs'),`import {fileURLToPath} from 'node:url'; console.log(JSON.stringify({source:fileURLToPath(new URL('./skill',import.meta.url))}));`);
+   }
+   await exec(process.execPath,[npmCli,'pack',fixture,'--pack-destination',temp,'--ignore-scripts']);
+   archives.set(`${name}-${version}`,{pkg,bytes:await fs.readFile(path.join(temp,`${name}-${version}.tgz`))});
+  }
+  async function gateway(){
+   const requests=[];
+   const server=createServer((req,res)=>{
+    requests.push(req.url);
+    if(req.url.endsWith('.tgz')){
+     const entry=archives.get(req.url.slice(1,-4));
+     if(!entry){res.writeHead(404).end();return;}
+     res.end(entry.bytes);return;
+    }
+    const name=req.url.slice(1);
+    const versions=Object.fromEntries([...archives.values()].filter(e=>e.pkg.name===name).map(e=>[e.pkg.version,{...e.pkg,dist:{tarball:`${base}${name}-${e.pkg.version}.tgz`}}]));
+    if(!Object.keys(versions).length){res.writeHead(404).end();return;}
+    res.end(JSON.stringify({name,'dist-tags':{latest:Object.keys(versions).at(-1)},versions}));
+   });
+   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+   servers.push(server);
+   const base=`http://127.0.0.1:${server.address().port}/`;
+   return {base,requests};
+  }
+  const prepare=(name,source,firstVersion,previous)=>collectionPrepare({directory:path.join(temp,name),yes:true,previous},{
+   registry:async url=>({ok:true,json:async()=>{const name=decodeURIComponent(url.split('/').at(-2));return {name,version:name==='first'?firstVersion:'1.0.0'};}}),
+   run:async(command,args,_timeout,cwd)=>(await exec(command,[...args,'--registry',source.base,'--cache',path.join(temp,`cache-${name}`)],{cwd})).stdout,
+  });
+  MANIFEST.components={first:{package:'first',bin:'first',skills:['first-skill']},second:{package:'second',bin:'second',skills:['second-skill']}};
+  const originalGateway=await gateway();
+  await prepare('original',originalGateway,'1.0.0');
+  originalGateway.requests.length=0;
+  const previous=path.join(temp,'original','collection.json');
+  const nextGateway=await gateway();
+  const candidate=await prepare('incremental',nextGateway,'1.0.1',previous);
+  assert.deepEqual(candidate.members.map(m=>m.version),['1.0.1','1.0.0']);
+  assert.ok(nextGateway.requests.includes('/first-1.0.1.tgz'),nextGateway.requests.join(', '));
+  assert.ok(!nextGateway.requests.some(url=>/^\/(second|shared)(?:[/-]|$)/.test(url)),nextGateway.requests.join(', '));
+  assert.deepEqual(originalGateway.requests,[]);
+  const originalSecond=path.join(temp,'original','runtime','node_modules','second','cli.mjs');
+  const nextSecond=path.join(temp,'incremental','runtime','node_modules','second','cli.mjs');
+  assert.notEqual((await fs.stat(originalSecond)).ino,(await fs.stat(nextSecond)).ino);
+  const unchangedGateway=await gateway();
+  await prepare('unchanged',unchangedGateway,'1.0.1',path.join(temp,'incremental','collection.json'));
+  assert.deepEqual(unchangedGateway.requests,[]);
+  delete MANIFEST.components.first;
+  MANIFEST.components.added={package:'added',bin:'added',skills:['added-skill']};
+  const changedGateway=await gateway();
+  const nextPrevious=path.join(temp,'incremental','collection.json');
+  const changed=await prepare('changed',changedGateway,'1.0.1',nextPrevious);
+  assert.deepEqual(changed.members.map(m=>m.package),['second','added']);
+  assert.ok(changedGateway.requests.includes('/added-1.0.0.tgz'));
+  assert.ok(!changedGateway.requests.some(url=>/^\/(first|second|shared)(?:[/-]|$)/.test(url)),changedGateway.requests.join(', '));
+  await assert.rejects(fs.stat(path.join(temp,'changed','runtime','node_modules','first')),{code:'ENOENT'});
+  process.env.SEALWORK_COLLECTION_FRESH_RUNTIME='1';
+  const repairGateway=await gateway();
+  await prepare('repair',repairGateway,'1.0.1',path.join(temp,'changed','collection.json'));
+  assert.ok(repairGateway.requests.includes('/second-1.0.0.tgz'));
+ }finally{
+  if(freshEnv===undefined)delete process.env.SEALWORK_COLLECTION_FRESH_RUNTIME;else process.env.SEALWORK_COLLECTION_FRESH_RUNTIME=freshEnv;
+  for(const server of servers){server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
+  MANIFEST.components=original;
+  if(npmEnv===undefined)delete process.env.npm_execpath;else process.env.npm_execpath=npmEnv;
+  await fs.rm(temp,{recursive:true,force:true});
+ }
 });
