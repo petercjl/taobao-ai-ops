@@ -24,7 +24,8 @@
       "product-scene-replacement",
       "qqdocscli",
       "product-seeding-studio",
-      "product-ad-creative-story"
+      "product-ad-creative-story",
+      "xiaohongshu-photo-style"
     ]
   },
   "nodes": [
@@ -62,7 +63,8 @@
         "product-scene-replacement",
         "qqdocscli",
         "product-seeding-studio",
-        "product-ad-creative-story"
+        "product-ad-creative-story",
+        "xiaohongshu-photo-style"
       ],
       "python_imports": [],
       "scripts": [],
@@ -444,6 +446,28 @@
         "concepts": "Three distinct advertising concepts, then wait for the user to select one",
         "story": "One complete story, target duration, product evidence and unresolved production conditions"
       }
+    },
+    {
+      "id": "xiaohongshu-photo-style",
+      "skill": "xiaohongshu-photo-style",
+      "component": "xiaohongshu-photo-style",
+      "stage": "visual-production",
+      "method_version": "xiaohongshu-photo-style@0.1",
+      "requires_skills": [],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": [
+        "media.image.inspect",
+        "command.execute",
+        "filesystem.artifacts",
+        "photocraft-own"
+      ],
+      "input_contract": {
+        "images": "Existing photo or ordered product-seeding image set"
+      },
+      "output_contract": {
+        "images": "Edited PNG files in input order with consistent color and lettering; editable PSD on request"
+      }
     }
   ],
   "tools": {
@@ -712,6 +736,14 @@
       "bin": "product-ad-creative-story",
       "skills": [
         "product-ad-creative-story"
+      ],
+      "skill_installation": "component-managed"
+    },
+    "xiaohongshu-photo-style": {
+      "package": "@petercjl/xiaohongshu-photo-style",
+      "bin": "xiaohongshu-photo-style",
+      "skills": [
+        "xiaohongshu-photo-style"
       ],
       "skill_installation": "component-managed"
     }

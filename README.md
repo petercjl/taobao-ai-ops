@@ -32,6 +32,7 @@
 - @petercjl/product-ad-creative-story：输入商品链接或平台与商品 ID，以及目标时长。先给三个广告创意方向，用户选定后展开一条完整故事及制作交接稿。
 - @petercjl/product-reference-replacement：可复用产品资产图、单格调整和单张/明确批量场景产品替换；使用独立实体 Skill 与目标自有运行时，生成依赖套件管理的 sealseek-media。
 - @petercjl/product-seeding-studio：按商品制作生活化种草图文，交付八张候选图、整篇文案和独立复盘。
+- @petercjl/xiaohongshu-photo-style：一次性编辑其他 AI 工具生成的种草套图，统一调色和花字。图片编辑依赖本机 @petercjl/photocraft-own 及其配套 Skill。
 - @petercjl/xhscli：只读采集小红书笔记及媒体，为种草方向研究提供参考。
 - taobao-ai-operations：套件自带的管理与业务路由 Skill。
 

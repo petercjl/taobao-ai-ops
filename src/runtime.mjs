@@ -125,6 +125,12 @@ export async function doctor(id,mode='excel'){
   checks.push({id:'creator-version',ok:Boolean(supported),value:record.version,minimum:'0.2.1'});
   checks.push({id:'creator-runtime',ok:result.status===0&&detail.ok===true&&detail.package===MANIFEST.components[n.component].package&&detail.version===record.version&&detail.python?.version?.length>=2,value:detail});
  }
+ if(n.component==='xiaohongshu-photo-style'){
+  const record=componentRecord(n.component);
+  const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:15000,env:componentEnvironment(n.component)});
+  let detail;try{detail=JSON.parse(result.stdout);}catch{}
+  checks.push({id:'photo-style-package',ok:result.status===0&&detail?.ok===true&&detail.package===record.package&&detail.version===record.version&&detail.integrity===true,value:detail});
+ }
  if(n.component==='product-ad-creative-story'){
   const record=componentRecord(n.component);
   const environment=componentEnvironment(n.component);
