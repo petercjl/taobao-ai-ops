@@ -1,6 +1,6 @@
 ---
 name: taobao-ai-operations
-description: Route Taobao research, sourcing, Cloud Hug brand visuals and product asset/replacement production to independently managed tools; preserve evidence handoffs and explicit project-management authorization.
+description: Route Taobao research, sourcing, Cloud Hug brand visuals and product asset/replacement production and cushion ad videos to independently managed tools; preserve evidence handoffs and explicit project-management authorization.
 ---
 
 # Taobao AI operations
@@ -132,3 +132,8 @@ For explicit Boardmix file, media or object operations, select `boardmix-tools`.
 应用本地操作通过 `taobao-ai-ops component run product-reference-replacement ...`；媒体依赖通过精确的 `sealseek-media` Skill 来源和 `taobao-ai-ops component run sealseek-media ...` 调用，保留有序参考、nano-banana-pro、单次一张、dry-run/submit及同task恢复语义。安装与本地预检不授权付费生成。来源、版本或能力不足时保留具体错误并停止相应阶段，修复后回到子节点；完成后返回套件主线第4步保留成果、第6步交付。
 
 组件通过自身安装器生成实体 Skill、完整资源与目标自有运行时；套件和宿主集合均使用该安装合同。普通任务保持选定版本，统一更新由套件或当前宿主集合负责；每个 Agent 只更新自己的环境。独立包后续发布由成员更新流程发现，新增组件须发布套件后才能供已有订阅发现。
+
+
+## Cushion ad video
+
+For “抱枕搜推广告视频” or a request to make an ad from cushion images, select the independent `pillow-ad-video` node. Resolve `taobao-ai-ops skill source --name pillow-ad-video --json` and read its complete current SKILL.md, then use `taobao-ai-ops component run pillow-ad-video ...` for package management discovery. Input is one or more cushion images, optional user-selected 9:16 or 16:9 and existing run context. The child owns reference selection, storyboard, prompt, generation, acceptance, publication copy and its six-stage attempt ledger. It resolves the external seedance-video dependency and preserves paid-generation authorization and recovery rules. Default aspect ratio is 9:16. Return to main-line step 6 with the MP4, copy and actual acceptance limits. Missing service access retains the child's explicit dependency error.

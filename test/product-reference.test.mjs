@@ -97,7 +97,7 @@ test('component installer creates physical independent runtimes; repeat, edits a
 test('host collection points product Skill at its own runtime after bootstrap runtime removal',()=>fixture(async({root,product})=>{
  const previous=MANIFEST.components,npm=process.env.npm_execpath;
  try{
-  MANIFEST.components={[name]:previous[name]};process.env.npm_execpath='fixture-npm-cli.js';
+  MANIFEST.components={[name]:previous[name]};process.env.npm_execpath=npm;
   const result=await collectionPrepare({directory:path.join(root,'candidate'),yes:true},{registry:async()=>({ok:true,json:async()=>({name:product.package,version:product.version})}),run:async(command,args)=>{
    const prefix=args[args.indexOf('--prefix')+1],dest=path.join(prefix,'node_modules',...product.package.split('/'));await fs.mkdir(path.dirname(dest),{recursive:true});await fs.cp(product.root,dest,{recursive:true});return '';
   }});

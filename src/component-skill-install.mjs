@@ -6,7 +6,8 @@ import {fail} from './core.mjs';
 // The suite owns selection/transaction recovery; the component owns its installation contract.
 export async function materializeComponentSkill(record,name,destination){
  const product=name==='product-reference-replacement'&&record.package==='@petercjl/product-reference-replacement';
- if(!product&&(name!=='portable-skill-creator'||record.package!=='@petercjl/portable-skill-creator'))throw fail('UNSUPPORTED_COMPONENT_INSTALLER',name);
+ const pillow=name==='pillow-ad-video'&&record.package==='@petercjl/pillow-ad-video';
+ if(!product&&!pillow&&(name!=='portable-skill-creator'||record.package!=='@petercjl/portable-skill-creator'))throw fail('UNSUPPORTED_COMPONENT_INSTALLER',name);
  destination=path.join(await fs.realpath(path.dirname(destination)),path.basename(destination));
  try{const existing=await fs.readdir(destination);if(existing.length)throw fail('UNMANAGED_TARGET','Component destination must be absent or an empty suite stage');await fs.rmdir(destination);}catch(e){if(e.code!=='ENOENT')throw e;}
  // npm must resolve package context from the owning component, not its caller.
@@ -25,6 +26,6 @@ export async function materializeComponentSkill(record,name,destination){
   return {...verified,runtimeEntry};
  }
  if(result.status!==0||data?.ok!==true||data.package!==record.package||data.name!==name||data.version!==record.version||data.current!==true||data.verification?.verified!==true)throw fail('COMPONENT_SKILL_INSTALL_FAILED',name,{child:data??result.stderr});
- await fs.access(path.join(destination,'.runtime','bin','portable-skill-creator.mjs'));
+ await fs.access(path.join(destination,'.runtime','bin',name+'.mjs'));
  return data;
 }

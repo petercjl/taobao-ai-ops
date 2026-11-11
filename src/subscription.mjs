@@ -86,7 +86,7 @@ export async function collectionPrepare(opts,services={}){
   async function copySkill(name,source,entry,member){
    if(installed.some(s=>s.name===name))throw fail('DUPLICATE_SKILL',name);
    const destination=path.join(skills,name);await fileHashes(source);if(MANIFEST.components[member.id]?.skill_installation==='component-managed')await materializeComponentSkill({entry,package:member.package,version:member.version},name,destination);else await fs.cp(source,destination,{recursive:true,dereference:true});
-   const runtimeEntry=member.id==='product-reference-replacement'?path.join(destination,'.runtime','bin','product-reference-replacement.mjs'):entry;
+   const runtimeEntry=['product-reference-replacement','pillow-ad-video'].includes(member.id)?path.join(destination,'.runtime','bin',member.bin+'.mjs'):entry;
    installed.push({name,package:member.package,version:member.version,source,directory:destination,runtimeEntry});
   }
   for(const member of plan.members){
