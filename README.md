@@ -130,3 +130,5 @@ Each component is an independent `@petercjl` npm package with its own canonical 
 `npm test` 默认在独立临时目录安装正式组件并运行全量测试，成功后清理，不读取或修改日常使用的组件状态和 Agent Skill 目录。已有独立 QA 环境可通过 `TAOBAO_AI_OPS_TEST_STATE_DIR` 指定其状态目录；执行测试前会核验完整组件清单、实际包名和版本、真实 CLI 入口。缺失组件或版本漂移会明确失败，按组件安装流程准备环境后再运行。
 
 CI 在各自 runner 的临时状态目录中准备完整组件，并让单元、安装恢复和业务合同检查共用同一版本集合。服务授权和实际生图质量验证另行记录；测试环境准备不授权登录或付费生成。
+
+抱枕搜推广告视频由独立组件 `@petercjl/pillow-ad-video` 提供，默认 9:16。使用时向当前 Agent 发送「把我附上的抱枕图片做成一条搜推广告视频。」

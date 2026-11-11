@@ -132,3 +132,8 @@ For explicit Boardmix file, media or object operations, select `boardmix-tools`.
 规范来源在组件npm包内，可使用 `taobao-ai-ops component run portable-skill-creator ...` 运行其实际CLI；本机受管安装副本带有自身 `.runtime`。输入是本次创建/维护意图、可选自然语言流程或脑图、既有资源与知识；输出是子Skill约定的规划、完整资源和验证证据。尊重子Skill当前的规划确认、隐私、独立回归授权和失败恢复规则；来源或能力缺失时停止相应阶段并保留原错误。完成后回到套件主线第4步保留成果、第6步交付。
 
 套件只登记并管理独立组件，普通业务调用保持已安装版本；用户显式更新时获取正式latest。台账按用户熟悉的业务流程图展示。基础Skill创建器仍由当前宿主动态提供。
+
+
+## Cushion ad video
+
+For “抱枕搜推广告视频” or a request to make an ad from cushion images, select the independent `pillow-ad-video` node. Resolve `taobao-ai-ops skill source --name pillow-ad-video --json` and read its complete current SKILL.md, then use `taobao-ai-ops component run pillow-ad-video ...` for package management discovery. Input is one or more cushion images, optional user-selected 9:16 or 16:9 and existing run context. The child owns reference selection, storyboard, prompt, generation, acceptance, publication copy and its six-stage attempt ledger. It resolves the external seedance-video dependency and preserves paid-generation authorization and recovery rules. Default aspect ratio is 9:16. Return to main-line step 6 with the MP4, copy and actual acceptance limits. Missing service access retains the child's explicit dependency error.

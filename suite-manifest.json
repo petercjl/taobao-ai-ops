@@ -25,7 +25,8 @@
       "qqdocscli",
       "product-seeding-studio",
       "product-ad-creative-story",
-      "xiaohongshu-photo-style"
+      "xiaohongshu-photo-style",
+      "pillow-ad-video"
     ]
   },
   "nodes": [
@@ -64,7 +65,8 @@
         "qqdocscli",
         "product-seeding-studio",
         "product-ad-creative-story",
-        "xiaohongshu-photo-style"
+        "xiaohongshu-photo-style",
+        "pillow-ad-video"
       ],
       "python_imports": [],
       "scripts": [],
@@ -468,6 +470,41 @@
       "output_contract": {
         "images": "Edited PNG files in input order with consistent color and lettering; editable PSD on request"
       }
+    },
+    {
+      "id": "pillow-ad-video",
+      "skill": "pillow-ad-video",
+      "component": "pillow-ad-video",
+      "stage": "product-ad-video",
+      "method_version": "pillow-ad-video@0.1",
+      "requires_skills": [],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": [
+        "media.image.inspect",
+        "media.video.inspect"
+      ],
+      "input_contract": {
+        "required": [
+          "One or more cushion reference images"
+        ],
+        "optional": [
+          "9:16 or 16:9 aspect ratio",
+          "existing run directory"
+        ]
+      },
+      "output_contract": {
+        "video": "MP4 with scene-matched music",
+        "copy": "Search/recommendation title and description",
+        "state": "Child-owned six-stage ledger with attempt history"
+      },
+      "required_component_contracts": {
+        "pillow-ad-video": "0.1.0+; physical Skill installation and source discovery"
+      },
+      "external_dependencies": [
+        "seedance-video Skill and configured seedancecli provider"
+      ],
+      "contract_resolution": "Load the complete current child Skill through named source discovery, discover its CLI, and preserve generation authorization and task recovery."
     }
   ],
   "tools": {
@@ -744,6 +781,14 @@
       "bin": "xiaohongshu-photo-style",
       "skills": [
         "xiaohongshu-photo-style"
+      ],
+      "skill_installation": "component-managed"
+    },
+    "pillow-ad-video": {
+      "package": "@petercjl/pillow-ad-video",
+      "bin": "pillow-ad-video",
+      "skills": [
+        "pillow-ad-video"
       ],
       "skill_installation": "component-managed"
     }
