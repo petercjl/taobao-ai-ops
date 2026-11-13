@@ -1,9 +1,13 @@
 import {spawnSync} from 'node:child_process';
 import {doctor} from '../src/runtime.mjs';
-import {componentRecord} from '../src/core.mjs';
+import {componentRecord,MANIFEST,nodeFor} from '../src/core.mjs';
 const d=await doctor();
 // CI has no private 1688 provider or credentials. Verify installed contracts, while local doctor reports service readiness separately.
-for(const child of d.children)if(!child.checks.filter(c=>c.id!=='1688-component-runtime').every(c=>c.ok))throw Error('Research dependency smoke failed: '+child.node);
+for(const child of d.children){
+ const expected=nodeFor(child.node).unavailable_dependencies||[];
+ if(expected.length){if(child.ok!==false||child.checks.length!==expected.length||!child.checks.every(c=>c.code==='DEPENDENCY_RETIRED'&&expected.some(d=>d.package===c.package)))throw Error('Retired dependency must stop before business execution: '+child.node);continue;}
+ if(!child.checks.filter(c=>c.id!=='1688-component-runtime').every(c=>c.ok))throw Error('Research dependency smoke failed: '+child.node);
+}
 for(const id of ['1688cli','1688-product-sourcing','1688-opportunity-sourcing-research']){
  const r=spawnSync(process.execPath,[componentRecord(id).entry,'capabilities','--json'],{encoding:'utf8'});
  if(r.status!==0)throw Error('1688 component contract unavailable: '+id);

@@ -27,16 +27,21 @@
 - @petercjl/sycmcli：店铺经营数据工具，含其独立 Skill。
 - @petercjl/commerce-ui：通用 HTML 报告 Skill、模板、渲染与校验。调用 `taobao-ai-ops component run html-report ...`；Python 依赖不足时通过该入口执行 `runtime install --yes`。
 - @petercjl/procli：项目 SOP、任务依赖与成果归档，配套 `project-management` Skill。任务卡组织工作，项目 Wiki 积累可复用的证据与结论。
-- @petercjl/sealseek-media-cli：生图、生视频、已有素材贴入及画板操作，配套 `sealseek-media` Skill。应用层负责素材选择与布局；接入不修改宿主的默认生图生视频路由。该组件需要 Node.js >=22。
 - @petercjl/cloud-hug-style-transfer：抱抱云朵社品牌视觉转换，提供完整品牌素材、人物设定、摄影排版方法和效果验收流程。实际生图需要宿主参考图编辑能力。
 - @petercjl/product-ad-creative-story：输入商品链接或平台与商品 ID，以及目标时长。先给三个广告创意方向，用户选定后展开一条完整故事及制作交接稿。
-- @petercjl/product-reference-replacement：可复用产品资产图、单格调整和单张/明确批量场景产品替换；使用独立实体 Skill 与目标自有运行时，生成依赖套件管理的 sealseek-media。
+- @petercjl/product-reference-replacement：可复用产品资产图、单格调整和单张/明确批量场景产品替换；使用独立实体 Skill 与目标自有运行时，相关生成依赖状态以节点预检为准。
 - @petercjl/product-seeding-studio：按商品制作生活化种草图文，交付八张候选图、整篇文案和独立复盘。
 - @petercjl/xiaohongshu-photo-style：一次性编辑其他 AI 工具生成的种草套图，统一调色和花字。图片编辑依赖本机 @petercjl/photocraft-own 及其配套 Skill。
 - @petercjl/xhscli：只读采集小红书笔记及媒体，为种草方向研究提供参考。
 - taobao-ai-operations：套件自带的管理与业务路由 Skill。
 
 yccli 为取数时按需准备的外部工具，可用 TAOBAO_AI_OPS_YCCLI 指定；Excel 分析不需要 NAS、VPN 或平台登录。账号与授权留在包外，安装不会获得服务权限。
+
+## 媒体依赖状态
+
+套件保留竞品视觉采集、抱抱云朵社风格转换、产品场景替换和种草工作室四个应用。其旧媒体依赖在注册表中标记为 `DEPENDENCY_RETIRED`；相关生成或画板业务等待各应用完成依赖迁移。套件继续安装这些应用的 Skill，版本、来源和本地资源仍可查询。套件安装与更新只解析当前注册的组件。
+
+`competitor-visual-canvas@0.1.7` 的独立 npm 包仍声明 `@petercjl/sealseek-media-cli` 依赖，因此会带入一份嵌套副本。彻底移除这份间接依赖由竞品视觉包的后续独立发布完成；该副本不作为套件可调用的媒体组件。
 
 ## 项目主线与知识复用
 
@@ -60,8 +65,6 @@ taobao-ai-ops components check --json
 taobao-ai-ops skill source --name yuce-category-opportunity-report --json
 taobao-ai-ops script category-research build_report.py --help
 taobao-ai-ops tool run tbcli capabilities --json
-taobao-ai-ops skill source --name sealseek-media --json
-taobao-ai-ops component run sealseek-media capabilities --json
 ```
 
 维护者分别发布各能力包的正式 latest。新增/移除组件或调整管理机制时才发布套件。源码开发可通过 components register --name ID --path CHECKOUT --yes 注册独立组件；开发记录由 Git 管理，不会被注册表更新覆盖。已安装 npm 组件的显式接入可加 --mode npm。源码套件自身通过 Git 更新。

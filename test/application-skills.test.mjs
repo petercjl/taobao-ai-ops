@@ -19,12 +19,12 @@ test('the suite resolves and physically installs the published application Skill
   assert.equal((await fs.lstat(script)).isSymbolicLink(),false);
   assert.equal(await fs.readFile(script,'utf8'),await fs.readFile(path.join(record.sources[name],'scripts','asset-guide.mjs'),'utf8'));
  }
- assert.ok(closure({name:'product-scene-replacement'}).some(node=>node.skill==='sealseek-media'));
+ assert.equal(closure({name:'product-scene-replacement'}).some(node=>node.skill==='sealseek-media'),false);
  const seeding=componentRecord('product-seeding-studio');
  assert.equal((await inspectComponent('product-seeding-studio',seeding.root)).entry,seeding.entry);
  assert.ok(closure({profile:'research'}).some(node=>node.skill==='product-seeding-studio'));
  const dependencies=closure({name:'product-seeding-studio'}).map(node=>node.skill);
- for(const name of ['tbcli','xhscli','sealseek-media','product-asset-set'])assert.ok(dependencies.includes(name));
+ for(const name of ['tbcli','xhscli','product-asset-set'])assert.ok(dependencies.includes(name));
  await install({name:'product-seeding-studio',targetDir:root,mode:'copy'});
  const workflow=path.join(root,'product-seeding-studio','scripts','creative_run.py');
  assert.equal((await fs.lstat(workflow)).isSymbolicLink(),false);

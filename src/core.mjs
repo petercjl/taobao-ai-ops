@@ -13,7 +13,7 @@ export const stat=p=>fs.lstat(p).catch(e=>{if(e.code==='ENOENT')return null;thro
 export const hash=data=>createHash('sha256').update(data).digest('hex');
 export function nodeFor(id){const n=MANIFEST.nodes.find(n=>n.id===id||n.skill===id);if(!n)throw fail('UNKNOWN_NODE',`Unknown node: ${id}`);return n;}
 export function componentRecords(){const file=path.join(stateRoot(),'components.json');const records=existsSync(file)?JSON.parse(readFileSync(file,'utf8')).components||{}:{};return Object.fromEntries(Object.entries(records).filter(([id])=>Object.hasOwn(MANIFEST.components,id)));}
-export function componentRecord(id){const r=componentRecords()[id];if(!r)throw fail('COMPONENT_NOT_INSTALLED',`Install registered component ${id} with components install`);return r;}
+export function componentRecord(id){if(MANIFEST.retired_components?.[id])throw fail('COMPONENT_RETIRED',`Component ${id} is retired`,MANIFEST.retired_components[id]);const r=componentRecords()[id];if(!r)throw fail('COMPONENT_NOT_INSTALLED',`Install registered component ${id} with components install`);return r;}
 export const source=n=>n.component?componentRecord(n.component).sources[n.skill]||(()=>{throw fail('SKILL_SOURCE_MISSING',n.skill);})():path.join(ROOT,'skills',n.skill);
 export const nodeVersion=n=>n.component?componentRecord(n.component).version:PACKAGE.version;
 export function stateRoot(){return process.env.TAOBAO_AI_OPS_STATE_DIR||path.join(os.homedir(),'.local','state','taobao-ai-ops');}
@@ -30,6 +30,7 @@ export async function fileHashes(root,rel=''){
 }
 export const digest=files=>hash(JSON.stringify(files));
 export function closure(opts={}){
+ if(opts.owned)return MANIFEST.nodes.filter(n=>!n.component);
  const selected=opts.name?[nodeFor(opts.name)]:opts.node?[nodeFor(opts.node)]:MANIFEST.profiles[opts.profile||'research']?.map(nodeFor);
  if(!selected)throw fail('UNKNOWN_PROFILE',`Unknown profile: ${opts.profile}`);
  const names=new Set();function visit(n){if(names.has(n.skill))return;names.add(n.skill);for(const dep of n.requires_skills)visit(nodeFor(dep));}selected.forEach(visit);

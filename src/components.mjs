@@ -6,7 +6,7 @@ import {MANIFEST,PACKAGE,stateRoot,componentRecords,fail,stat} from './core.mjs'
 import {install} from './skill-manager.mjs';
 import {npm} from './update.mjs';
 
-const config=id=>{const c=MANIFEST.components[id];if(!c)throw fail('UNKNOWN_COMPONENT',id);return c;};
+const config=id=>{if(MANIFEST.retired_components?.[id])throw fail('COMPONENT_RETIRED',id,MANIFEST.retired_components[id]);const c=MANIFEST.components[id];if(!c)throw fail('UNKNOWN_COMPONENT',id);return c;};
 export async function inspectComponent(id,root){
  root=await fs.realpath(root);
  const c=config(id),p=JSON.parse(await fs.readFile(path.join(root,'package.json'),'utf8'));

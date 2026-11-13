@@ -29,7 +29,8 @@
     "!skills/**/.install-meta.json",
     "sealwork.collection.json",
     "INSTALL.md",
-    "UPDATE.md"
+    "UPDATE.md",
+    "capabilities.json"
   ],
   "publishConfig": {
     "access": "public",
@@ -39,6 +40,7 @@
     "test": "node scripts/run-tests.mjs",
     "test:business": "node scripts/test-business.mjs",
     "check": "node scripts/validate-suite.mjs",
-    "prepack": "npm run check"
+    "prepack": "npm run check",
+    "test:upgrade": "node scripts/test-upgrade-compat.mjs"
   }
 }

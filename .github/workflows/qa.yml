@@ -23,5 +23,6 @@ jobs:
       - run: npm run check
       - run: node bin/taobao-ai-ops.mjs components install --target-dir .qa-skills --yes --json
       - run: npm test
+      - run: npm run test:upgrade # scripts/test-upgrade-compat.mjs
       - run: npm run test:business
       - run: npm pack --dry-run --json

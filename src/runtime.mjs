@@ -5,20 +5,19 @@ import {spawnSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {ROOT,MANIFEST,PACKAGE,nodeFor,source,componentRecord,componentRecords,fail} from './core.mjs';
 export function componentEnvironment(id,env=process.env,records=componentRecords()){
- const media=records['sealseek-media'];
  let reportEntries={};
  if(id==='dmp-product-report'){if(!records.tbcli?.entry)throw fail('COMPONENT_NOT_INSTALLED','DMP report requires the registered tbcli component');reportEntries={DMP_REPORT_TBCLI_ENTRY:records.tbcli.entry,AGENT_PACKAGE_UPDATE_CHECK:'0'};}
- const canvasEntries=id==='competitor-visual-canvas'?Object.fromEntries([['tbcli','TBCLI_ENTRY'],['sealseek-media','SEALSEEK_MEDIA_ENTRY'],['boardmixcli','BOARDMIXCLI_ENTRY']].filter(([key])=>records[key]?.entry).map(([key,variable])=>[variable,records[key].entry])):{};
- return {...env,...(id==='product-ad-creative-story'?{PRODUCT_AD_CREATIVE_STORY_AUTO_UPDATE:'0'}:{}),...(id==='portable-skill-creator'?{PORTABLE_SKILL_UPDATE_CHECK:'0'}:{}),...canvasEntries,...reportEntries,BOARDMIXCLI_UPDATE_CHECK:'0',TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0',...(id==='cloud-hug-style-transfer'&&media&&!env.CLOUD_HUG_MEDIA_ROOT?{CLOUD_HUG_MEDIA_ROOT:media.root}:{})};
+ const canvasEntries=id==='competitor-visual-canvas'?Object.fromEntries([['tbcli','TBCLI_ENTRY'],['boardmixcli','BOARDMIXCLI_ENTRY']].filter(([key])=>records[key]?.entry).map(([key,variable])=>[variable,records[key].entry])):{};
+ return {...env,...(id==='product-ad-creative-story'?{PRODUCT_AD_CREATIVE_STORY_AUTO_UPDATE:'0'}:{}),...(id==='portable-skill-creator'?{PORTABLE_SKILL_UPDATE_CHECK:'0'}:{}),...canvasEntries,...reportEntries,BOARDMIXCLI_UPDATE_CHECK:'0',TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0'};
 }
 export function pythonEnvironment(env=process.env){
  return {...env,PYTHONUTF8:'1',PYTHONIOENCODING:'utf-8',PYTHONDONTWRITEBYTECODE:'1'};
 }
 export function pythonCandidates(platform=process.platform,home=os.homedir(),env=process.env){
  const targetPath=platform==='win32'?path.win32:path.posix;
- const agent=env.SEALSEEK_HOME||targetPath.join(home,'.sealseek');
+ const agent=env.SEALSEEK_HOME;
  const bins=platform==='win32'?['Scripts','python.exe']:['bin','python'];
- return [...new Set([env.TAOBAO_AI_OPS_PYTHON,env.TAOBAO_SEARCH_PYTHON,targetPath.join(agent,'binaries','python','envs','default',...bins),targetPath.join(home,'.local','share','taobao-ai-ops','.venv',...bins),targetPath.join(home,'.local','share','taobao-search-product-form','.venv',...bins),...(platform==='win32'?['py','python','python3']:['python3','python'])].filter(Boolean))];
+ return [...new Set([env.TAOBAO_AI_OPS_PYTHON,env.TAOBAO_SEARCH_PYTHON,agent?targetPath.join(agent,'binaries','python','envs','default',...bins):null,targetPath.join(home,'.local','share','taobao-ai-ops','.venv',...bins),targetPath.join(home,'.local','share','taobao-search-product-form','.venv',...bins),...(platform==='win32'?['py','python','python3']:['python3','python'])].filter(Boolean))];
 }
 export function resolvePython(imports,candidates=pythonCandidates()){
  for(const command of candidates){const prefix=command==='py'?['-3']:[];const result=spawnSync(command,[...prefix,'-c',imports.length?`import ${imports.join(',')}`:'import sys'],{encoding:'utf8',timeout:15000});if(result.status===0)return {command,prefix};}
@@ -31,7 +30,12 @@ export function toolEntry(id){
  if(!fs.existsSync(managed.entry))throw fail('CAPABILITY_UNAVAILABLE',`Missing ${id} entry`);
  return {command:process.execPath,args:[managed.entry],version:managed.version};
 }
+export function assertDependencies(id){
+ const n=MANIFEST.nodes.find(n=>n.id===id||n.skill===id||n.component===id);
+ if(n?.unavailable_dependencies?.length)throw fail('DEPENDENCY_RETIRED',`Node ${n.id} awaits dependency migration`,n.unavailable_dependencies);
+}
 export function runScript(id,name,args){
+ assertDependencies(id);
  const n=nodeFor(id);if(!n.component||!/^[a-z][a-z0-9_]*\.(py|mjs)$/.test(name))throw fail('SCRIPT_NOT_ALLOWED',`Invalid component script ${name}`);
  // The independent CLI owns its current allowlist and runtime; new component scripts need no shell release.
  const record=componentRecord(n.component);
@@ -41,6 +45,7 @@ export function runScript(id,name,args){
 }
 export async function doctor(id,mode='excel'){
  const n=nodeFor(id||'operations'),checks=[];
+ if(n.unavailable_dependencies?.length)return {ok:false,package:PACKAGE.name,version:PACKAGE.version,node:n.id,checks:n.unavailable_dependencies.map(d=>({id:'dependency:'+d.skill,ok:false,code:'DEPENDENCY_RETIRED',package:d.package,status:d.status})),native_requirements:[],service_access:'not-probed'};
  checks.push({id:'node',ok:Number(process.versions.node.split('.')[0])>=20,value:process.version});
  try{checks.push({id:'skill',ok:fs.existsSync(path.join(source(n),'SKILL.md'))});}catch(e){return {ok:false,node:n.id,checks:[...checks,{id:'component',ok:false,code:e.code,message:e.message}],native_requirements:[]};}
  if(n.id==='operations'){
@@ -79,15 +84,6 @@ export async function doctor(id,mode='excel'){
   const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:30000,env:{...pythonEnvironment(),SEEDAUDIO_AUTO_UPDATE:'0'}});
   let detail;try{detail=JSON.parse(result.stdout);}catch{detail={code:'COMPONENT_DOCTOR_FAILED'};}
   checks.push({id:'seedaudio-runtime-and-config',ok:result.status===0,value:detail});
- }
- if(n.component==='sealseek-media'){
-  const record=componentRecord(n.component);
-  const result=spawnSync(process.execPath,[record.entry,'version'],{encoding:'utf8',timeout:15000,env:{...process.env,SEALSEEK_MEDIA_AUTO_UPDATE:'0'}});
-  let version=result.stdout?.trim().replace(/^sealseek-media\s+/,'');
-  try{const identity=JSON.parse(result.stdout);version=identity.name===record.package||identity.package===record.package?identity.version:null;}catch{}
-  checks.push({id:'sealseek-media-node',ok:Number(process.versions.node.split('.')[0])>=22,value:process.version,minimum:22});
-  checks.push({id:'sealseek-media-runtime',ok:result.status===0&&version===record.version,value:version});
-  checks.push({id:'sealseek-media-contract',ok:fs.existsSync(path.join(source(n),'capabilities.json'))});
  }
  if(n.component==='cloud-hug-style-transfer'){
   const record=componentRecord(n.component);

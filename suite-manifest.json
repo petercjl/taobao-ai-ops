@@ -14,7 +14,6 @@
       "sourcing-tools",
       "product-sourcing",
       "opportunity-sourcing",
-      "sealseek-media-tools",
       "competitor-visual-canvas",
       "cloud-hug-style-transfer",
       "boardmix-tools",
@@ -220,17 +219,6 @@
       ]
     },
     {
-      "id": "sealseek-media-tools",
-      "skill": "sealseek-media",
-      "component": "sealseek-media",
-      "stage": "tools",
-      "method_version": "sealseek-media-canvas-contract@1",
-      "requires_skills": [],
-      "python_imports": [],
-      "scripts": [],
-      "native_requirements": []
-    },
-    {
       "id": "competitor-visual-canvas",
       "skill": "competitor-visual-canvas",
       "component": "competitor-visual-canvas",
@@ -238,12 +226,19 @@
       "method_version": "competitor-visual-canvas@0.1.7",
       "requires_skills": [
         "tbcli",
-        "sealseek-media",
         "boardmixcli"
       ],
       "python_imports": [],
       "scripts": [],
-      "native_requirements": []
+      "native_requirements": [],
+      "unavailable_dependencies": [
+        {
+          "skill": "sealseek-media",
+          "package": "@petercjl/sealseek-media-cli",
+          "status": "retired",
+          "code": "DEPENDENCY_RETIRED"
+        }
+      ]
     },
     {
       "id": "cloud-hug-style-transfer",
@@ -251,9 +246,7 @@
       "component": "cloud-hug-style-transfer",
       "stage": "visual-production",
       "method_version": "cloud-hug-style-transfer@0.2",
-      "requires_skills": [
-        "sealseek-media"
-      ],
+      "requires_skills": [],
       "python_imports": [],
       "scripts": [],
       "native_requirements": [
@@ -275,7 +268,15 @@
         "generation": "agreed number of separate raster images and acceptance summary",
         "state": "child remains owner of generation task records and artifacts"
       },
-      "contract_resolution": "Resolve canonical Skill and live capabilities through the component CLI; host preflight remains mandatory."
+      "contract_resolution": "Resolve canonical Skill and live capabilities through the component CLI; host preflight remains mandatory.",
+      "unavailable_dependencies": [
+        {
+          "skill": "sealseek-media",
+          "package": "@petercjl/sealseek-media-cli",
+          "status": "retired",
+          "code": "DEPENDENCY_RETIRED"
+        }
+      ]
     },
     {
       "id": "boardmix-tools",
@@ -373,13 +374,19 @@
       "component": "product-scene-replacement",
       "stage": "scene-product-replacement",
       "method_version": "product-scene-replacement@0.1",
-      "requires_skills": [
-        "sealseek-media"
-      ],
+      "requires_skills": [],
       "python_imports": [],
       "scripts": [],
       "native_requirements": [
         "media.image.inspect"
+      ],
+      "unavailable_dependencies": [
+        {
+          "skill": "sealseek-media",
+          "package": "@petercjl/sealseek-media-cli",
+          "status": "retired",
+          "code": "DEPENDENCY_RETIRED"
+        }
       ]
     },
     {
@@ -413,7 +420,6 @@
       "requires_skills": [
         "tbcli",
         "xhscli",
-        "sealseek-media",
         "product-asset-set"
       ],
       "python_imports": [
@@ -422,6 +428,14 @@
       "scripts": [],
       "native_requirements": [
         "media.image.inspect"
+      ],
+      "unavailable_dependencies": [
+        {
+          "skill": "sealseek-media",
+          "package": "@petercjl/sealseek-media-cli",
+          "status": "retired",
+          "code": "DEPENDENCY_RETIRED"
+        }
       ]
     },
     {
@@ -556,11 +570,6 @@
       "component": "1688-opportunity-sourcing-research",
       "role": "opportunity-portfolio"
     },
-    "sealseek-media": {
-      "package": "@petercjl/sealseek-media-cli",
-      "component": "sealseek-media",
-      "role": "explicit media generation, existing-media import and canvas operations; caller owns asset selection and layout"
-    },
     "competitor-visual-canvas": {
       "package": "@petercjl/competitor-visual-canvas",
       "component": "competitor-visual-canvas",
@@ -683,13 +692,6 @@
         "1688-opportunity-sourcing-research"
       ]
     },
-    "sealseek-media": {
-      "package": "@petercjl/sealseek-media-cli",
-      "bin": "sealseek-media",
-      "skills": [
-        "sealseek-media"
-      ]
-    },
     "competitor-visual-canvas": {
       "package": "@petercjl/competitor-visual-canvas",
       "bin": "competitor-visual-canvas",
@@ -791,6 +793,13 @@
         "pillow-ad-video"
       ],
       "skill_installation": "component-managed"
+    }
+  },
+  "retired_components": {
+    "sealseek-media": {
+      "package": "@petercjl/sealseek-media-cli",
+      "skill": "sealseek-media",
+      "reason": "The media service is unavailable; dependent application Skills remain registered for migration."
     }
   }
 }

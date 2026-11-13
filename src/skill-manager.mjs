@@ -3,27 +3,25 @@ import path from 'node:path';
 import os from 'node:os';
 import {randomUUID,createHash} from 'node:crypto';
 import {materializeComponentSkill} from './component-skill-install.mjs';
-import {MANIFEST,componentRecord,PACKAGE,source,nodeVersion,closure,json,stat,fileHashes,digest,fail,stateRoot} from './core.mjs';
+import {ROOT,MANIFEST,componentRecord,PACKAGE,source,nodeVersion,closure,json,stat,fileHashes,digest,fail,stateRoot} from './core.mjs';
 
 const OWNER='.taobao-ai-ops-managed.json';
+const runtimeItems=['package.json','capabilities.json','suite-manifest.json','sealwork.collection.json','INSTALL.md','UPDATE.md','bin','src','contracts','skills'];
+async function runtimeDigest(){const files={};for(const item of runtimeItems){const p=path.join(ROOT,item);if((await fs.stat(p)).isDirectory()){for(const [name,value]of Object.entries(await fileHashes(p)))files[item+'/'+name]=value;}else files[item]=digest({bytes:(await fs.readFile(p)).toString('base64')});}return digest(files);}
+const legacyTargets=JSON.parse(await fs.readFile(new URL('../contracts/legacy-host-targets.json',import.meta.url),'utf8'));
 export function targetRoot(opts){
- if(opts.targetDir&&opts.agent)throw fail('USAGE','Choose --agent or --target-dir');
+ if(opts.agent&&!/^[a-z][a-z0-9-]{0,63}$/.test(opts.agent))throw fail('INVALID_AGENT','Use a valid Agent identifier');
  if(opts.targetDir)return path.resolve(opts.targetDir);
- if(opts.agent==='codex')return path.join(process.env.CODEX_HOME||path.join(os.homedir(),'.codex'),'skills');
- if(opts.agent==='workbuddy')return process.env.WORKBUDDY_SKILLS_DIR||path.join(process.env.WORKBUDDY_HOME||path.join(os.homedir(),'.workbuddy'),'skills');
- if(opts.agent==='agents')return process.env.AGENT_SKILLS_DIR||path.join(os.homedir(),'.agents','skills');
- if(opts.agent==='sealseek'){
-  if(process.env.SEALSEEK_SKILLS_DIR)return path.resolve(process.env.SEALSEEK_SKILLS_DIR);
-  const home=process.env.SEALSEEK_HOME||path.join(os.homedir(),'.sealseek');
-  const choices=[path.join(home,'workspaces','default','skills'),path.join(home,'workspace','skills')].filter(p=>{try{return osExists(p);}catch{return false;}});
-  if(choices.length!==1)throw fail('TARGET_UNRESOLVED','Set SEALSEEK_SKILLS_DIR or --target-dir to the active SealSeek Skill root');
-  return choices[0];
- }
- throw fail('UNKNOWN_AGENT','Choose codex, agents, sealseek, workbuddy or --target-dir');
+ const adapter=legacyTargets[opts.agent];
+ if(!adapter)throw fail('UNKNOWN_AGENT','Resolve the current host Skill parent and pass --target-dir');
+ if(adapter.directoryEnv&&process.env[adapter.directoryEnv])return path.resolve(process.env[adapter.directoryEnv]);
+ const home=adapter.env&&process.env[adapter.env]||path.join(os.homedir(),adapter.home);
+ if(adapter.choices){const choices=adapter.choices.map(p=>path.join(home,p)).filter(osExists);if(choices.length!==1)throw fail('TARGET_UNRESOLVED','Pass the resolved current host Skill parent with --target-dir');return choices[0];}
+ return path.join(home,adapter.append);
 }
 import {existsSync as osExists} from 'node:fs';
 async function owners(root){const p=path.join(root,OWNER);if(!await stat(p))return {package:PACKAGE.name,skills:{}};const value=await json(p);if(value.package!==PACKAGE.name)throw fail('OWNERSHIP_CONFLICT','Suite ownership file belongs to another package');return value;}
-export async function status(root,n){
+async function legacyStatus(root,n){
  const dest=path.join(root,n.skill),files=await fileHashes(source(n));const base={skill:n.skill,node:n.id,source:source(n),destination:dest,sourceDigest:digest(files),version:nodeVersion(n)};
  const s=await stat(dest);if(!s)return {...base,state:'absent',managed:false};
  const own=(await owners(root)).skills[n.skill];
@@ -31,20 +29,30 @@ export async function status(root,n){
   const link=path.resolve(root,await fs.readlink(dest));const resolved=await fs.realpath(dest).catch(()=>null);
   const current=resolved===await fs.realpath(source(n));
   const managed=current||(own&&own.source===link);
-  return {...base,mode:'link',managed:Boolean(managed),state:current?'current':managed?'stale':resolved?'foreign-link':'broken-link'};
+  return {...base,mode:'link',managed:Boolean(managed),state:managed?'stale':resolved?'foreign-link':'broken-link'};
  }
  const meta=await json(path.join(dest,'.suite-install.json')).catch(()=>null);
  if(meta?.package!==PACKAGE.name||meta.skill!==n.skill)return {...base,mode:'copy',state:'unmanaged',managed:false};
  const actual=await fileHashes(dest);
  const same=JSON.stringify(actual)===JSON.stringify(meta.files);
- return {...base,mode:'copy',managed:true,state:!same?'modified':meta.sourceDigest===base.sourceDigest?'current':'stale'};
+ return {...base,mode:'copy',managed:true,state:!same?'modified':meta.sourceDigest===base.sourceDigest&&meta.version===base.version&&(n.component||meta.runtimeDigest===await runtimeDigest())?'current':'stale'};
+}
+export async function status(root,n){
+ const value=await legacyStatus(root,n);
+ const current=value.state==='current',installed=value.state!=='absent',edited=value.state==='modified';
+ return {...value,ok:true,package:PACKAGE.name,suiteVersion:PACKAGE.version,installed,current,edited,verification:{verified:current,algorithm:'sha256'},recovery:{required:false},hostDiscovery:'pending',runtimeEntry:!n.component?path.join(value.destination,'.runtime','bin','taobao-ai-ops.mjs'):undefined};
+}
+async function ownRuntime(dest){
+ const target=path.join(dest,'.runtime');await fs.mkdir(target);
+ for(const item of runtimeItems)await fs.cp(new URL('../'+item,import.meta.url),path.join(target,item),{recursive:true,errorOnExist:true,force:false});
 }
 async function makeCopy(dest,n){
  const canonical=await fileHashes(source(n));
  if(MANIFEST.components[n.component]?.skill_installation==='component-managed')await materializeComponentSkill(componentRecord(n.component),n.skill,dest);
  else{await fs.mkdir(dest,{recursive:true});for(const relative of Object.keys(canonical)){const d=path.join(dest,relative);await fs.mkdir(path.dirname(d),{recursive:true});await fs.copyFile(path.join(source(n),relative),d);}}
+ if(!n.component)await ownRuntime(dest);
  const files=await fileHashes(dest);
- await fs.writeFile(path.join(dest,'.suite-install.json'),JSON.stringify({package:PACKAGE.name,skill:n.skill,version:nodeVersion(n),sourceDigest:digest(canonical),files}),{flag:'wx'});
+ await fs.writeFile(path.join(dest,'.suite-install.json'),JSON.stringify({package:PACKAGE.name,skill:n.skill,version:nodeVersion(n),sourceDigest:digest(canonical),runtimeDigest:n.component?undefined:await runtimeDigest(),files}),{flag:'wx'});
  await fs.writeFile(path.join(dest,'.install-meta.json'),JSON.stringify({title:n.skill,description:`Taobao AI operations: ${n.id}`}),{flag:'wx'});
 }
 async function restore(backup,dest,inPlace){
@@ -70,7 +78,8 @@ export async function install(opts,options={}){
     if(inPlace){await fs.cp(dest,backup,{recursive:true,errorOnExist:true,force:false});if(digest(await fileHashes(dest))!==digest(await fileHashes(backup)))throw fail('BACKUP_VERIFY_FAILED','Backup differs from the current Skill; preserving original target');}
    }
    const record={dest,backup:await stat(backup)?backup:null,inPlace};changed.push(record);
-   const mode=MANIFEST.components[n.component]?.skill_installation==='component-managed'?'copy':item.mode==='copy'&&item.managed?'copy':(opts.mode||'auto')==='auto'?(process.platform==='win32'?'copy':'link'):opts.mode;
+   if(opts.mode&&!['auto','copy','link'].includes(opts.mode))throw fail('USAGE','Mode must be auto, copy or legacy link');
+   const mode='copy';
    if(!['link','copy'].includes(mode))throw fail('USAGE','Mode must be auto, link or copy');
    if(inPlace){for(const e of await fs.readdir(dest))await fs.rm(path.join(dest,e),{recursive:true,force:true});}
    if(mode==='link')await fs.symlink(source(n),dest,process.platform==='win32'?'junction':'dir');else await makeCopy(dest,n);

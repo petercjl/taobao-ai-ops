@@ -3,9 +3,7 @@
   "schema_version": "1.0.0",
   "skill": "taobao-ai-operations",
   "target_platforms": [
-    "codex",
-    "sealseek",
-    "workbuddy"
+    "generic"
   ],
   "capabilities": [
     {
@@ -70,5 +68,10 @@
         "OUTPUT_CONTRACT_FAILED"
       ]
     }
-  ]
+  ],
+  "host_resolution": {
+    "fallback_adapter": "generic",
+    "directory_authority": "current-host",
+    "explicit_target_required": true
+  }
 }

@@ -11,3 +11,5 @@
 开发者合同：`collection check --previous <collection.json> --json` 只检查；`collection prepare --directory <new-directory> --previous <collection.json> --yes --json` 生成候选。首次安装省略 previous。宿主提供 Node 和 `npm_execpath` 指向的 npm CLI，不运行 npm 生命周期脚本；宿主负责任务隔离、候选验证、激活、原生 Skill 刷新和失败回退。候选回执包含完整成员、所有 Skill、目标自有 CLI 入口与运行环境。Skill 和成员方法仍由各自包拥有。
 
 目录必须是新目录。安装失败删除本次候选；未知结果先检查候选回执和实际入口，避免重复安装。安装成功与宿主发现确认分别记录。
+
+开发者：当前宿主解析 Skill 父目录后通过 `--target-dir` 明确传入；任意有效 Agent 标识均使用 generic 适配。`skill install/update --owned` 仅同步套件自有路由 Skill，其 `.runtime/bin/taobao-ai-ops.mjs` 是目标独占入口。完整成员使用 collection prepare 的宿主独占版本目录。历史 link 模式迁移为实体副本并保留备份。版本与 SHA-256 核验后，由宿主确认发现；未确认时为 pending。

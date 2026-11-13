@@ -49,6 +49,7 @@ jobs:
       - run: npm run check --if-present
       - run: node bin/taobao-ai-ops.mjs components install --target-dir .qa-skills --yes --json
       - run: npm test --if-present
+      - run: npm run test:upgrade # scripts/test-upgrade-compat.mjs
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

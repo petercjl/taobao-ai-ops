@@ -23,7 +23,7 @@ export async function installUpdate(opts){
  if(!opts.agent&&!opts.targetDir)throw fail('USAGE','Specify --agent or --target-dir before updating');
  const nodeModules=path.dirname(path.dirname(ROOT.slice(0,-1)));
  if(path.basename(nodeModules)!=='node_modules'||(process.platform!=='win32'&&path.basename(path.dirname(nodeModules))!=='lib'))throw fail('SOURCE_CHECKOUT','This source or local test install updates through its owner, not global npm');
- const check=await checkUpdate(opts.tag||'latest');if(!check.ok)throw fail(check.code,check.message);if(!check.updateAvailable)return {...check,components:await (await import('./components.mjs')).installComponents(opts)};
+ const check=await checkUpdate(opts.tag||'latest');if(!check.ok)throw fail(check.code,check.message);if(!check.updateAvailable&&opts.owned)return {...check,skills:await (await import('./skill-manager.mjs')).install(opts)};if(!check.updateAvailable)return {...check,components:await (await import('./components.mjs')).installComponents(opts)};
  // Persist the installed version as a local archive for recovery, including unpublished prerequisites.
  const backup=await fs.mkdtemp(path.join(await fs.mkdir(path.join(stateRoot(),'package-backups'),{recursive:true}).then(()=>path.join(stateRoot(),'package-backups')),'update-'));
  const packed=JSON.parse(npm(['pack',ROOT,'--ignore-scripts','--pack-destination',backup,'--json']))[0];
@@ -31,9 +31,28 @@ export async function installUpdate(opts){
  try{
   npm(['install','--global','--prefix',prefix,'--ignore-scripts',`${PACKAGE.name}@${check.available}`]);
   const fresh=path.join(nodeModules,...PACKAGE.name.split('/'),'bin','taobao-ai-ops.mjs');
-  const args=['components','install','--yes','--json'];if(opts.targetDir)args.push('--target-dir',opts.targetDir);else if(opts.agent)args.push('--agent',opts.agent);else throw fail('USAGE','Specify the Agent or custom target for managed Skill synchronization');
+  const args=opts.owned?['skill','update','--owned','--json']:['components','install','--yes','--json'];if(opts.targetDir)args.push('--target-dir',opts.targetDir);else if(opts.agent)args.push('--agent',opts.agent);else throw fail('USAGE','Specify the Agent or custom target for managed Skill synchronization');
   const r=spawnSync(process.execPath,[fresh,...args],{encoding:'utf8',timeout:300000});if(r.status!==0)throw fail('SKILL_SYNC_FAILED',r.stderr||r.error?.message||'Skill synchronization failed');
   const v=spawnSync(process.execPath,[fresh,'version'],{encoding:'utf8',timeout:10000});if(v.stdout.trim()!==check.available)throw fail('UPDATE_VERIFY_FAILED','Installed version differs from registry selection');
   return {ok:true,from:PACKAGE.version,to:check.available,backup:path.join(backup,packed.filename),skills:JSON.parse(r.stdout)};
  }catch(e){npm(['install','--global','--prefix',prefix,'--ignore-scripts',path.join(backup,packed.filename)]);const restored=path.join(nodeModules,...PACKAGE.name.split('/'),'bin','taobao-ai-ops.mjs');const args=['skill','update','--json',...(opts.targetDir?['--target-dir',opts.targetDir]:['--agent',opts.agent])];const synced=spawnSync(process.execPath,[restored,...args],{encoding:'utf8',timeout:60000});if(synced.status!==0)throw fail('ROLLBACK_SYNC_REQUIRED','Old package restored; managed Skill recovery needs attention',{original_error:e.message,backup:path.join(backup,packed.filename)});throw e;}
+}
+
+export async function detectUpdate(registry=fetch,now=Date.now()){
+ if(process.env.TAOBAO_AI_OPS_AUTO_UPDATE==='0')return;
+ const cache=path.join(stateRoot(),'update-check.json'),lock=cache+'.lock';let locked=false;
+ try{
+  const previous=JSON.parse(await fs.readFile(cache,'utf8').catch(e=>{if(e.code==='ENOENT')return 'null';throw e;}));
+  if(previous&&now-previous.checkedAt<21600000)return;
+  await fs.mkdir(stateRoot(),{recursive:true});
+  try{await fs.mkdir(lock);locked=true;}catch(e){if(e.code==='EEXIST')return;throw e;}
+  let version=null;
+  try{const response=await registry('https://registry.npmjs.org/'+encodeURIComponent(PACKAGE.name)+'/latest',{signal:AbortSignal.timeout(2000)});
+   if(response.ok){const value=await response.json();if(value.name===PACKAGE.name&&/^\d+\.\d+\.\d+$/.test(value.version))version=value.version;}
+  }catch{/* Offline backoff uses the same bounded cache. */}
+  const pending=cache+'.'+process.pid+'.pending';await fs.writeFile(pending,JSON.stringify({checkedAt:now,version}),{flag:'wx',mode:0o600});await fs.rename(pending,cache);
+  if(version){const a=version.split('.').map(Number),b=PACKAGE.version.split('.').map(Number);
+   if(a.some((v,i)=>v!==b[i]&&a.slice(0,i).every((x,j)=>x===b[j])&&v>b[i]))console.error('[taobao-ai-ops] Update available: '+version+'; use the selected host update flow.');}
+ }catch{/* Advisory checks retain the current installation and malformed user cache. */}
+ finally{if(locked)await fs.rmdir(lock);}
 }

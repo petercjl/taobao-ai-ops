@@ -20,3 +20,17 @@ console.log(JSON.stringify({ok:true,package:PACKAGE.name,skills:skills.size,node
 for(const [id,component] of Object.entries(MANIFEST.components)){
  if(typeof component.bin!=='string'||!component.bin||!Array.isArray(component.skills)||!component.skills.length)throw Error('Component requires its real management bin and logical Skills: '+id);
 }
+for(const [id,retired] of Object.entries(MANIFEST.retired_components||{})){
+ if(MANIFEST.components[id]||MANIFEST.tools[id]||MANIFEST.nodes.some(n=>n.skill===retired.skill)||!retired.package)throw Error('Retired component remains registered: '+id);
+}
+for(const node of MANIFEST.nodes)for(const dep of node.unavailable_dependencies||[]){
+ const retired=Object.values(MANIFEST.retired_components||{}).find(r=>r.skill===dep.skill);
+ if(!retired||retired.package!==dep.package||dep.status!=='retired'||dep.code!=='DEPENDENCY_RETIRED')throw Error('Invalid unavailable dependency: '+node.id);
+}
+
+const contract=JSON.parse(await fs.readFile(path.join(ROOT,'capabilities.json'),'utf8'));
+if(contract.package!==PACKAGE.name||contract.skills.some(name=>!MANIFEST.nodes.some(n=>!n.component&&n.skill===name)))throw Error('Package/owned Skill identity drift');
+for(const n of MANIFEST.nodes.filter(n=>!n.component)){
+ const manifest=path.join(source(n),'package.json');
+ try{if(JSON.parse(await fs.readFile(manifest,'utf8')).version!==PACKAGE.version)throw Error('Shipped Skill version drift');}catch(e){if(e.code!=='ENOENT')throw e;}
+}

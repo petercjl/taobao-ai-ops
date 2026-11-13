@@ -1,0 +1,27 @@
+{
+  "codex": {
+    "env": "CODEX_HOME",
+    "home": ".codex",
+    "append": "skills"
+  },
+  "workbuddy": {
+    "env": "WORKBUDDY_HOME",
+    "directoryEnv": "WORKBUDDY_SKILLS_DIR",
+    "home": ".workbuddy",
+    "append": "skills"
+  },
+  "agents": {
+    "directoryEnv": "AGENT_SKILLS_DIR",
+    "home": ".agents",
+    "append": "skills"
+  },
+  "sealseek": {
+    "env": "SEALSEEK_HOME",
+    "directoryEnv": "SEALSEEK_SKILLS_DIR",
+    "home": ".sealseek",
+    "choices": [
+      "workspaces/default/skills",
+      "workspace/skills"
+    ]
+  }
+}

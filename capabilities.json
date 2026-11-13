@@ -1,0 +1,371 @@
+{
+  "schemaVersion": 1,
+  "package": "@petercjl/taobao-ai-ops",
+  "skills": [
+    "taobao-ai-operations"
+  ],
+  "commandContracts": {
+    "version": {
+      "options": {
+        "--json": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "none"
+    },
+    "capabilities": {
+      "options": {
+        "--json": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "none"
+    },
+    "doctor": {
+      "options": {
+        "--json": {
+          "type": "boolean"
+        },
+        "--node": {
+          "type": "string"
+        },
+        "--mode": {
+          "type": "string"
+        }
+      },
+      "sideEffects": "none"
+    },
+    "skill source": {
+      "options": {
+        "--json": {
+          "type": "boolean"
+        },
+        "--name": {
+          "type": "string"
+        },
+        "--owned": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "none"
+    },
+    "skill status": {
+      "options": {
+        "--json": {
+          "type": "boolean"
+        },
+        "--agent": {
+          "type": "string"
+        },
+        "--target-dir": {
+          "type": "string"
+        },
+        "--name": {
+          "type": "string"
+        },
+        "--node": {
+          "type": "string"
+        },
+        "--profile": {
+          "type": "string"
+        },
+        "--owned": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "none"
+    },
+    "skill install": {
+      "options": {
+        "--json": {
+          "type": "boolean"
+        },
+        "--agent": {
+          "type": "string"
+        },
+        "--target-dir": {
+          "type": "string"
+        },
+        "--name": {
+          "type": "string"
+        },
+        "--node": {
+          "type": "string"
+        },
+        "--profile": {
+          "type": "string"
+        },
+        "--owned": {
+          "type": "boolean"
+        },
+        "--adopt": {
+          "type": "boolean"
+        },
+        "--mode": {
+          "type": "string"
+        }
+      },
+      "sideEffects": "local-write"
+    },
+    "skill update": {
+      "options": {
+        "--json": {
+          "type": "boolean"
+        },
+        "--agent": {
+          "type": "string"
+        },
+        "--target-dir": {
+          "type": "string"
+        },
+        "--name": {
+          "type": "string"
+        },
+        "--node": {
+          "type": "string"
+        },
+        "--profile": {
+          "type": "string"
+        },
+        "--owned": {
+          "type": "boolean"
+        },
+        "--adopt": {
+          "type": "boolean"
+        },
+        "--mode": {
+          "type": "string"
+        }
+      },
+      "sideEffects": "local-write"
+    },
+    "update check": {
+      "options": {
+        "--json": {
+          "type": "boolean"
+        },
+        "--tag": {
+          "type": "string"
+        }
+      },
+      "sideEffects": "none"
+    },
+    "update install": {
+      "options": {
+        "--json": {
+          "type": "boolean"
+        },
+        "--agent": {
+          "type": "string"
+        },
+        "--target-dir": {
+          "type": "string"
+        },
+        "--name": {
+          "type": "string"
+        },
+        "--node": {
+          "type": "string"
+        },
+        "--profile": {
+          "type": "string"
+        },
+        "--owned": {
+          "type": "boolean"
+        },
+        "--tag": {
+          "type": "string"
+        },
+        "--yes": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "package-and-skill-update"
+    },
+    "update recover": {
+      "options": {
+        "--json": {
+          "type": "boolean"
+        },
+        "--agent": {
+          "type": "string"
+        },
+        "--target-dir": {
+          "type": "string"
+        },
+        "--name": {
+          "type": "string"
+        },
+        "--node": {
+          "type": "string"
+        },
+        "--profile": {
+          "type": "string"
+        },
+        "--owned": {
+          "type": "boolean"
+        },
+        "--yes": {
+          "type": "boolean"
+        }
+      },
+      "sideEffects": "local-write"
+    }
+  },
+  "discoveryContract": {
+    "schemaVersion": 1,
+    "commandsField": "commandContracts",
+    "entryPoints": [
+      {
+        "argv": [
+          "capabilities",
+          "--json"
+        ],
+        "result": "manifest"
+      }
+    ],
+    "version": {
+      "command": "version",
+      "argv": [
+        "version",
+        "--json"
+      ],
+      "fields": {
+        "package": {
+          "field": "package",
+          "type": "string"
+        },
+        "version": {
+          "field": "version",
+          "type": "string"
+        }
+      }
+    },
+    "skillCollection": {
+      "namesField": "skills",
+      "default": "taobao-ai-operations",
+      "selector": {
+        "option": "--name",
+        "type": "string"
+      },
+      "enumeration": {
+        "argv": [
+          "skill",
+          "source",
+          "--owned",
+          "--json"
+        ],
+        "itemsField": "sources",
+        "completeField": "complete"
+      },
+      "namedSource": [
+        "skill",
+        "source",
+        "--name",
+        "{skill}",
+        "--json"
+      ]
+    }
+  },
+  "maintenanceContract": {
+    "schemaVersion": 1,
+    "source": {
+      "name": {
+        "field": "skill",
+        "type": "string"
+      },
+      "package": {
+        "field": "package",
+        "type": "string"
+      },
+      "version": {
+        "field": "suiteVersion",
+        "type": "string"
+      },
+      "path": {
+        "field": "source",
+        "type": "string"
+      }
+    },
+    "status": {
+      "name": {
+        "field": "skill",
+        "type": "string"
+      },
+      "package": {
+        "field": "package",
+        "type": "string"
+      },
+      "version": {
+        "field": "suiteVersion",
+        "type": "string"
+      },
+      "target": {
+        "field": "destination",
+        "type": "string"
+      },
+      "installed": {
+        "field": "installed",
+        "type": "boolean"
+      },
+      "managed": {
+        "field": "managed",
+        "type": "boolean"
+      },
+      "current": {
+        "field": "current",
+        "type": "boolean"
+      },
+      "edited": {
+        "field": "edited",
+        "type": "boolean"
+      },
+      "verification": {
+        "field": "verification",
+        "type": "object"
+      },
+      "recovery": {
+        "field": "recovery",
+        "type": "object"
+      }
+    },
+    "targetOptions": {
+      "--target-dir": {
+        "kind": "skill-parent"
+      }
+    },
+    "agentEligibility": "valid-name-with-generic-fallback",
+    "hostDiscoveryAuthority": "host"
+  },
+  "installationLifecycle": {
+    "agentNeutral": true,
+    "targetRequired": true,
+    "hostRegistrationRequired": true,
+    "skillRequired": true,
+    "updateRequiresSkillSync": true,
+    "required_components": [
+      "cli",
+      "skill"
+    ],
+    "installationMode": "copy",
+    "sharedLinksAllowed": false,
+    "isolatedRuntimeRequired": true,
+    "installGuide": "INSTALL.md",
+    "updateGuide": "UPDATE.md",
+    "installerIntegration": "Read INSTALL.md before managed installation, including scripts-disabled npm installs; host owns registration.",
+    "install": "Resolve an explicit Skill parent and install the owned routing Skill with --owned, or prepare a complete host-owned collection.",
+    "update": "Resolve the selected target before package replacement; synchronize even at the same version.",
+    "verification": "Verify CLI, physical files, version and SHA-256 status, then verify discovery through the current host."
+  },
+  "automaticUpdates": {
+    "enabledByDefault": true,
+    "intervalHours": 6,
+    "timeoutMs": 2000,
+    "trigger": "ordinary component, tool and script business entry",
+    "configuration": "TAOBAO_AI_OPS_STATE_DIR/update-check.json",
+    "disable": "TAOBAO_AI_OPS_AUTO_UPDATE=0",
+    "recovery": "Keep the current installation when registry or cache is unavailable.",
+    "defaultMode": "notify",
+    "installation": "explicit-authorization"
+  }
+}

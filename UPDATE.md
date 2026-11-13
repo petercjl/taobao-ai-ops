@@ -13,3 +13,5 @@
 开发者：每次检查都以当前壳的注册表为准，与 previous 回执比较成员身份、版本和所需 Skill；`collection prepare` 返回独立候选，宿主验证后才激活。回执中的运行环境必须跟随 CLI 调用，当前任务内保持同一版本。新集合入口不接管历史全局 npm 安装；历史安装继续通过其已声明的维护入口操作。
 
 开发者：迁移已批准的跨兼容版本组件时，在collection check/prepare中显式传入 `--accept-component-upgrades ID,ID` 并保留previous回执。该参数仅批准列出的组件升级，不批准降级；其余不兼容组件继续保留原版本。DMP快照v2迁移选择 `tbcli,dmp-product-report`，候选doctor通过后再激活。
+
+开发者：当前宿主解析 Skill 父目录后通过 `--target-dir` 明确传入；任意有效 Agent 标识均使用 generic 适配。`skill install/update --owned` 仅同步套件自有路由 Skill，其 `.runtime/bin/taobao-ai-ops.mjs` 是目标独占入口。完整成员使用 collection prepare 的宿主独占版本目录。历史 link 模式迁移为实体副本并保留备份。版本与 SHA-256 核验后，由宿主确认发现；未确认时为 pending。
