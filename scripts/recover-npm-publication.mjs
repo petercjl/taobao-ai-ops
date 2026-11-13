@@ -34,9 +34,7 @@ try{
  const env={...process.env,NODE_AUTH_TOKEN:'',npm_config_dry_run:'false'};
  // OIDC publication only: no version bump, tag replacement, write token or local publish.
  const result=await invoke(npm,['publish',path.join(work,info.filename),'--tag',tag,'--access','public','--provenance','--dry-run=false'],{cwd:source,env});console.log(result.stdout);console.log(result.stderr);
- for(let attempt=0;attempt<12;attempt++){
-  const state=await observe();if(state.versions?.[version]&&state['dist-tags']?.[tag]===version){if(state.versions[version].dist.integrity!==info.integrity)throw Error('PUBLIC_ARTIFACT_IDENTITY_MISMATCH');console.log(JSON.stringify({ok:true,package:after.name,version,tag,integrity:info.integrity,sourceCommit:commit,validatedRun:runId}));process.exitCode=0;break;}
-  if(attempt===11)throw Error('PUBLIC_VERSION_NOT_VISIBLE');
-  console.log('Waiting for exact registry version and tag.');await new Promise(resolve=>setTimeout(resolve,10000));
- }
+ const verified=await verifyPublication({name:after.name,version,tag});
+ if(verified.integrity!==info.integrity)throw Error('PUBLIC_ARTIFACT_IDENTITY_MISMATCH');
+ console.log(JSON.stringify({...verified,sourceCommit:commit,validatedRun:runId}));
 }finally{await fs.rm(work,{recursive:true,force:true});}
