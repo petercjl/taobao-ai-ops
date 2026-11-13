@@ -31,8 +31,12 @@ try{
  await run(entry,['skill','install','--target-dir',target,'--json'],env);
  const oldBytes=await fs.readFile(path.join(target,'taobao-ai-operations','SKILL.md'));
  let address;
- server=http.createServer((req,res)=>{
+ server=http.createServer(async(req,res)=>{
   const url=decodeURIComponent(req.url.split('?')[0]);
+  if(url!=='/candidate.tgz'&&url!=='/'+PACKAGE.name){
+   try{const upstream=await fetch('https://registry.npmjs.org'+req.url);res.statusCode=upstream.status;res.setHeader('content-type',upstream.headers.get('content-type')||'application/json');return res.end(Buffer.from(await upstream.arrayBuffer()));}
+   catch{res.statusCode=502;return res.end('registry unavailable');}
+  }
   if(url.endsWith('.tgz')){res.setHeader('content-type','application/octet-stream');return res.end(tarball);}
   const pkg={...manifest,dist:{tarball:address+'/candidate.tgz',integrity:'sha512-'+createHash('sha512').update(tarball).digest('base64'),shasum:createHash('sha1').update(tarball).digest('hex')}};
   res.setHeader('content-type','application/json');res.end(JSON.stringify({name:PACKAGE.name,'dist-tags':{latest:version},versions:{[version]:pkg}}));
