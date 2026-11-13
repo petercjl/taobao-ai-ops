@@ -63,3 +63,16 @@ test('ordinary-entry detection is cached, concurrent, optional and backs off off
   const cache=path.join(root,'update-check.json');await fs.writeFile(cache,'user-invalid-cache');await detectUpdate(registry,100000000);assert.equal(await fs.readFile(cache,'utf8'),'user-invalid-cache');
  }finally{if(previous===undefined)delete process.env.TAOBAO_AI_OPS_STATE_DIR;else process.env.TAOBAO_AI_OPS_STATE_DIR=previous;if(setting===undefined)delete process.env.TAOBAO_AI_OPS_AUTO_UPDATE;else process.env.TAOBAO_AI_OPS_AUTO_UPDATE=setting;await fs.rm(root,{recursive:true,force:true});}
 });
+
+test('cross-device legacy links preserve a verified backup and restore the original link on failure',async()=>{
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'suite-link-exdev-')),n=nodeFor('operations'),dest=path.join(root,n.skill),original=path.join(ROOT,'skills',n.skill);
+ const rename=async()=>{throw Object.assign(new Error('different volume'),{code:'EXDEV'});};
+ try{
+  await fs.symlink(original,dest,process.platform==='win32'?'junction':'dir');const raw=await fs.readlink(dest);
+  await assert.rejects(install({owned:true,targetDir:root},{rename,failAfter:1}),e=>e.code==='TEST_INJECTED_FAILURE');
+  assert.equal(await fs.readlink(dest),raw);assert.equal(await fs.realpath(dest),await fs.realpath(original));
+  const result=await install({owned:true,targetDir:root},{rename});assert.equal((await fs.lstat(dest)).isSymbolicLink(),false);
+  assert.equal(await fs.realpath(result.skills[0].backup),await fs.realpath(original));
+  const metadata=JSON.parse(await fs.readFile(result.skills[0].backup+'.link.json','utf8'));assert.equal(metadata.raw,raw);
+ }finally{await fs.rm(root,{recursive:true,force:true});}
+});

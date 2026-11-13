@@ -67,17 +67,27 @@ export async function install(opts,options={}){
  try{
   const before=await Promise.all(nodes.map(n=>status(root,n)));
   for(const item of before){if(item.state==='modified')throw fail('LOCAL_CHANGES',`Preserve local edits before updating ${item.skill}`);if(!['absent','current','stale'].includes(item.state)&&!opts.adopt)throw fail('UNMANAGED_TARGET',`Use an explicit backed-up migration for ${item.skill} (${item.state})`);}
-  transaction=path.join(stateRoot(),'skill-backups',randomUUID());await fs.mkdir(transaction,{recursive:true});
+  transaction=path.join(stateRoot(),'skill-backups',randomUUID());await fs.mkdir(transaction,{recursive:true,mode:0o700});
   for(let i=0;i<nodes.length;i++){
    const n=nodes[i],item=before[i];
    if(item.state==='current'){results.push({...item,action:'unchanged'});continue;}
-   const dest=item.destination,backup=path.join(transaction,n.skill);let inPlace=false;
+   const dest=item.destination,backup=path.join(transaction,n.skill);let inPlace=false,linkSnapshot=null;
    if(await stat(dest)){
     if(options.forceInPlace&&item.mode==='copy')inPlace=true;
-    else try{await (options.rename??fs.rename)(dest,backup);}catch(e){if(!['EPERM','EBUSY','EACCES','EXDEV'].includes(e.code)||(await stat(dest)).isSymbolicLink())throw e;inPlace=true;}
+    else try{await (options.rename??fs.rename)(dest,backup);}catch(e){
+     const old=await stat(dest);
+     if(e.code==='EXDEV'&&old.isSymbolicLink()){
+      const raw=await fs.readlink(dest),target=await fs.realpath(dest),kind=process.platform==='win32'?'junction':'dir';
+      await fs.symlink(target,backup,kind);
+      if(await fs.realpath(backup)!==target)throw fail('BACKUP_VERIFY_FAILED','Link backup differs from original');
+      linkSnapshot={raw,target,kind};
+      await fs.writeFile(backup+'.link.json',JSON.stringify(linkSnapshot),{flag:'wx',mode:0o600});
+      await fs.unlink(dest);
+     }else{if(!['EPERM','EBUSY','EACCES','EXDEV'].includes(e.code)||old.isSymbolicLink())throw e;inPlace=true;}
+    }
     if(inPlace){await fs.cp(dest,backup,{recursive:true,errorOnExist:true,force:false});if(digest(await fileHashes(dest))!==digest(await fileHashes(backup)))throw fail('BACKUP_VERIFY_FAILED','Backup differs from the current Skill; preserving original target');}
    }
-   const record={dest,backup:await stat(backup)?backup:null,inPlace};changed.push(record);
+   const record={dest,backup:await stat(backup)?backup:null,inPlace,linkSnapshot};changed.push(record);
    if(opts.mode&&!['auto','copy','link'].includes(opts.mode))throw fail('USAGE','Mode must be auto, copy or legacy link');
    const mode='copy';
    if(!['link','copy'].includes(mode))throw fail('USAGE','Mode must be auto, link or copy');
@@ -96,6 +106,6 @@ export async function install(opts,options={}){
   const registration=path.join(registry,createHash('sha256').update(root).digest('hex')+'.json');
   if(!await stat(registration))await fs.writeFile(registration,JSON.stringify({root}),{flag:'wx'});
   return {ok:true,package:PACKAGE.name,version:PACKAGE.version,targetRoot:root,transaction,skills:results};
- }catch(e){for(const item of changed.reverse()){if(item.backup)await restore(item.backup,item.dest,item.inPlace);else if(await stat(item.dest))await fs.rm(item.dest,{recursive:true,force:true});}throw e;}
+ }catch(e){for(const item of changed.reverse()){if(item.linkSnapshot){if(await stat(item.dest))await fs.rm(item.dest,{recursive:true,force:true});await fs.symlink(item.linkSnapshot.raw,item.dest,item.linkSnapshot.kind);}else if(item.backup)await restore(item.backup,item.dest,item.inPlace);else if(await stat(item.dest))await fs.rm(item.dest,{recursive:true,force:true});}throw e;}
  finally{await fs.rmdir(lock);}
 }
