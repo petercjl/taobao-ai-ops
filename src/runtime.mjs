@@ -8,7 +8,7 @@ export function componentEnvironment(id,env=process.env,records=componentRecords
  let reportEntries={};
  if(id==='dmp-product-report'){if(!records.tbcli?.entry)throw fail('COMPONENT_NOT_INSTALLED','DMP report requires the registered tbcli component');reportEntries={DMP_REPORT_TBCLI_ENTRY:records.tbcli.entry,AGENT_PACKAGE_UPDATE_CHECK:'0'};}
  const canvasEntries=id==='competitor-visual-canvas'?Object.fromEntries([['tbcli','TBCLI_ENTRY'],['boardmixcli','BOARDMIXCLI_ENTRY']].filter(([key])=>records[key]?.entry).map(([key,variable])=>[variable,records[key].entry])):{};
- return {...env,...(id==='product-ad-creative-story'?{PRODUCT_AD_CREATIVE_STORY_AUTO_UPDATE:'0'}:{}),...(id==='portable-skill-creator'?{PORTABLE_SKILL_UPDATE_CHECK:'0'}:{}),...canvasEntries,...reportEntries,BOARDMIXCLI_UPDATE_CHECK:'0',TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0'};
+return {...env,...(id==='skill-flow-explainer'?{SKILL_FLOW_UPDATE_CHECK:'0'}:{}),...(id==='product-ad-creative-story'?{PRODUCT_AD_CREATIVE_STORY_AUTO_UPDATE:'0'}:{}),...(id==='portable-skill-creator'?{PORTABLE_SKILL_UPDATE_CHECK:'0'}:{}),...canvasEntries,...reportEntries,BOARDMIXCLI_UPDATE_CHECK:'0',TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0'};
 }
 export function pythonEnvironment(env=process.env){
  return {...env,PYTHONUTF8:'1',PYTHONIOENCODING:'utf-8',PYTHONDONTWRITEBYTECODE:'1'};
@@ -58,7 +58,8 @@ export async function doctor(id,mode='excel'){
   const record=componentRecord(n.component);
   const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:15000,env:{...componentEnvironment(n.component),AGENT_PACKAGE_UPDATE_CHECK:'0'}});
   let detail;try{detail=JSON.parse(result.stdout);}catch{}
-  checks.push({id:'application-management-runtime',ok:result.status===0&&detail?.ok===true&&detail.package===record.package&&detail.version===record.version&&detail.integrity?.verified===true,value:detail});
+  const integrity=n.component==='skill-flow-explainer'?Array.isArray(detail?.errors)&&detail.errors.length===0:detail?.integrity?.verified===true;
+  checks.push({id:'application-management-runtime',ok:result.status===0&&detail?.ok===true&&detail.package===record.package&&detail.version===record.version&&integrity,value:detail});
  }
  if(n.python_imports.length&&n.id!=='html-report'){const python=resolvePython(n.python_imports);checks.push({id:'python',ok:Boolean(python),value:python,required_imports:n.python_imports});}
  if(n.id==='html-report'){

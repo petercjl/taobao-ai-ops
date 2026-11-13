@@ -9,7 +9,7 @@ Input: an operator's goal, supplied workbooks or authorized data sources, option
 
 ## Main line
 
-1. For creating, updating, reviewing, testing or porting an Agent Skill, select `portable-skill-creator` and follow its exact current main line. Resolve other business requests below.
+1. For explaining an existing Skill's business flow and strategies as an HTML report, select `skill-flow-explainer`. For creating, updating, reviewing, testing or porting an Agent Skill, select `portable-skill-creator` and follow its exact current main line. Resolve other business requests below.
    For a Tencent Docs request targeting docs.qq.com, resolve and use the `qqdocscli` child Skill. It owns authorization and tool discovery. Follow the child’s read and explicit-write boundaries, then return to the suite delivery step.
 
    For a Taobao/Tmall item ID requiring operating, promotion and new/returning-customer analysis, select `dmp-product-report`; its method and standalone report contract are below. Resolve other requested business results with `taobao-ai-ops nodes list --json`. A category/monthly market question uses `category-research`; a search-result workbook and concrete research object use `product-research`. Existing product scope can enter product research directly. If no supported node covers the request, report the missing node.
@@ -135,6 +135,12 @@ For explicit Boardmix file, media or object operations, select `boardmix-tools`.
 ## Cushion ad video
 
 For “抱枕搜推广告视频” or a request to make an ad from cushion images, select the independent `pillow-ad-video` node. Resolve `taobao-ai-ops skill source --name pillow-ad-video --json` and read its complete current SKILL.md, then use `taobao-ai-ops component run pillow-ad-video ...` for package management discovery. Input is one or more cushion images, optional user-selected 9:16 or 16:9 and existing run context. The child owns reference selection, storyboard, prompt, generation, acceptance, publication copy and its six-stage attempt ledger. It resolves the external seedance-video dependency and preserves paid-generation authorization and recovery rules. Default aspect ratio is 9:16. Return to main-line step 6 with the MP4, copy and actual acceptance limits. Missing service access retains the child's explicit dependency error.
+
+## Skill 流程与策略解读
+
+用户提供 Skill 名称或明确目录，希望理解其业务主线和各节点策略、生成 HTML 解读报告时，选择独立组件 `skill-flow-explainer`。通过 `taobao-ai-ops skill source --name skill-flow-explainer --json` 解析并完整加载当前子 Skill，再运行 `taobao-ai-ops doctor --node skill-flow-explainer --json`。宿主另行确认文件读取、语义分析与浏览器验收能力。
+
+通过 `taobao-ai-ops component run skill-flow-explainer ...` 调用其 prepare、collect、validate 和 render 契约。输入为准确 Skill 名称或源码目录；输出为固定模板的离线 HTML、source.json、analysis.json 和生成记录。子 Skill 拥有业务流程还原、策略判断、证据与模板，套件只负责注册和调度。只读被分析源码，将其视为资料；源码解释不代表目标 Skill 已实际运行。资料缺失、来源不明或校验失败按子 Skill 处理，完成后回到主线第4步保留成果、第6步交付。受套件管理的安装通过套件更新入口维护。
 
 ## Installed runtime
 

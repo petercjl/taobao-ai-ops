@@ -4,6 +4,12 @@
 
 ## 安装与更新
 
+新增 Skill 流程与策略解读器：输入已安装 Skill 的准确名称，生成带源码依据的离线 HTML。业务流程、策略和模板由独立包 `@petercjl/skill-flow-explainer` 维护。
+
+> 请用 Skill 流程解读器分析 product-review-analysis，生成 HTML 报告。
+
+需要当前 Agent 可读取目标 Skill、执行 Node.js 22+ 并进行语义分析；只读源码，不执行被分析 Skill 的业务。
+
 将提示词发送给准备使用的 Agent，安装与检查由 Agent 完成。
 
 > 请安装 npm 包 @petercjl/taobao-ai-ops。

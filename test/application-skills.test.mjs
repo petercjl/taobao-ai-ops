@@ -44,9 +44,9 @@ test('collection graph keeps real managed runtimeEntry paths and rejects failed 
   assert.ok(skill.runtimeEntry.startsWith(directory+path.sep));
   assert.ok((await fs.lstat(skill.runtimeEntry)).isFile());
  }
- for(const name of ['product-asset-set','product-scene-replacement','product-seeding-studio']){
+ for(const name of ['product-asset-set','product-scene-replacement','product-seeding-studio','skill-flow-explainer']){
   const skill=receipt.skills.find(item=>item.name===name);
-  assert.equal(skill.runtimeEntry,path.join(skill.directory,'.runtime/bin',name+'.mjs'));
+  assert.equal(skill.runtimeEntry,name==='skill-flow-explainer'?path.join(skill.directory,'scripts/cli.mjs'):path.join(skill.directory,'.runtime/bin',name+'.mjs'));
   const version=spawnSync(process.execPath,[skill.runtimeEntry,'version','--json'],{encoding:'utf8'});
   assert.equal(version.status,0,version.stderr);
   const identity=JSON.parse(version.stdout);

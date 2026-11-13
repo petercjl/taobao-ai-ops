@@ -128,7 +128,7 @@ export async function collectionPrepare(opts,services={}){
    if(installed.some(s=>s.name===name))throw fail('DUPLICATE_SKILL',name);
    const destination=path.join(skills,name);await fileHashes(source);
    const managed=MANIFEST.components[member.id]?.skill_installation==='component-managed';
-   const receipt=managed?await materializeComponentSkill({entry,package:member.package,version:member.version},name,destination):null;
+   const receipt=managed?await materializeComponentSkill(records[member.id],name,destination):null;
    if(!managed)await fs.cp(source,destination,{recursive:true,dereference:true});
    const runtimeEntry=receipt?.entry??entry;
    if(typeof runtimeEntry!=='string'||!runtimeEntry||!(await fs.lstat(runtimeEntry)).isFile())throw fail('INVALID_COMPONENT_ENTRY',name);
