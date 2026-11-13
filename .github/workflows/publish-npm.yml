@@ -15,6 +15,15 @@ on:
         type: choice
         options: [latest, next]
 
+      recover_existing:
+        description: Recover publication of the exact already validated Git tag
+        type: boolean
+        default: false
+      validated_run:
+        description: Successful release run proving the unchanged package source
+        type: string
+        default: ''
+
 permissions:
   contents: write
   id-token: write
@@ -25,8 +34,10 @@ concurrency:
 
 jobs:
   qa:
+    if: ${{ !inputs.recover_existing }}
     uses: ./.github/workflows/qa.yml
   publish:
+    if: ${{ !inputs.recover_existing }}
     env:
       TAOBAO_AI_OPS_STATE_DIR: ${{ github.workspace }}/../taobao-ai-ops-publish-qa/state
       TAOBAO_AI_OPS_TEST_STATE_DIR: ${{ github.workspace }}/../taobao-ai-ops-publish-qa/state
@@ -64,3 +75,22 @@ jobs:
         run: npx --yes --package @petercjl/npm-release-kit@0.1.4 npm-release-kit ci publish --release "${{ inputs.release }}" --tag "${{ inputs.tag }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  recover:
+    if: ${{ inputs.recover_existing }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24.15.0'
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - run: npm install --global npm@11.18.0
+      - name: Recover exact validated publication through OIDC
+        run: node scripts/recover-npm-publication.mjs --release "${{ inputs.release }}" --tag "${{ inputs.tag }}" --validated-run "${{ inputs.validated_run }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ''
