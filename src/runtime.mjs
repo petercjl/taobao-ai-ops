@@ -13,9 +13,10 @@ export function componentEnvironment(id,env=process.env,records=componentRecords
 export function pythonEnvironment(env=process.env){
  return {...env,PYTHONUTF8:'1',PYTHONIOENCODING:'utf-8',PYTHONDONTWRITEBYTECODE:'1'};
 }
+const legacyHosts=JSON.parse(fs.readFileSync(new URL('../contracts/legacy-host-targets.json',import.meta.url),'utf8'));
 export function pythonCandidates(platform=process.platform,home=os.homedir(),env=process.env){
  const targetPath=platform==='win32'?path.win32:path.posix;
- const agent=env.SEALSEEK_HOME;
+ const agent=env.SEALSEEK_HOME||targetPath.join(home,legacyHosts['sealseek'].home);
  const bins=platform==='win32'?['Scripts','python.exe']:['bin','python'];
  return [...new Set([env.TAOBAO_AI_OPS_PYTHON,env.TAOBAO_SEARCH_PYTHON,agent?targetPath.join(agent,'binaries','python','envs','default',...bins):null,targetPath.join(home,'.local','share','taobao-ai-ops','.venv',...bins),targetPath.join(home,'.local','share','taobao-search-product-form','.venv',...bins),...(platform==='win32'?['py','python','python3']:['python3','python'])].filter(Boolean))];
 }
