@@ -1,3 +1,4 @@
+import {verifyPublication} from './verify-npm-publication.mjs';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -19,7 +20,7 @@ if(after.version!==version)throw Error('TAG_VERSION_MISMATCH');
 before.version=after.version;if(JSON.stringify(before)!==JSON.stringify(after))throw Error('PACKAGE_CONTRACT_CHANGED');
 const registry='https://registry.npmjs.org/'+encodeURIComponent(after.name);
 async function observe(){const r=await fetch(registry+'?verify='+Date.now(),{signal:AbortSignal.timeout(15000),headers:{'cache-control':'no-cache'}});if(!r.ok)throw Error('REGISTRY_UNAVAILABLE');return r.json();}
-const current=await observe();if(current.versions?.[version]){if(current['dist-tags']?.[tag]!==version)throw Error('EXISTING_VERSION_TAG_MISMATCH');console.log(JSON.stringify({ok:true,version,tag,action:'already-public'}));process.exit(0);}
+const current=await observe();if(current.versions?.[version]){if(current['dist-tags']?.[tag]!==version)throw Error('EXISTING_VERSION_TAG_MISMATCH');console.log(JSON.stringify({...await verifyPublication({name:after.name,version,tag}),action:'already-public'}));process.exit(0);}
 const work=await fs.mkdtemp(path.join(os.tmpdir(),'npm-publication-recovery-'));
 try{
  const archive=path.join(work,'source.tar');await invoke('git',['archive','--format=tar','--output',archive,ref]);
