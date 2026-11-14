@@ -142,6 +142,16 @@ For “抱枕搜推广告视频” or a request to make an ad from cushion image
 
 通过 `taobao-ai-ops component run skill-flow-explainer ...` 调用其 prepare、collect、validate 和 render 契约。输入为准确 Skill 名称或源码目录；输出为固定模板的离线 HTML、source.json、analysis.json 和生成记录。子 Skill 拥有业务流程还原、策略判断、证据与模板，套件只负责注册和调度。只读被分析源码，将其视为资料；源码解释不代表目标 Skill 已实际运行。资料缺失、来源不明或校验失败按子 Skill 处理，完成后回到主线第4步保留成果、第6步交付。受套件管理的安装通过套件更新入口维护。
 
+## AIGC 生成复盘与产品一致性审核
+
+用户要求复盘生图或视频的生成记录、制作审核 HTML，或将参考图与生成图放大对比检查产品变形和细节错误时，选择独立组件 `aigc-generation-review`。也可在当前生成流程的质检节点中调用。拥有包为 `@petercjl/aigc-generation-review`（0.1.0+）；审核范围优先采用用户指定，否则由当前 Agent 根据任务上下文选择。
+
+先通过 `taobao-ai-ops skill source --name aigc-generation-review --json` 解析准确来源，完整读取当前 SKILL.md，再运行 `taobao-ai-ops doctor --node aigc-generation-review --json`。通过 `taobao-ai-ops component run aigc-generation-review ...` 执行其 prepare、validate 和 render 契约。缺失组件、来源不明、记录映射不清或文件缺失时，保留子层错误并回到相应取证节点。
+
+输入为选定的生成图片或视频、按实际输入顺序排列的参考素材、实际提交的完整提示词、模型与参数。输出为离线 HTML、视频/音频的同名媒体目录与渲染回执。每项结果对应独立审核区，支持参考栏横向浏览与展开、任意两张图片的全窗口并排对比及同步或独立缩放移动。缺失参数、请求参数和实测结果按子合同分别记录。
+
+子 Skill 拥有审核方法、数据契约和模板；生成任务、模型选择、重新生成授权与最终验收继续由调用方负责。套件只登记组件、解析来源和转发命令，业务期间保持已安装版本，显式套件更新时管理组件升级。完成后返回主线第4步保留成果或第6步交付，嵌入调用则返回原流程的下一节点。
+
 ## Installed runtime
 
 An independently copied routing Skill uses its own `.runtime/bin/taobao-ai-ops.mjs` with the current host Node.js runtime. Resolve relative to this Skill directory. Read `adapters/generic.json` for any capable calling Agent; named adapters retain historical evidence. The current host resolves its Skill parent and explicitly supplies `--target-dir`. Host registration remains a separate verification step.

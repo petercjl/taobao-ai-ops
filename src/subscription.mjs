@@ -51,7 +51,7 @@ export async function collectionCheck(previous,registry=fetch,approved=[],channe
  const changed=previous?.version!==PACKAGE.version||JSON.stringify(members.map(m=>[m.id,m.package,m.version,m.skills,m.channel??'latest']))!==JSON.stringify(previous?.members?.map(m=>[m.id,m.package,m.version,m.skills,m.channel??'latest']));
  return {ok:true,schemaVersion:1,package:PACKAGE.name,version:PACKAGE.version,changed,members};
 }
-export const maintenanceEnvironment=()=>({...process.env,AGENT_PACKAGE_UPDATE_CHECK:'0',TAOBAO_AI_OPS_AUTO_UPDATE:'0',TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0'});
+export const maintenanceEnvironment=()=>({...process.env,AGENT_PACKAGE_UPDATE_CHECK:'0',AIGC_REVIEW_UPDATE_CHECK:'0',TAOBAO_AI_OPS_AUTO_UPDATE:'0',TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0'});
 async function run(command,args,timeout=300000,cwd){
  return new Promise((resolve,reject)=>{
   const child=spawn(command,args,{cwd,env:maintenanceEnvironment(),stdio:['ignore','pipe','pipe'],windowsHide:true});
@@ -169,7 +169,7 @@ export async function collectionPrepare(opts,services={}){
   await copySkill('taobao-ai-operations',path.join(shell,'skills','taobao-ai-operations'),path.join(shell,'bin','taobao-ai-ops.mjs'),{package:PACKAGE.name,version:PACKAGE.version});
   const state=path.join(directory,'state');await fs.mkdir(state);
   await fs.writeFile(path.join(state,'components.json'),JSON.stringify({schema_version:1,components:records}),{flag:'wx',mode:0o600});
-  const receipt={...plan,skillsDirectory:skills,skills:installed,environment:{TAOBAO_AI_OPS_STATE_DIR:state,TAOBAO_AI_OPS_AUTO_UPDATE:'0',AGENT_PACKAGE_UPDATE_CHECK:'0'}};
+  const receipt={...plan,skillsDirectory:skills,skills:installed,environment:{TAOBAO_AI_OPS_STATE_DIR:state,TAOBAO_AI_OPS_AUTO_UPDATE:'0',AGENT_PACKAGE_UPDATE_CHECK:'0',AIGC_REVIEW_UPDATE_CHECK:'0'}};
   for(const skill of installed){
    const environment=skill.package===MANIFEST.components['dmp-product-report']?.package?componentEnvironment('dmp-product-report',receipt.environment,records):receipt.environment;
    await fs.writeFile(path.join(skill.directory,'.collection-runtime.json'),JSON.stringify({runtimeEntry:skill.runtimeEntry,environment,package:skill.package,version:skill.version}),{flag:'wx',mode:0o600});

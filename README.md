@@ -141,3 +141,9 @@ Each component is an independent `@petercjl` npm package with its own canonical 
 CI 在各自 runner 的临时状态目录中准备完整组件，并让单元、安装恢复和业务合同检查共用同一版本集合。服务授权和实际生图质量验证另行记录；测试环境准备不授权登录或付费生成。
 
 抱枕搜推广告视频由独立组件 `@petercjl/pillow-ad-video` 提供，默认 9:16。使用时向当前 Agent 发送「把我附上的抱枕图片做成一条搜推广告视频。」
+
+## AIGC 生成复盘
+
+已包含独立组件 `@petercjl/aigc-generation-review`：将参考素材、生成结果、实际提示词和参数整理为离线 HTML，并支持两图放大对比检查产品一致性。可在生成流程中调用，也可在流程结束后主动审核。
+
+> 用 taobao-ai-ops 复盘这次生成的图片和视频。
