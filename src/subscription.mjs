@@ -36,6 +36,7 @@ export async function collectionCheck(previous,registry=fetch,approved=[],channe
   const old=previous?.members?.find(m=>m.package===c.package);
   const channel=requested[id]??old?.channel??'latest';if(!['latest','next'].includes(channel))throw fail('INVALID_CHANNEL_SELECTION',id);
   const channelSwitch=Boolean(old&&Object.hasOwn(requested,id)&&channel!==(old.channel??'latest'));
+  if(old&&Object.keys(requested).length&&!Object.hasOwn(requested,id)){members.push({id,package:c.package,version:old.version,available:old.version,bin:c.bin,skills:c.skills,channel,requestedChannel:channel,blocked:false,explicitMigration:false,channelSwitch:false});continue;}
   const response=await registry(`https://registry.npmjs.org/${encodeURIComponent(c.package)}/${channel}`,{signal:AbortSignal.timeout(15000)});
   if(response.status===404&&channel==='next')throw fail('CHANNEL_UNAVAILABLE',`${c.package} has no next release; keep current collection`);
   if(!response.ok)throw fail('REGISTRY_UNAVAILABLE',`${c.package}: HTTP ${response.status}; keep current collection`);

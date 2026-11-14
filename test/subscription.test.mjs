@@ -169,3 +169,9 @@ test('unpublished next and invalid channel selection fail without falling back t
  for(const value of [{unknown:'next'},{[id]:'beta'},'not-json',[]])await assert.rejects(collectionCheck(undefined,registry,[],value),e=>['UNKNOWN_COMPONENT','INVALID_CHANNEL_SELECTION'].includes(e.code));
  await assert.rejects(collectionCheck(undefined,async url=>({ok:true,json:async()=>({name:decodeURIComponent(url.split('/').at(-2)),version:'1.1.0-next.1'})})),{code:'INVALID_REGISTRY_IDENTITY'});
 });
+
+test('switching one tool channel retains all other installed versions even when newer releases exist',async()=>{
+ const first=await collectionCheck(undefined,registry),id=Object.keys(MANIFEST.components)[0];let calls=0;
+ const next=await collectionCheck(first,async url=>{calls++;return {ok:true,json:async()=>({name:decodeURIComponent(url.split('/').at(-2)),version:url.endsWith('/next')?'2.0.0-next.0':'2.0.0'})};},[],{[id]:'next'});
+ assert.equal(calls,1);assert(next.members.filter(m=>m.id!==id).every(m=>m.version==='1.0.0'&&!m.blocked));assert.equal(next.members.find(m=>m.id===id).version,'2.0.0-next.0');
+});
