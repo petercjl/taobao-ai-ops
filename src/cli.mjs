@@ -10,7 +10,7 @@ import {collectionCheck,collectionPrepare} from './subscription.mjs';
 import fs from 'node:fs/promises';
 const CONTRACT=JSON.parse(await fs.readFile(new URL('../capabilities.json',import.meta.url),'utf8'));
 const print=v=>console.log(JSON.stringify(v,null,2));
-function options(args){const out={};for(let i=0;i<args.length;i++){const k=args[i];if(['--json','--adopt','--yes','--owned'].includes(k)){if(Object.hasOwn(out,k.slice(2)))throw fail('USAGE','Duplicate option '+k);out[k.slice(2)]=true;}else if(['--accept-component-upgrades','--directory','--previous','--path','--agent','--target-dir','--name','--node','--profile','--mode','--run-dir','--input','--out','--candidate','--query','--tag','--context','--run-id'].includes(k)){if(!args[i+1]||args[i+1].startsWith('--'))throw fail('USAGE',`${k} needs a value`);const key=k.slice(2).replace(/-([a-z])/g,(_,c)=>c.toUpperCase());if(Object.hasOwn(out,key))throw fail('USAGE','Duplicate option '+k);out[key]=args[++i];}else throw fail('USAGE',`Unknown option ${k}`);}return out;}
+function options(args){const out={};for(let i=0;i<args.length;i++){const k=args[i];if(['--json','--adopt','--yes','--owned'].includes(k)){if(Object.hasOwn(out,k.slice(2)))throw fail('USAGE','Duplicate option '+k);out[k.slice(2)]=true;}else if(['--component-channels','--accept-component-upgrades','--directory','--previous','--path','--agent','--target-dir','--name','--node','--profile','--mode','--run-dir','--input','--out','--candidate','--query','--tag','--context','--run-id'].includes(k)){if(!args[i+1]||args[i+1].startsWith('--'))throw fail('USAGE',`${k} needs a value`);const key=k.slice(2).replace(/-([a-z])/g,(_,c)=>c.toUpperCase());if(Object.hasOwn(out,key))throw fail('USAGE','Duplicate option '+k);out[key]=args[++i];}else throw fail('USAGE',`Unknown option ${k}`);}return out;}
 export async function main(argv){
  const [command,action,...rest]=argv;
  if(['--help','help'].includes(command)&&argv.includes('--json'))return print(CONTRACT);
@@ -31,11 +31,11 @@ export async function main(argv){
  }
  if(command==='nodes'&&action==='list')return print(MANIFEST.nodes);
  if(command==='node'&&action==='show')return print(nodeFor(rest[0]));
- if(command==='capabilities')return print({package:PACKAGE.name,version:PACKAGE.version,...MANIFEST,...CONTRACT,collectionContract:{schemaVersion:1,manifest:'sealwork.collection.json',check:['collection','check','--json'],prepare:['collection','prepare','--directory','{newDirectory}','--yes','--json'],previousOption:'--previous',migrationOption:'--accept-component-upgrades',migrationPolicy:'Explicitly approved component IDs may cross compatibility boundaries; unselected incompatible versions stay pinned; downgrades stay blocked',installationMode:'host-owned-generation',hostDiscoveryAuthority:'host'}});
+ if(command==='capabilities')return print({package:PACKAGE.name,version:PACKAGE.version,...MANIFEST,...CONTRACT,collectionContract:{schemaVersion:1,componentChannels:{option:'--component-channels',format:'JSON object keyed by registered component id',default:'latest',supported:['latest','next'],explicitSwitchMayDowngrade:true},manifest:'sealwork.collection.json',check:['collection','check','--json'],prepare:['collection','prepare','--directory','{newDirectory}','--yes','--json'],previousOption:'--previous',migrationOption:'--accept-component-upgrades',migrationPolicy:'Explicitly approved component IDs may cross compatibility boundaries; unselected incompatible versions stay pinned; downgrades stay blocked',installationMode:'host-owned-generation',hostDiscoveryAuthority:'host'}});
  if(command==='doctor'){const opts=options(argv.slice(1));const r=await doctor(opts.node,opts.mode);print(r);if(!r.ok)process.exitCode=1;return;}
  const opts=options(rest);
  if(command==='collection'){
-  if(action==='check')return print(await collectionCheck(opts.previous?JSON.parse(await fs.readFile(opts.previous,'utf8')):undefined,undefined,opts.acceptComponentUpgrades));
+  if(action==='check')return print(await collectionCheck(opts.previous?JSON.parse(await fs.readFile(opts.previous,'utf8')):undefined,undefined,opts.acceptComponentUpgrades,opts.componentChannels));
   if(action==='prepare')return print(await collectionPrepare(opts));
  }
 

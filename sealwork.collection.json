@@ -5,6 +5,23 @@
   "name": "淘宝 AI 运营工具集",
   "description": "独立发布的电商 Skill 与 CLI，自动检查壳和成员更新并安装新增成员。",
   "entry": "bin/taobao-ai-ops.mjs",
-  "platforms": ["darwin", "win32", "linux"],
-  "autoUpdate": {"channel": "latest", "compatibility": "semver"}
+  "platforms": [
+    "darwin",
+    "win32",
+    "linux"
+  ],
+  "autoUpdate": {
+    "channel": "latest",
+    "compatibility": "semver"
+  },
+  "componentChannels": {
+    "contract": 1,
+    "default": "latest",
+    "supported": [
+      "latest",
+      "next"
+    ],
+    "selection": "per-component",
+    "option": "--component-channels"
+  }
 }

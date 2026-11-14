@@ -12,23 +12,42 @@ export function compatible(current,next){
  const a=current.split('.').map(Number),b=next.split('.').map(Number);
  return a[0]===b[0]&&(a[0]!==0||a[1]===b[1])&&next.localeCompare(current,undefined,{numeric:true})>=0;
 }
-export async function collectionCheck(previous,registry=fetch,approved=[]){
+const semver=v=>typeof v==='string'&&/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*)?$/.test(v);
+export function compareVersions(a,b){
+ if(!semver(a)||!semver(b))throw fail('INVALID_VERSION','Expected exact semantic versions');
+ const [baseA,preA]=a.split(/-(.*)/s),[baseB,preB]=b.split(/-(.*)/s);
+ const x=baseA.split('.'),y=baseB.split('.');for(let i=0;i<3;i++)if(BigInt(x[i])!==BigInt(y[i]))return BigInt(x[i])>BigInt(y[i])?1:-1;
+ if(preA===preB)return 0;if(preA===undefined)return 1;if(preB===undefined)return -1;
+ const left=preA.split('.'),right=preB.split('.');for(let i=0;i<Math.max(left.length,right.length);i++){if(left[i]===undefined)return -1;if(right[i]===undefined)return 1;if(left[i]===right[i])continue;const n=/^\d+$/.test(left[i]),m=/^\d+$/.test(right[i]);if(n&&m)return BigInt(left[i])>BigInt(right[i])?1:-1;if(n!==m)return n?-1:1;return left[i]>right[i]?1:-1;}return 0;
+}
+export function componentChannels(value={}){
+ let channels=value;if(typeof value==='string'){try{channels=JSON.parse(value);}catch{throw fail('INVALID_CHANNEL_SELECTION','Expected a JSON object of component ids to latest/next');}}
+ if(!channels||typeof channels!=='object'||Array.isArray(channels))throw fail('INVALID_CHANNEL_SELECTION','Expected component channel mapping');
+ for(const [id,channel] of Object.entries(channels)){if(!Object.hasOwn(MANIFEST.components,id))throw fail('UNKNOWN_COMPONENT',id);if(!['latest','next'].includes(channel))throw fail('INVALID_CHANNEL_SELECTION',id);}
+ return channels;
+}
+export async function collectionCheck(previous,registry=fetch,approved=[],channelSelection={}){
+ const requested=componentChannels(channelSelection);
  const selected=new Set(typeof approved==='string'?approved.split(',').map(x=>x.trim()).filter(Boolean):approved);
  for(const id of selected)if(!Object.hasOwn(MANIFEST.components,id))throw fail('UNKNOWN_COMPONENT',id);
  if(previous&&(previous.package!==PACKAGE.name||!Array.isArray(previous.members)||!stable(previous.version)))throw fail('INVALID_PREVIOUS_COLLECTION','Previous receipt must belong to this collection');
  const members=[];
  for(const [id,c] of Object.entries(MANIFEST.components)){
-  const response=await registry(`https://registry.npmjs.org/${encodeURIComponent(c.package)}/latest`,{signal:AbortSignal.timeout(15000)});
+  const old=previous?.members?.find(m=>m.package===c.package);
+  const channel=requested[id]??old?.channel??'latest';if(!['latest','next'].includes(channel))throw fail('INVALID_CHANNEL_SELECTION',id);
+  const channelSwitch=Boolean(old&&Object.hasOwn(requested,id)&&channel!==(old.channel??'latest'));
+  const response=await registry(`https://registry.npmjs.org/${encodeURIComponent(c.package)}/${channel}`,{signal:AbortSignal.timeout(15000)});
+  if(response.status===404&&channel==='next')throw fail('CHANNEL_UNAVAILABLE',`${c.package} has no next release; keep current collection`);
   if(!response.ok)throw fail('REGISTRY_UNAVAILABLE',`${c.package}: HTTP ${response.status}; keep current collection`);
   const metadata=await response.json();
-  if(metadata.name!==c.package||!stable(metadata.version))throw fail('INVALID_REGISTRY_IDENTITY',c.package);
-  const old=previous?.members?.find(m=>m.package===c.package);
-  const explicitMigration=Boolean(old&&selected.has(id)&&metadata.version.localeCompare(old.version,undefined,{numeric:true})>=0);
-  const accepted=!old||compatible(old.version,metadata.version)||explicitMigration;
+  if(metadata.name!==c.package||!(channel==='latest'?stable(metadata.version):semver(metadata.version)))throw fail('INVALID_REGISTRY_IDENTITY',c.package);
+  const explicitMigration=Boolean(old&&selected.has(id)&&compareVersions(metadata.version,old.version)>=0);
+  const compatibleNext=Boolean(old&&channel==='next'&&semver(old.version)&&compareVersions(metadata.version,old.version)>=0&&compatible(old.version.split('-')[0],metadata.version.split('-')[0]));
+  const accepted=!old||compatible(old.version,metadata.version)||compatibleNext||explicitMigration||channelSwitch;
   members.push({id,package:c.package,version:accepted?metadata.version:old.version,available:metadata.version,
-   bin:c.bin,skills:c.skills,blocked:!accepted,explicitMigration});
+   bin:c.bin,skills:c.skills,channel:accepted?channel:(old.channel??'latest'),requestedChannel:channel,blocked:!accepted,explicitMigration,channelSwitch});
  }
- const changed=previous?.version!==PACKAGE.version||JSON.stringify(members.map(m=>[m.id,m.package,m.version,m.skills]))!==JSON.stringify(previous?.members?.map(m=>[m.id,m.package,m.version,m.skills]));
+ const changed=previous?.version!==PACKAGE.version||JSON.stringify(members.map(m=>[m.id,m.package,m.version,m.skills,m.channel??'latest']))!==JSON.stringify(previous?.members?.map(m=>[m.id,m.package,m.version,m.skills,m.channel??'latest']));
  return {ok:true,schemaVersion:1,package:PACKAGE.name,version:PACKAGE.version,changed,members};
 }
 export const maintenanceEnvironment=()=>({...process.env,AGENT_PACKAGE_UPDATE_CHECK:'0',TAOBAO_AI_OPS_AUTO_UPDATE:'0',TBCLI_UPDATE_CHECK:'0',SYCMCLI_DISABLE_AUTO_UPDATE:'1',SEEDAUDIO_AUTO_UPDATE:'0',SEALSEEK_MEDIA_AUTO_UPDATE:'0',COMPETITOR_CANVAS_AUTO_UPDATE:'0'});
@@ -110,7 +129,7 @@ export async function collectionPrepare(opts,services={}){
  const directory=path.resolve(opts.directory);
  if(await stat(directory))throw fail('TARGET_EXISTS','Candidate directory must be new');
  const previous=opts.previous?JSON.parse(await fs.readFile(opts.previous,'utf8')):undefined;
- const plan=await collectionCheck(previous,services.registry,opts.acceptComponentUpgrades);
+ const plan=await collectionCheck(previous,services.registry,opts.acceptComponentUpgrades,opts.componentChannels);
  await fs.mkdir(directory,{recursive:true,mode:0o700});
  try{
   const shell=path.join(directory,'shell'),runtime=path.join(directory,'runtime'),skills=path.join(directory,'skills');

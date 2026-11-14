@@ -7,7 +7,7 @@ import {execFile,spawnSync} from 'node:child_process';
 import {createServer} from 'node:http';
 import {promisify} from 'node:util';
 import {MANIFEST,PACKAGE} from '../src/core.mjs';
-import {collectionCheck,collectionPrepare,compatible} from '../src/subscription.mjs';
+import {collectionCheck,collectionPrepare,compatible,compareVersions} from '../src/subscription.mjs';
 
 const registry=async url=>({ok:true,json:async()=>({name:decodeURIComponent(url.split('/').at(-2)),version:'1.0.0'})});
 test('member releases are checked without changing the shell; newly registered members are selected',async()=>{
@@ -152,4 +152,20 @@ test('incremental candidate keeps unchanged dependencies through a new registry 
   if(npmEnv===undefined)delete process.env.npm_execpath;else process.env.npm_execpath=npmEnv;
   await fs.rm(temp,{recursive:true,force:true});
  }
+});
+
+
+test('per-component next selection persists and explicit latest return permits only that channel downgrade',async()=>{
+ const first=await collectionCheck(undefined,registry),id=Object.keys(MANIFEST.components)[0],other=Object.keys(MANIFEST.components)[1];
+ const requested=[];const tagged=async url=>{requested.push(url);return {ok:true,json:async()=>({name:decodeURIComponent(url.split('/').at(-2)),version:url.endsWith('/next')?'1.1.0-next.10':'1.0.0'})};};
+ const next=await collectionCheck(first,tagged,[],{[id]:'next'});const row=next.members.find(m=>m.id===id);assert.equal(row.version,'1.1.0-next.10');assert.equal(row.channel,'next');assert(row.channelSwitch);assert(next.changed);assert.equal(next.members.find(m=>m.id===other).version,'1.0.0');assert.equal(requested.filter(u=>u.endsWith('/next')).length,1);
+ const unchanged=await collectionCheck(next,tagged);assert.equal(unchanged.changed,false);assert.equal(unchanged.members.find(m=>m.id===id).channel,'next');
+ const back=await collectionCheck(next,tagged,[],{[id]:'latest'});assert.equal(back.members.find(m=>m.id===id).version,'1.0.0');assert.equal(back.members.find(m=>m.id===id).channel,'latest');assert(back.changed);
+ const backward=await collectionCheck(next,async url=>({ok:true,json:async()=>({name:decodeURIComponent(url.split('/').at(-2)),version:url.endsWith('/next')?'1.1.0-next.2':'1.0.0'})}));assert(backward.members.find(m=>m.id===id).blocked);assert.equal(backward.changed,false);
+ assert.equal(compareVersions('1.1.0-next.10','1.1.0-next.2'),1);assert.equal(compareVersions('1.1.0','1.1.0-next.10'),1);
+});
+test('unpublished next and invalid channel selection fail without falling back to latest',async()=>{
+ const id=Object.keys(MANIFEST.components)[0];let calls=0;await assert.rejects(collectionCheck(undefined,async()=>{calls++;return {ok:false,status:404};},[],{[id]:'next'}),{code:'CHANNEL_UNAVAILABLE'});assert.equal(calls,1);
+ for(const value of [{unknown:'next'},{[id]:'beta'},'not-json',[]])await assert.rejects(collectionCheck(undefined,registry,[],value),e=>['UNKNOWN_COMPONENT','INVALID_CHANNEL_SELECTION'].includes(e.code));
+ await assert.rejects(collectionCheck(undefined,async url=>({ok:true,json:async()=>({name:decodeURIComponent(url.split('/').at(-2)),version:'1.1.0-next.1'})})),{code:'INVALID_REGISTRY_IDENTITY'});
 });
