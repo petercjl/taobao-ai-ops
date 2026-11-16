@@ -1,3 +1,4 @@
+import {collectionManifestSchema} from './legacy-collection-contract.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {ROOT,MANIFEST,PACKAGE,nodeFor,source,closure} from '../src/core.mjs';
@@ -34,3 +35,5 @@ for(const n of MANIFEST.nodes.filter(n=>!n.component)){
  const manifest=path.join(source(n),'package.json');
  try{if(JSON.parse(await fs.readFile(manifest,'utf8')).version!==PACKAGE.version)throw Error('Shipped Skill version drift');}catch(e){if(e.code!=='ENOENT')throw e;}
 }
+
+collectionManifestSchema.parse(JSON.parse(await fs.readFile(path.join(ROOT,'sealwork.collection.json'),'utf8')));

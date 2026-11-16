@@ -10,7 +10,7 @@ import {ROOT,PACKAGE} from '../src/core.mjs';
 const exec=promisify(execFile),work=await fs.mkdtemp(path.join(os.tmpdir(),'ops-archived-updater-'));
 const npmCli=process.env.npm_execpath;
 if(!npmCli)throw Error('Run through npm run test:upgrade so the real npm entry is resolved.');
-const npm=async(args,env=process.env)=>exec(process.execPath,[npmCli,...args],{env,timeout:240000,maxBuffer:16*1024*1024});
+const npm=async(args,env=process.env,cwd=ROOT)=>exec(process.execPath,[npmCli,...args],{env,cwd,timeout:240000,maxBuffer:16*1024*1024});
 const run=async(entry,args,env)=>{try{const r=await exec(process.execPath,[entry,...args],{env,timeout:300000,maxBuffer:16*1024*1024});return JSON.parse(r.stdout);}catch(e){throw Error('CLI operation failed: '+args.join(' ')+'\n'+(e.stderr||e.message));}};
 let server;
 try{
@@ -20,6 +20,7 @@ try{
  const version=PACKAGE.version==='0.4.17'?'0.4.18':PACKAGE.version;
  const manifest=JSON.parse(await fs.readFile(path.join(source,'package.json'),'utf8'));manifest.version=version;await fs.writeFile(path.join(source,'package.json'),JSON.stringify(manifest,null,2));
  const lock=JSON.parse(await fs.readFile(path.join(source,'package-lock.json'),'utf8'));lock.version=version;lock.packages[''].version=version;await fs.writeFile(path.join(source,'package-lock.json'),JSON.stringify(lock,null,2));
+ await npm(['ci','--ignore-scripts','--no-audit','--no-fund'],process.env,source);
  const packed=await npm(['pack',source,'--pack-destination',work,'--json']);const info=JSON.parse(packed.stdout.slice(packed.stdout.lastIndexOf('\n[')+1))[0];const tarball=await fs.readFile(path.join(work,info.filename));
  const prefix=path.join(work,'global');await npm(['install','--global','--prefix',prefix,'--ignore-scripts','--no-audit','--no-fund',PACKAGE.name+'@0.4.17','--registry','https://registry.npmjs.org']);
  const modules=process.platform==='win32'?path.join(prefix,'node_modules'):path.join(prefix,'lib','node_modules');const entry=path.join(modules,...PACKAGE.name.split('/'),'bin','taobao-ai-ops.mjs');

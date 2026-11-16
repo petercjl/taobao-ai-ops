@@ -1,6 +1,6 @@
 {
   "name": "@petercjl/taobao-ai-ops",
-  "version": "0.4.21",
+  "version": "0.4.22",
   "description": "Independent Taobao AI operations SOP skills with a managed suite lifecycle",
   "repository": {
     "type": "git",
@@ -42,5 +42,8 @@
     "check": "node scripts/validate-suite.mjs",
     "prepack": "npm run check",
     "test:upgrade": "node scripts/test-upgrade-compat.mjs"
+  },
+  "devDependencies": {
+    "zod": "4.1.12"
   }
 }

@@ -13,15 +13,5 @@
   "autoUpdate": {
     "channel": "latest",
     "compatibility": "semver"
-  },
-  "componentChannels": {
-    "contract": 1,
-    "default": "latest",
-    "supported": [
-      "latest",
-      "next"
-    ],
-    "selection": "per-component",
-    "option": "--component-channels"
   }
 }
