@@ -19,7 +19,7 @@ test('shell dispatch selects registered tool entries and verifies Boardmix JSON 
   const skill=path.join(root,'skill');await fs.mkdir(skill);await fs.writeFile(path.join(skill,'SKILL.md'),'fixture');
   const entry=path.join(root,'cli.mjs');await fs.writeFile(entry,'console.log(JSON.stringify({package:"@petercjl/boardmixcli",version:"0.1.6"}));');
   await fs.writeFile(path.join(root,'capabilities.json'),'{}');
-  const components={boardmixcli:{root,entry,version:'0.1.6',sources:{boardmixcli:skill}},tbcli:{entry:'registered-tbcli'},'sealseek-media':{entry:'registered-media'}};
+  const components={boardmixcli:{package:'@petercjl/boardmixcli',root,entry,version:'0.1.6',sources:{boardmixcli:skill}},tbcli:{entry:'registered-tbcli'},'sealseek-media':{entry:'registered-media'}};
   await fs.writeFile(path.join(root,'components.json'),JSON.stringify({components}));
   const env=componentEnvironment('competitor-visual-canvas',{BOARDMIXCLI_ENTRY:'wrong-global'});
   assert.equal(env.BOARDMIXCLI_ENTRY,entry);assert.equal(env.TBCLI_ENTRY,'registered-tbcli');assert.equal(env.SEALSEEK_MEDIA_ENTRY,undefined);
