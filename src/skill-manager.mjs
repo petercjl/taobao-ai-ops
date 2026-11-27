@@ -95,7 +95,8 @@ export async function install(opts,options={}){
     if((await stat(operationPath))?.isFile()){
      const operation=await json(operationPath);
      if(operation.package==='@petercjl/portable-skill-creator'&&operation.phase==='complete'&&
-        operation.agent==='suite-managed'&&operation.target===dest&&item.managed&&record.backup){
+        operation.agent==='suite-managed'&&
+        operation.target===path.join(await fs.realpath(root),n.skill)&&item.managed&&record.backup){
       const operationBackup=backup+'.operation.json';
       await fs.rename(operationPath,operationBackup);
       record.operation={path:operationPath,backup:operationBackup};
