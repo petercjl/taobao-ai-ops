@@ -11,6 +11,7 @@
       "html-report",
       "project-management",
       "seedaudio-tools",
+      "toapiscli",
       "sourcing-tools",
       "product-sourcing",
       "opportunity-sourcing",
@@ -69,7 +70,8 @@
         "xiaohongshu-photo-style",
         "pillow-ad-video",
         "skill-flow-explainer",
-        "aigc-generation-review"
+        "aigc-generation-review",
+        "toapiscli"
       ],
       "python_imports": [],
       "scripts": [],
@@ -173,6 +175,16 @@
       "skill": "seedaudiocli",
       "component": "seedaudiocli",
       "stage": "visual-production-audio",
+      "requires_skills": [],
+      "python_imports": [],
+      "scripts": [],
+      "native_requirements": []
+    },
+    {
+      "id": "toapiscli",
+      "skill": "toapiscli",
+      "component": "toapiscli",
+      "stage": "media-generation",
       "requires_skills": [],
       "python_imports": [],
       "scripts": [],
@@ -622,6 +634,11 @@
       "component": "seedaudiocli",
       "role": "audio generation, reference voices, image-conditioned audio and task recovery"
     },
+    "toapiscli": {
+      "package": "@petercjl/toapiscli",
+      "component": "toapiscli",
+      "role": "image and video model discovery, generation and task recovery through configured media providers"
+    },
     "1688cli": {
       "package": "@petercjl/1688cli",
       "component": "1688cli",
@@ -879,6 +896,19 @@
       ],
       "kind": "application-skill",
       "skill_installation": "component-managed"
+    },
+    "toapiscli": {
+      "package": "@petercjl/toapiscli",
+      "bin": "toapiscli",
+      "skills": ["toapiscli"],
+      "kind": "cli-skill",
+      "skill_installation": "component-managed",
+      "doctor_contract": {
+        "ok": "ok",
+        "package": "package",
+        "version": "version",
+        "minimum_node": 22
+      }
     },
     "aigc-generation-review": {
       "package": "@petercjl/aigc-generation-review",

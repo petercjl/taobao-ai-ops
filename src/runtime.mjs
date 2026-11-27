@@ -5,6 +5,7 @@ import {spawnSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {ROOT,MANIFEST,PACKAGE,nodeFor,source,componentRecord,componentRecords,fail} from './core.mjs';
 export function componentEnvironment(id,env=process.env,records=componentRecords()){
+ if(id==='toapiscli')env={...env,TOAPISCLI_UPDATE_CHECK:'0'};
  let reportEntries={};
  if(id==='dmp-product-report'){if(!records.tbcli?.entry)throw fail('COMPONENT_NOT_INSTALLED','DMP report requires the registered tbcli component');reportEntries={DMP_REPORT_TBCLI_ENTRY:records.tbcli.entry,AGENT_PACKAGE_UPDATE_CHECK:'0'};}
  const canvasEntries=id==='competitor-visual-canvas'?Object.fromEntries([['tbcli','TBCLI_ENTRY'],['boardmixcli','BOARDMIXCLI_ENTRY']].filter(([key])=>records[key]?.entry).map(([key,variable])=>[variable,records[key].entry])):{};

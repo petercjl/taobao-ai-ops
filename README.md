@@ -39,7 +39,10 @@
 - @petercjl/product-seeding-studio：按商品制作生活化种草图文，交付八张候选图、整篇文案和独立复盘。
 - @petercjl/xiaohongshu-photo-style：一次性编辑其他 AI 工具生成的种草套图，统一调色和花字。图片编辑依赖本机 @petercjl/photocraft-own 及其配套 Skill。
 - @petercjl/xhscli：只读采集小红书笔记及媒体，为种草方向研究提供参考。
+- @petercjl/toapiscli：通过已配置的 NAS、ToAPIs 或 AI派查找模型、生成图片和视频、恢复任务及下载成品。需要 Node.js 22+，实际生成使用获授权的渠道配置。
 - taobao-ai-operations：套件自带的管理与业务路由 Skill。
+
+> 请用 toapiscli 查看当前已配置渠道可用的生图和视频模型。
 
 yccli 为取数时按需准备的外部工具，可用 TAOBAO_AI_OPS_YCCLI 指定；Excel 分析不需要 NAS、VPN 或平台登录。账号与授权留在包外，安装不会获得服务权限。
 
