@@ -121,7 +121,7 @@ Each component is an independent `@petercjl` npm package with its own canonical 
 
 ## Skill 创建与维护
 
-独立组件 `@petercjl/portable-skill-creator` 提供Skill创建、更新、审查、测试与迁移方法，台账按用户业务流程图展示。当前Agent需要Node.js 22+、Python 3.10+及可动态加载的基础 `skill-creator`。套件管理独立包的安装和显式更新。
+独立组件 `@lumyne/portable-skill-creator` 提供Skill创建、更新、审查、测试与迁移方法，从 0.2.2 起，创建与修改先提交规划，经确认后再实施。规划 HTML 使用套件中的 `skill-flow-explainer` 原版模板。当前Agent需要Node.js 22+、Python 3.10+及可动态加载的基础 `skill-creator`。套件管理独立包的安装和显式更新。
 
 > 用 portable-skill-creator 创建一个Skill：【说明业务目标与流程】。
 

@@ -88,6 +88,20 @@ export async function install(opts,options={}){
     if(inPlace){await fs.cp(dest,backup,{recursive:true,errorOnExist:true,force:false});if(digest(await fileHashes(dest))!==digest(await fileHashes(backup)))throw fail('BACKUP_VERIFY_FAILED','Backup differs from the current Skill; preserving original target');}
    }
    const record={dest,backup:await stat(backup)?backup:null,inPlace,linkSnapshot};changed.push(record);
+   if(n.component==='portable-skill-creator'){
+    // The old creator puts its install journal beside the target. Keep its completed
+    // journal with the suite backup before re-materializing under the new package.
+    const operationPath=dest+'.operation.json';
+    if((await stat(operationPath))?.isFile()){
+     const operation=await json(operationPath);
+     if(operation.package==='@petercjl/portable-skill-creator'&&operation.phase==='complete'&&
+        operation.agent==='suite-managed'&&operation.target===dest&&item.managed&&record.backup){
+      const operationBackup=backup+'.operation.json';
+      await fs.rename(operationPath,operationBackup);
+      record.operation={path:operationPath,backup:operationBackup};
+     }
+    }
+   }
    if(opts.mode&&!['auto','copy','link'].includes(opts.mode))throw fail('USAGE','Mode must be auto, copy or legacy link');
    const mode='copy';
    if(!['link','copy'].includes(mode))throw fail('USAGE','Mode must be auto, link or copy');
@@ -106,6 +120,19 @@ export async function install(opts,options={}){
   const registration=path.join(registry,createHash('sha256').update(root).digest('hex')+'.json');
   if(!await stat(registration))await fs.writeFile(registration,JSON.stringify({root}),{flag:'wx'});
   return {ok:true,package:PACKAGE.name,version:PACKAGE.version,targetRoot:root,transaction,skills:results};
- }catch(e){for(const item of changed.reverse()){if(item.linkSnapshot){if(await stat(item.dest))await fs.rm(item.dest,{recursive:true,force:true});await fs.symlink(item.linkSnapshot.raw,item.dest,item.linkSnapshot.kind);}else if(item.backup)await restore(item.backup,item.dest,item.inPlace);else if(await stat(item.dest))await fs.rm(item.dest,{recursive:true,force:true});}throw e;}
+ }catch(e){
+  for(const item of changed.reverse()){
+   if(item.linkSnapshot){
+    if(await stat(item.dest))await fs.rm(item.dest,{recursive:true,force:true});
+    await fs.symlink(item.linkSnapshot.raw,item.dest,item.linkSnapshot.kind);
+   }else if(item.backup)await restore(item.backup,item.dest,item.inPlace);
+   else if(await stat(item.dest))await fs.rm(item.dest,{recursive:true,force:true});
+   if(item.operation){
+    if(await stat(item.operation.path))await fs.rename(item.operation.path,item.operation.backup+'.failed');
+    await fs.rename(item.operation.backup,item.operation.path);
+   }
+  }
+  throw e;
+ }
  finally{await fs.rmdir(lock);}
 }

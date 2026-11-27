@@ -347,7 +347,9 @@
       "component": "portable-skill-creator",
       "stage": "skill-authoring",
       "method_version": "portable-skill-creator@0.2",
-      "requires_skills": [],
+      "requires_skills": [
+        "skill-flow-explainer"
+      ],
       "python_imports": [],
       "scripts": [],
       "native_requirements": [
@@ -367,9 +369,10 @@
         "state": "child owns business flow, strategies, privacy, run ledger and confirmation boundaries"
       },
       "required_component_contracts": {
-        "portable-skill-creator": "0.2.1+; business-flow ledger presentation; Node 22+ and Python 3.10+"
+        "portable-skill-creator": "0.2.2+; confirmed planning and a single planning ledger; Node 22+ and Python 3.10+",
+        "skill-flow-explainer": "0.1.1+; original assets/report.html planning template"
       },
-      "contract_resolution": "Resolve the exact current child Skill and live CLI; dynamically load the host-provided base skill-creator, preserving the child confirmation and regression boundaries."
+      "contract_resolution": "Resolve the exact current child Skill and live CLI; dynamically load the host-provided base skill-creator and resolve the exact skill-flow-explainer template for planning, preserving the child confirmation and regression boundaries."
     },
     {
       "id": "product-asset-set",
@@ -675,7 +678,7 @@
       "role": "DMP product performance, promotion and customer composition report with buyer-page product identity"
     },
     "portable-skill-creator": {
-      "package": "@petercjl/portable-skill-creator",
+      "package": "@lumyne/portable-skill-creator",
       "component": "portable-skill-creator",
       "role": "Skill creation, maintenance, portability QA and business-flow run ledger design"
     },
@@ -815,7 +818,7 @@
       ]
     },
     "portable-skill-creator": {
-      "package": "@petercjl/portable-skill-creator",
+      "package": "@lumyne/portable-skill-creator",
       "bin": "portable-skill-creator",
       "skills": [
         "portable-skill-creator"

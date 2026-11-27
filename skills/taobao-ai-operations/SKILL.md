@@ -127,9 +127,9 @@ For explicit Boardmix file, media or object operations, select `boardmix-tools`.
 
 ## Skill 创建与维护
 
-用户要求创建、更新、审查、测试或迁移Skill时，选择 `portable-skill-creator` 节点。独立拥有包为 `@petercjl/portable-skill-creator`（0.2.1+）；创建方法、策略来源、可移植性、业务流程台账和验证规则由该包维护。
+用户要求创建、更新、审查、测试或迁移Skill时，选择 `portable-skill-creator` 节点。独立拥有包为 `@lumyne/portable-skill-creator`（0.2.2+）；创建方法、策略来源、可移植性、业务流程台账和验证规则由该包维护。
 
-通过 `taobao-ai-ops skill source --name portable-skill-creator --json` 解析准确来源，完整读取当前SKILL.md。运行 `taobao-ai-ops doctor --node portable-skill-creator --json` 核对Node、Python及组件版本；当前Agent另外解析并完整读取系统提供的准确逻辑名 `skill-creator`，其缺失返回DEPENDENCY_MISSING，不由套件复制替代。宿主基础Creator解析是运行前置能力，doctor的本地成功不证明它存在。
+通过 `taobao-ai-ops skill source --name portable-skill-creator --json` 解析准确来源，完整读取当前SKILL.md。运行 `taobao-ai-ops doctor --node portable-skill-creator --json` 核对Node、Python及组件版本；当前Agent另外解析并完整读取系统提供的准确逻辑名 `skill-creator`，其缺失返回DEPENDENCY_MISSING，不由套件复制替代。宿主基础 Creator 由当前 Agent 解析。需要生成规划 HTML 时，再按子 Skill 的约定加载套件中的 `skill-flow-explainer`，使用其原版模板。
 
 规范来源在组件npm包内，可使用 `taobao-ai-ops component run portable-skill-creator ...` 运行其实际CLI；本机受管安装副本带有自身 `.runtime`。输入是本次创建/维护意图、可选自然语言流程或脑图、既有资源与知识；输出是子Skill约定的规划、完整资源和验证证据。尊重子Skill当前的规划确认、隐私、独立回归授权和失败恢复规则；来源或能力缺失时停止相应阶段并保留原错误。完成后回到套件主线第4步保留成果、第6步交付。
 

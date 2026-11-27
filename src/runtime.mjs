@@ -128,8 +128,8 @@ export async function doctor(id,mode='excel'){
   const record=componentRecord(n.component);
   const result=spawnSync(process.execPath,[record.entry,'doctor','--json'],{encoding:'utf8',timeout:30000,env:componentEnvironment(n.component)});
   let detail;try{detail=JSON.parse(result.stdout||result.stderr);}catch{detail={ok:false,code:'COMPONENT_DOCTOR_FAILED'};}
-  const version=record.version?.split('.').map(Number);const supported=version?.length===3&&version.every(Number.isInteger)&&(version[0]>0||version[1]>2||version[1]===2&&version[2]>=1);
-  checks.push({id:'creator-version',ok:Boolean(supported),value:record.version,minimum:'0.2.1'});
+  const version=record.version?.split('.').map(Number);const supported=version?.length===3&&version.every(Number.isInteger)&&(version[0]>0||version[1]>2||version[1]===2&&version[2]>=2);
+  checks.push({id:'creator-version',ok:Boolean(supported),value:record.version,minimum:'0.2.2'});
   checks.push({id:'creator-runtime',ok:result.status===0&&detail.ok===true&&detail.package===MANIFEST.components[n.component].package&&detail.version===record.version&&detail.python?.version?.length>=2,value:detail});
  }
  if(n.component==='xiaohongshu-photo-style'){

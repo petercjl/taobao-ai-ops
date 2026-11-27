@@ -13,7 +13,10 @@ export const stat=p=>fs.lstat(p).catch(e=>{if(e.code==='ENOENT')return null;thro
 export const hash=data=>createHash('sha256').update(data).digest('hex');
 export function nodeFor(id){const n=MANIFEST.nodes.find(n=>n.id===id||n.skill===id);if(!n)throw fail('UNKNOWN_NODE',`Unknown node: ${id}`);return n;}
 export function componentRecords(){const file=path.join(stateRoot(),'components.json');const records=existsSync(file)?JSON.parse(readFileSync(file,'utf8')).components||{}:{};return Object.fromEntries(Object.entries(records).filter(([id])=>Object.hasOwn(MANIFEST.components,id)));}
-export function componentRecord(id){if(MANIFEST.retired_components?.[id])throw fail('COMPONENT_RETIRED',`Component ${id} is retired`,MANIFEST.retired_components[id]);const r=componentRecords()[id];if(!r)throw fail('COMPONENT_NOT_INSTALLED',`Install registered component ${id} with components install`);return r;}
+export function componentRecord(id){if(MANIFEST.retired_components?.[id])throw fail('COMPONENT_RETIRED',`Component ${id} is retired`,MANIFEST.retired_components[id]);const r=componentRecords()[id];if(!r)throw fail('COMPONENT_NOT_INSTALLED',`Install registered component ${id} with components install`);
+ const expected=MANIFEST.components[id].package;
+ if(r.package!==expected)throw fail('COMPONENT_IDENTITY_MISMATCH',`Update ${id} from ${r.package} to ${expected} with components install`);
+ return r;}
 export const source=n=>n.component?componentRecord(n.component).sources[n.skill]||(()=>{throw fail('SKILL_SOURCE_MISSING',n.skill);})():path.join(ROOT,'skills',n.skill);
 export const nodeVersion=n=>n.component?componentRecord(n.component).version:PACKAGE.version;
 export function stateRoot(){return process.env.TAOBAO_AI_OPS_STATE_DIR||path.join(os.homedir(),'.local','state','taobao-ai-ops');}

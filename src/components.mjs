@@ -33,14 +33,16 @@ export async function registerComponent(opts){
   const backup=path.join(stateRoot(),'component-backups',randomUUID());await fs.mkdir(backup,{recursive:true});await fs.writeFile(path.join(backup,'components.json'),JSON.stringify(old),{flag:'wx'});
   const development=opts.mode!=='npm';await save({...old,[opts.name]:{...record,development}});return {ok:true,component:opts.name,...record,development,backup};});
 }
-export async function checkComponents(registry=fetch){
+export async function checkComponents(registry=fetch,componentIds){
  const installed=componentRecords(),components=[];
  for(const [id,c] of Object.entries(MANIFEST.components)){
-  if(installed[id]?.development){components.push({id,package:c.package,current:installed[id].version,updateAvailable:false,development:true,updateOwner:'git'});continue;}
+  if(componentIds&&!componentIds.has(id))continue;
+  const packageChanged=Boolean(installed[id]&&installed[id].package!==c.package);
+  if(installed[id]?.development&&!packageChanged){components.push({id,package:c.package,current:installed[id].version,updateAvailable:false,development:true,updateOwner:'git'});continue;}
   try{const r=await registry(`https://registry.npmjs.org/${encodeURIComponent(c.package)}`,{signal:AbortSignal.timeout(15000)});
    if(!r.ok)throw Error(`Registry HTTP ${r.status}`);const data=await r.json(),latest=data['dist-tags']?.latest;
    if(!latest||latest.includes('-'))throw Error('No stable latest version');
-   components.push({id,package:c.package,current:installed[id]?.version||null,available:latest,updateAvailable:installed[id]?.version!==latest,development:Boolean(installed[id]?.development)});
+   components.push({id,package:c.package,current:installed[id]?.version||null,available:latest,updateAvailable:packageChanged||installed[id]?.version!==latest,development:Boolean(installed[id]?.development&&!packageChanged)});
   }catch(e){components.push({id,package:c.package,current:installed[id]?.version||null,ok:false,code:'REGISTRY_UNAVAILABLE',message:e.message,offline:'keep-current'});}
  }
  return {ok:components.every(c=>c.ok!==false),components};
@@ -49,7 +51,7 @@ export async function installComponents(opts,services={}){
  if(!opts.yes)throw fail('AUTHORIZATION_REQUIRED','Component installation/update requires --yes');
  if(!opts.agent&&!opts.targetDir)throw fail('USAGE','Specify Agent or target directory');
  return locked(async()=>{
-  const old=componentRecords(),check=await (services.check||checkComponents)();if(!check.ok)throw fail('REGISTRY_UNAVAILABLE','No changes made; one or more component checks failed',check);
+  const old=componentRecords(),check=await (services.check||checkComponents)(undefined,opts.componentIds);if(!check.ok)throw fail('REGISTRY_UNAVAILABLE','No changes made; one or more component checks failed',check);
   const updates=check.components.filter(c=>c.updateAvailable&&!c.development);
   if(updates.length===0)return {ok:true,action:'unchanged',check,skills:await install(opts)};
   const generation=path.join(stateRoot(),'component-generations',randomUUID());await fs.mkdir(generation,{recursive:true});

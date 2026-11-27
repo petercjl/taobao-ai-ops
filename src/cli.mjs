@@ -48,7 +48,11 @@ export async function main(argv){
  if(command==='skill'){
   if(action==='source'){const selected=opts.name?[nodeFor(opts.name)]:opts.owned?MANIFEST.nodes.filter(n=>!n.component):MANIFEST.nodes;const sources=await Promise.all(selected.map(async n=>({ok:true,package:PACKAGE.name,suiteVersion:PACKAGE.version,skill:n.skill,node:n.id,source:source(n),sourceDigest:digest(await fileHashes(source(n))),version:nodeVersion(n)})));const own=MANIFEST.nodes.find(n=>!n.component);return print(opts.name?sources[0]:{...CONTRACT,ok:true,complete:true,package:PACKAGE.name,version:PACKAGE.version,suiteVersion:PACKAGE.version,skill:own.skill,source:source(own),sources,skills:sources});}
   if(action==='status'){const root=targetRoot(opts);if(opts.name)return print(await status(root,nodeFor(opts.name)));const nodes=opts.owned?MANIFEST.nodes.filter(n=>!n.component):MANIFEST.nodes;return print({...await status(root,MANIFEST.nodes.find(n=>!n.component)),root,skills:await Promise.all(nodes.map(n=>status(root,n)))});}
-  if(['install','update'].includes(action)){const records=componentRecords();return print(closure(opts).filter(n=>n.component).every(n=>records[n.component])?await install(opts):await installComponents({...opts,yes:true}));}
+  if(['install','update'].includes(action)){
+   const records=componentRecords(),componentIds=new Set(closure(opts)
+    .map(n=>n.component).filter(id=>id&&records[id]?.package!==MANIFEST.components[id].package));
+   return print(componentIds.size?await installComponents({...opts,componentIds,yes:true}):await install(opts));
+  }
  }
  if(command==='workflow'&&action==='plan')return print(await plan(opts));
  if(command==='workflow'&&action==='status')return print(await workflowStatus(opts));
